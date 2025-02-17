@@ -118,8 +118,8 @@ export function TableGeneric({structure, data, setData}) {
               </TableRow>
             ): (
               sortedAndFilteredEvents.map((data, index) => (
-                <TableRow key={data.id}>
-                <TableCell>{index + 1}</TableCell>
+                <TableRow key={index + data.id}>
+                <TableCell key={index + data.id}>{index + 1}</TableCell>
                   {Object.keys(data).map((value) => (
                     structure[value] && (
                       value == "state" ? (
@@ -137,26 +137,26 @@ export function TableGeneric({structure, data, setData}) {
                       )
                     )
                   ))}
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-fit w-fit p-0">
-                              <span className="sr-only">Abrir menú</span>
-                              <MoreVertical className="h-4 w-4 p-0"/>
-                          </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
-                              <QrCode className="mr-2 h-4 w-4" />
-                              QR Inscripción
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
-                              <QrCode className="mr-2 h-4 w-4" />
-                              QR Asistencia
-                          </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-fit w-fit p-0">
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreVertical className="h-4 w-4 p-0"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
+                            <QrCode className="mr-2 h-4 w-4" />
+                            QR Inscripción
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
+                            <QrCode className="mr-2 h-4 w-4" />
+                            QR Asistencia
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
                 </TableRow>
               ))
             )
