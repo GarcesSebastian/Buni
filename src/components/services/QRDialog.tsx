@@ -20,12 +20,6 @@ interface QRDialogProps {
 }
 
 export function QRDialog({ open, onOpenChange, event, type }: QRDialogProps) {
-  const qrData = {
-    eventId: event.id,
-    type,
-    timestamp: new Date().toISOString(),
-  }
-
   const handleDownload = () => {
     const svg = document.getElementById("qr-code")
     if (svg) {
