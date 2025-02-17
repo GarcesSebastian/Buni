@@ -59,7 +59,7 @@ export function QRDialog({ open, onOpenChange, event, type }: QRDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-center py-4">
-          <QRCode id="qr-code" value={JSON.stringify(qrData)} size={256} level="H" includeMargin />
+          <QRCode id="qr-code"/>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

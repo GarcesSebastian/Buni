@@ -1,6 +1,10 @@
-const QRCode = (id: any) => {
+interface PropsQRCode {
+  id: string
+}
+
+const QRCode = ({id}: PropsQRCode) => {
     return (
-        <svg height="256" width="256" viewBox="0 0 57 57" role="img" id="qr-code">
+        <svg id={id} height="256" width="256" viewBox="0 0 57 57" role="img">
         <path fill="#FFFFFF" d="M0,0 h57v57H0z" shape-rendering="crispEdges"></path>
         <path
           fill="#000000"
