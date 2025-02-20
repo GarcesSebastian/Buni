@@ -2,6 +2,7 @@
 import React, { useState} from "react"
 import { TableGeneric } from "@/components/services/TableGeneric"
 import { SideBar } from '@/components/ui/SideBar'
+import Section from "@/components/ui/Section"
 
 export type Event = {
   id: number
@@ -40,16 +41,7 @@ export default function EventosPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex flex-1 flex-row max-md:flex-col">
-      <SideBar/>
-        <main className="flex-1 p-4 sm:p-8">
-          <div className="space-y-4">
-            <h1 className="text-2xl font-bold">Eventos</h1>
-            <p className="text-muted-foreground">Listado de Eventos</p>
-            <TableGeneric structure={structure} data={events} setData={setEvents} />
-          </div>
-        </main>
-      </div>
+        <Section structure={structure} data={events} setData={setEvents} name={"Eventos"}/>
     </div>
   )
 }
