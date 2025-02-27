@@ -85,15 +85,14 @@ export function CreateEventDialog({ data, open, onOpenChange, onSubmit }) {
             <DialogDescription>Complete los datos para {data.name}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {data.structureForm.map((structureData, index) => (
+            {Object.keys(data.structureForm).map((value, index) => (
               <div key={index} className="grid gap-2">
-                <h1>{}</h1>
                 <InputBasic
                   formData={formData}
                   data={{
-                    name: structureData.name,
-                    type: structureData.type,
-                    onChange: (e) => setFormData({ ...formData, [structureData.name.toLowerCase()]: e.target?.value == undefined ? e : e.target.value }),
+                    name: data.structureForm[value].name,
+                    type: data.structureForm[value].type,
+                    onChange: (e) => setFormData({ ...formData, [data.structureForm[value].name.toLowerCase()]: e.target?.value == undefined ? e : e.target.value }),
                     key: index
                   }}
                 />

@@ -13,13 +13,13 @@ export function TableGeneric({structure, structureForm, data, setData, name}) {
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
-  const [qrType, setQrType] = useState<"inscripcion" | "asistencia">("inscripcion")
+  const [qrType, setQrType] = useState("inscripcion")
   const [filters, setFilters] = useState({
     nombre: "",
     organizador: "",
   })
-  const [sortConfig, setSortConfig] = useState<SortConfig>(null)
-  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  const [sortConfig, setSortConfig] = useState(null)
+  const [openFilter, setOpenFilter] = useState(null)
 
   const sortedAndFilteredEvents = useMemo(() => {
     const filteredEvents = data.filter(

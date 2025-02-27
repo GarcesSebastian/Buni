@@ -18,24 +18,24 @@ export default function Scenerys() {
       active: "Estados"
     }
 
-    const structureForm = [
-      {
+    const structureForm = {
+      nombre: {
         name: "Nombre",
         type: "text"
       },
-      {
+      organizador: {
         name: "Organizador",
         type: "text"
       },
-      {
+      fecha: {
         name: "Fecha",
         type: "date"
       },
-      {
+      facultad: {
         name: "Facultad",
         type: "selection"
       }
-    ]
+    }
 
     const [events, setEvents] = useState<Event[]>([
     ])
