@@ -152,7 +152,7 @@ export function Events() {
           </TableHeader>
           <TableBody>
             {sortedAndFilteredEvents.map((event) => (
-              <TableRow key={event.id}>
+              <TableRow>
                 <TableCell>{event.id}</TableCell>
                 <TableCell>{event.nombre}</TableCell>
                 <TableCell>{event.organizador}</TableCell>
