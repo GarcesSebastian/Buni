@@ -118,7 +118,7 @@ export function TableGeneric({structure, data, setData}) {
               </TableRow>
             ): (
               sortedAndFilteredEvents.map((data, index) => (
-                <TableRow key={index + data.id}>
+                <TableRow>
                 <TableCell key={index + data.id}>{index + 1}</TableCell>
                   {Object.keys(data).map((value) => (
                     structure[value] && (
