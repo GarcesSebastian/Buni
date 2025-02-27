@@ -18,12 +18,31 @@ export default function Scenerys() {
       active: "Estados"
     }
 
+    const structureForm = [
+      {
+        name: "Nombre",
+        type: "text"
+      },
+      {
+        name: "Organizador",
+        type: "text"
+      },
+      {
+        name: "Fecha",
+        type: "date"
+      },
+      {
+        name: "Facultad",
+        type: "selection"
+      }
+    ]
+
     const [events, setEvents] = useState<Event[]>([
     ])
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Section structure={structure} data={events} setData={setEvents} name={"Escenarios"}/>
+      <Section structure={structure} structureForm={structureForm} data={events} setData={setEvents} name={"Escenarios"}/>
     </div>
   )
 }

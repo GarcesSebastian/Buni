@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
-import type { Event } from "./Events"
+import type { Event } from "@/types/Events"
 
 interface QRDialogProps {
   open: boolean

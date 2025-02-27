@@ -1,7 +1,5 @@
 "use client"
 import React, { useState} from "react"
-import { TableGeneric } from "@/components/services/TableGeneric"
-import { SideBar } from '@/components/ui/SideBar'
 import Section from "@/components/ui/Section"
 
 export type Event = {
@@ -19,6 +17,25 @@ export default function EventosPage() {
       organizador: "Organizador",
       state: "Estados"
     }
+
+    const structureForm = [
+      {
+        name: "Nombre",
+        type: "text"
+      },
+      {
+        name: "Organizador",
+        type: "text"
+      },
+      {
+        name: "Fecha",
+        type: "date"
+      },
+      {
+        name: "Facultad",
+        type: "selection"
+      }
+    ]
 
     const [events, setEvents] = useState<Event[]>([
       {
@@ -41,7 +58,7 @@ export default function EventosPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-        <Section structure={structure} data={events} setData={setEvents} name={"Eventos"}/>
+        <Section structure={structure} structureForm={structureForm} data={events} setData={setEvents} name={"Eventos"}/>
     </div>
   )
 }

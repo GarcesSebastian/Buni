@@ -9,12 +9,7 @@ import { CreateEventDialog } from "./CreateDialog"
 import { QRDialog } from "./QRDialog"
 import { FilterDialog } from "./FilterDialog"
 
-type SortConfig = {
-  key: string
-  direction: "asc" | "desc"
-} | null
-
-export function TableGeneric({structure, data, setData}) {
+export function TableGeneric({structure, structureForm, data, setData, name}) {
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -48,7 +43,7 @@ export function TableGeneric({structure, data, setData}) {
     return filteredEvents
   }, [data, filters, sortConfig])
 
-  const handleCreateRow = (newRow: Omit<never, "id">) => {
+  const handleCreateRow = (newRow) => {
     const event = {
       ...newRow,
       id: data.length + 1,
@@ -58,17 +53,17 @@ export function TableGeneric({structure, data, setData}) {
     setOpenCreate(false)
   }
 
-  const handleQRClick = (event: Event, type: "inscripcion" | "asistencia") => {
+  const handleQRClick = (event, type) => {
     setSelectedEvent(event)
     setQrType(type)
     setOpenQR(true)
   }
 
-  const handleFilter = (column: string, value: string) => {
+  const handleFilter = (column, value) => {
     setFilters((prev) => ({ ...prev, [column]: value }))
   }
 
-  const handleSort = (column: string, direction: "asc" | "desc" | null) => {
+  const handleSort = (column, direction) => {
     setSortConfig(direction ? { key: column, direction } : null)
   }
 
@@ -110,62 +105,64 @@ export function TableGeneric({structure, data, setData}) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedAndFilteredEvents.length == 0 ? (
-              <TableRow>
-                <TableCell colSpan={Object.keys(structure).length + 2} className="text-center">
-                  No se encontraron datos
-                </TableCell>
-              </TableRow>
-            ): (
+            {sortedAndFilteredEvents.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={Object.keys(structure).length + 2} className="text-center">
+                  No se encontraron datos
+                </TableCell>
+              </TableRow>
+            ) : (
               sortedAndFilteredEvents.map((data, index) => (
-                <TableRow>
-                <TableCell key={index + data.id}>{index + 1}</TableCell>
-                  {Object.keys(data).map((value) => (
-                    structure[value] && (
-                      value == "state" ? (
-                        <TableCell>
-                            <span
-                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                    data[value] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                                }`}
-                            >
-                                {data[value] ? "Activo" : "No activo"}
-                            </span>
+                <TableRow key={data.id || index}>
+                  <TableCell>{index + 1}</TableCell>
+                  {Object.keys(data).map((value) =>
+                    structure[value] ? (
+                      value === "state" ? (
+                        <TableCell key={value}>
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            data[value] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}>
+                            {data[value] ? "Activo" : "No activo"}
+                          </span>
                         </TableCell>
                       ) : (
-                        <TableCell key={data[value]}>{data[value]}</TableCell>
+                        <TableCell key={value}>{data[value]}</TableCell>
                       )
-                    )
-                  ))}
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-fit w-fit p-0">
-                            <span className="sr-only">Abrir menú</span>
-                            <MoreVertical className="h-4 w-4 p-0"/>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
-                            <QrCode className="mr-2 h-4 w-4" />
-                            QR Inscripción
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
-                            <QrCode className="mr-2 h-4 w-4" />
-                            QR Asistencia
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                    ) : null
+                  )}
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-fit w-fit p-0">
+                              <span className="sr-only">Abrir menú</span>
+                              <MoreVertical className="h-4 w-4 p-0"/>
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
+                              <QrCode className="mr-2 h-4 w-4" />
+                              QR Inscripción
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
+                              <QrCode className="mr-2 h-4 w-4" />
+                              QR Asistencia
+                          </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
-            )
-          }
+            )}
           </TableBody>
         </Table>
       </div>
-
-      <CreateEventDialog open={openCreate} onOpenChange={setOpenCreate} onSubmit={handleCreateRow} />
+      
+      <CreateEventDialog 
+        data = {{name: name, structureForm: structureForm}}
+        open={openCreate} 
+        onOpenChange={setOpenCreate} 
+        onSubmit={handleCreateRow} 
+      />
 
       {selectedEvent && <QRDialog open={openQR} onOpenChange={setOpenQR} event={selectedEvent} type={qrType} />}
 
