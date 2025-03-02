@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "../styles/globals.css"
 
 import { TopNav } from "@/components/ui/TopNav"
+import { UserDataProvider } from "@/hooks/useUserData"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,7 +27,9 @@ export default function RootLayout({
         <div className="h-screen overflow-hidden">
           <TopNav/>
           <div className="flex">
-            <main className="flex-1 overflow-y-hidden">{children}</main>
+            <UserDataProvider>
+              <main className="flex-1 overflow-y-hidden">{children}</main>
+            </UserDataProvider>
           </div>
         </div>
       </body>

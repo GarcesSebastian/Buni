@@ -2,7 +2,7 @@
 import React, { useState} from "react"
 import Section from "@/components/ui/Section"
 
-export type Event = {
+export type Faculty = {
   id: number
   nombre: string
   organizador: string
@@ -11,15 +11,16 @@ export type Event = {
   facultad: string
 }
 
-export default function EventosPage() {
+export default function FacultiesPage() {
     const table = {
-      name: "Eventos",
-      key: "events",
+      name: "Facultades",
+      key: "faculties",
     }
-    
+
     const structure = {
       nombre: "Nombre",
       organizador: "Organizador",
+      aniversario: "Aniversario",
       state: "Estados"
     }
 
@@ -32,8 +33,8 @@ export default function EventosPage() {
         name: "Organizador",
         type: "text"
       },
-      fecha: {
-        name: "Fecha",
+      aniversario: {
+        name: "Aniversario",
         type: "date"
       },
       facultad: {
@@ -42,11 +43,11 @@ export default function EventosPage() {
       }
     }
 
-    const [events, setEvents] = useState<Event[]>([])
+    const [faculties, setFaculties] = useState<Faculty[]>([])
 
   return (
     <div className="min-h-screen flex flex-col">
-        <Section structure={structure} structureForm={structureForm} data={events} setData={setEvents} table={table}/>
+        <Section structure={structure} structureForm={structureForm} data={faculties} setData={setFaculties} table={table}/>
     </div>
   )
 }
