@@ -18,6 +18,7 @@ export default function EventosPage() {
     }
     
     const structure = {
+      id: "ID",
       nombre: "Nombre",
       organizador: "Organizador",
       state: "Estados"

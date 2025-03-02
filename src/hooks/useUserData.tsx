@@ -6,6 +6,7 @@ interface User {
     events?: [];
     faculties?: [];
     scenerys?: [];
+    loans?: [];
     users?: [];
 }
 
@@ -19,6 +20,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         events: [],
         faculties: [],
         scenerys: [],
+        loans: [],
         users: [],
     });
 

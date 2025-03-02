@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import { Edit, Filter, MoreVertical, Plus, QrCode, Trash } from "lucide-react"
-import { CreateEventDialog } from "./CreateDialog"
-import { QRDialog } from "./QRDialog"
-import { FilterDialog } from "./FilterDialog"
-import { EditDialog } from "./EditDialog"
-import { DeleteDialog } from "./DeleteDialog"
+import { CreateEventDialog } from "./Dialogs/CreateDialog"
+import { QRDialog } from "./Dialogs/QRDialog"
+import { FilterDialog } from "./Dialogs/FilterDialog"
+import { EditDialog } from "./Dialogs/EditDialog"
+import { DeleteDialog } from "./Dialogs/DeleteDialog"
 import { useUserData } from "@/hooks/useUserData"
 
 export function TableGeneric({structure, structureForm, table}) {
@@ -71,12 +71,6 @@ export function TableGeneric({structure, structureForm, table}) {
     setOpenDelete(true)
   }
 
-  const handleDelete = () => {
-    const updatedData = data.filter((item) => item.id !== eventToDelete.id)
-    setData(updatedData)
-    setOpenDelete(false)
-  }
-
   const handleFilter = (column, value) => {
     setFilters((prev) => ({ ...prev, [column]: value }))
   }
@@ -93,6 +87,8 @@ export function TableGeneric({structure, structureForm, table}) {
     })
     setSortConfig(null)
   }
+
+  console.log(user)
 
   return (
     <div className="space-y-4">
@@ -112,7 +108,9 @@ export function TableGeneric({structure, structureForm, table}) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">N°</TableHead>
-              {Object.keys(structure).map((value) => (
+              {Object.keys(structure)
+              .filter((key) => key !== "id")
+              .map((value) => (
                 <TableHead key={value}>
                   {structure[value]}
                   <Button variant="ghost" onClick={() => setOpenFilter(value)} className="ml-2 hover:bg-transparent">
@@ -133,21 +131,23 @@ export function TableGeneric({structure, structureForm, table}) {
             ) : (
               sortedAndFilteredEvents.map((data, index) => (
                 <TableRow key={data.id || index}>
-                  <TableCell>{index + 1}</TableCell>
-                  {Object.keys(data).map((value) =>
-                    structure[value] ? (
-                      value === "state" ? (
-                        <TableCell key={value}>
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            data[value] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                          }`}>
-                            {data[value] ? "Activo" : "No activo"}
-                          </span>
-                        </TableCell>
-                      ) : (
-                        <TableCell key={value}>{data[value]}</TableCell>
-                      )
-                    ) : null
+                  <TableCell>{data.id}</TableCell>
+                  {Object.keys(data)
+                    .filter((key) => key !== "id")
+                    .map((value) =>
+                      structure[value] ? (
+                        value === "state" ? (
+                          <TableCell key={value}>
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              data[value] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            }`}>
+                              {data[value] ? "Activo" : "No activo"}
+                            </span>
+                          </TableCell>
+                        ) : (
+                          <TableCell key={value}>{data[value]}</TableCell>
+                        )
+                      ) : null
                   )}
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -194,24 +194,18 @@ export function TableGeneric({structure, structureForm, table}) {
 
       {eventToDelete && (
         <DeleteDialog
+          data={{ table: table, structureForm: structureForm }}
           open={openDelete}
           onOpenChange={setOpenDelete}
-          onDelete={handleDelete}
+          initialData={eventToDelete}
         />
       )}
 
       {eventToEdit && (
         <EditDialog
-          data={{ name: name, structureForm: structureForm }}
+          data={{ table: table, structureForm: structureForm }}
           open={openEdit}
           onOpenChange={setOpenEdit}
-          onSubmit={(updatedEvent) => {
-            const updatedData = data.map((item) =>
-              item.id === eventToEdit.id ? { ...item, ...updatedEvent } : item
-            )
-            setData(updatedData)
-            setOpenEdit(false)
-          }}
           initialData={eventToEdit}
         />
       )}
