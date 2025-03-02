@@ -18,6 +18,7 @@ export default function Scenerys() {
     }
 
     const structure = {
+      id: "ID",
       nombre: "Nombre",
       organizador: "Organizador",
       state: "Estados"

@@ -72,12 +72,13 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    const id = user[data.table.key].length + 1
+    formData.id = id
+    formData.state = true
+
     setUser({
       ...user,
-      [data.table.key]: [...(user[data.table.key] || []), {
-        ...formData,
-        state: true,
-      }],
+      [data.table.key]: [...(user[data.table.key] || []), formData],
     })
 
     RestartFormData()

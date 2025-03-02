@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { useUserData } from "@/hooks/useUserData"
 
 const InputBasic = ({formData, data}) => {
   if(data.type == "text" || data.type == "number" || data.type == "date"){
@@ -53,13 +54,25 @@ const InputBasic = ({formData, data}) => {
   }
 }
 
-export function EditDialog({ data, open, onOpenChange, onSubmit, initialData }) {
+export function EditDialog({ data, open, onOpenChange, initialData }) {
+  const { user, setUser } = useUserData()
   const [formData, setFormData] = useState({
     nombre: "",
     organizador: "",
     fecha: "",
     facultad: "",
   })
+  
+  const RestartFormData = () => {
+    setFormData(() => {
+      let obj = {}
+      Object.keys(data.structureForm).map((value) => {
+        obj[data.structureForm[value].name.toLowerCase()] = ""
+      })
+  
+      return obj
+    })
+  }
 
   useEffect(() => {
     if (initialData) {
@@ -69,17 +82,18 @@ export function EditDialog({ data, open, onOpenChange, onSubmit, initialData }) 
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSubmit({
-      ...formData,
-      active: true,
+    setUser({
+      ...user,
+      [data.table.key]: user[data.table.key].map((item) =>
+        item.id === initialData.id ? { ...item, ...{
+          ...formData,
+          active: true,
+        } } : item
+      ),
     })
 
-    setFormData({
-      nombre: "",
-      organizador: "",
-      fecha: "",
-      facultad: "",
-    })
+    RestartFormData()
+    onOpenChange(false)
   }
 
   return (
@@ -87,8 +101,8 @@ export function EditDialog({ data, open, onOpenChange, onSubmit, initialData }) 
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Editar dato para {data.name}</DialogTitle>
-            <DialogDescription>Complete los datos para {data.name}</DialogDescription>
+            <DialogTitle>Editar dato para {data.table.name}</DialogTitle>
+            <DialogDescription>Complete los datos para {data.table.name}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {Object.keys(data.structureForm).map((value, index) => (

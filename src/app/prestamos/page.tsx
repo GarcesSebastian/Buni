@@ -13,15 +13,16 @@ export type Faculty = {
 
 export default function FacultiesPage() {
     const table = {
-      name: "Facultades",
-      key: "faculties",
+      name: "Prestamos",
+      key: "loans",
     }
 
     const structure = {
       id: "ID",
       nombre: "Nombre",
-      organizador: "Organizador",
-      aniversario: "Aniversario",
+      codigo: "Codigo",
+      ["fecha registro"]: "Fecha Registro",
+      escenario: "Escenario",
       state: "Estados"
     }
 
@@ -30,16 +31,16 @@ export default function FacultiesPage() {
         name: "Nombre",
         type: "text"
       },
-      organizador: {
-        name: "Organizador",
-        type: "text"
+      codigo: {
+        name: "Codigo",
+        type: "number"
       },
-      aniversario: {
-        name: "Aniversario",
+      ["fecha registro"]: {
+        name: "Fecha Registro",
         type: "date"
       },
-      facultad: {
-        name: "Facultad",
+      escenario: {
+        name: "Escenario",
         type: "selection"
       }
     }
