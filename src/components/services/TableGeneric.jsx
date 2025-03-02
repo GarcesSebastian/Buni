@@ -4,10 +4,12 @@ import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
-import { Filter, MoreVertical, Plus, QrCode } from "lucide-react"
-import { CreateEventDialog } from "./Dialogs/CreateDialog"
-import { QRDialog } from "./Dialogs/QRDialog"
-import { FilterDialog } from "./Dialogs/FilterDialog"
+import { Edit, Filter, MoreVertical, Plus, QrCode, Trash } from "lucide-react"
+import { CreateEventDialog } from "./CreateDialog"
+import { QRDialog } from "./QRDialog"
+import { FilterDialog } from "./FilterDialog"
+import { EditDialog } from "./EditDialog"
+import { DeleteDialog } from "./DeleteDialog"
 import { useUserData } from "@/hooks/useUserData"
 
 export function TableGeneric({structure, structureForm, table}) {
@@ -23,6 +25,10 @@ export function TableGeneric({structure, structureForm, table}) {
   })
   const [sortConfig, setSortConfig] = useState(null)
   const [openFilter, setOpenFilter] = useState(null)
+  const [openEdit, setOpenEdit] = useState(false)
+  const [eventToEdit, setEventToEdit] = useState(null)
+  const [openDelete, setOpenDelete] = useState(false)
+  const [eventToDelete, setEventToDelete] = useState(null)
 
   const sortedAndFilteredEvents = useMemo(() => {
     const filteredEvents = user[table.key].filter(
@@ -53,6 +59,22 @@ export function TableGeneric({structure, structureForm, table}) {
     setSelectedEvent(event)
     setQrType(type)
     setOpenQR(true)
+  }
+
+  const handleEditClick = (event) => {
+    setEventToEdit(event)
+    setOpenEdit(true)
+  }
+
+  const handleDeleteClick = (event) => {
+    setEventToDelete(event)
+    setOpenDelete(true)
+  }
+
+  const handleDelete = () => {
+    const updatedData = data.filter((item) => item.id !== eventToDelete.id)
+    setData(updatedData)
+    setOpenDelete(false)
   }
 
   const handleFilter = (column, value) => {
@@ -130,20 +152,28 @@ export function TableGeneric({structure, structureForm, table}) {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-fit w-fit p-0">
-                              <span className="sr-only">Abrir menú</span>
-                              <MoreVertical className="h-4 w-4 p-0"/>
-                          </Button>
+                        <Button variant="ghost" className="h-fit w-fit p-0">
+                          <span className="sr-only">Abrir menú</span>
+                          <MoreVertical className="h-4 w-4 p-0"/>
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
-                              <QrCode className="mr-2 h-4 w-4" />
-                              QR Inscripción
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
-                              <QrCode className="mr-2 h-4 w-4" />
-                              QR Asistencia
-                          </DropdownMenuItem>
+                        <DropdownMenuItem className="text-green-800" onClick={() => handleEditClick(data)}>
+                          <Edit className="mr-2 h-4 w-4 bg-green-100 text-green-800" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-800" onClick={() => handleDeleteClick(data)}>
+                          <Trash className="mr-2 h-4 w-4 bg-red-100 text-red-800" />
+                          Eliminar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
+                          <QrCode className="mr-2 h-4 w-4" />
+                          QR Inscripción
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
+                          <QrCode className="mr-2 h-4 w-4" />
+                          QR Asistencia
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -161,6 +191,30 @@ export function TableGeneric({structure, structureForm, table}) {
       />
 
       {selectedEvent && <QRDialog open={openQR} onOpenChange={setOpenQR} event={selectedEvent} type={qrType} />}
+
+      {eventToDelete && (
+        <DeleteDialog
+          open={openDelete}
+          onOpenChange={setOpenDelete}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {eventToEdit && (
+        <EditDialog
+          data={{ name: name, structureForm: structureForm }}
+          open={openEdit}
+          onOpenChange={setOpenEdit}
+          onSubmit={(updatedEvent) => {
+            const updatedData = data.map((item) =>
+              item.id === eventToEdit.id ? { ...item, ...updatedEvent } : item
+            )
+            setData(updatedData)
+            setOpenEdit(false)
+          }}
+          initialData={eventToEdit}
+        />
+      )}
 
       <FilterDialog
         open={openFilter !== null}
