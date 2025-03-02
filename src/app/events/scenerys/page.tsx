@@ -6,16 +6,21 @@ export type Event = {
   id: number
   nombre: string
   organizador: string
-  active: boolean
+  state: boolean
   fecha: string
   facultad: string
 }
 
 export default function Scenerys() {
+    const table = {
+      name: "Escenarios",
+      key: "scenerys",
+    }
+
     const structure = {
       nombre: "Nombre",
       organizador: "Organizador",
-      active: "Estados"
+      state: "Estados"
     }
 
     const structureForm = {
@@ -42,7 +47,7 @@ export default function Scenerys() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Section structure={structure} structureForm={structureForm} data={events} setData={setEvents} name={"Escenarios"}/>
+      <Section structure={structure} structureForm={structureForm} data={events} setData={setEvents} table={table}/>
     </div>
   )
 }

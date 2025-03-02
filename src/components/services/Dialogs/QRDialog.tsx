@@ -1,6 +1,6 @@
 "use client"
 
-import QRCode from "../Icons/QRCode"
+import QRCode from "../../Icons/QRCode"
 import { Button } from "@/components/ui/Button"
 import {
   Dialog,

@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import { Filter, MoreVertical, Plus, QrCode } from "lucide-react"
-import { CreateEventDialog } from "./CreateDialog"
-import { QRDialog } from "./QRDialog"
-import { FilterDialog } from "./FilterDialog"
+import { CreateEventDialog } from "./Dialogs/CreateDialog"
+import { QRDialog } from "./Dialogs/QRDialog"
+import { FilterDialog } from "./Dialogs/FilterDialog"
+import { useUserData } from "@/hooks/useUserData"
 
-export function TableGeneric({structure, structureForm, data, setData, name}) {
+export function TableGeneric({structure, structureForm, table}) {
+  const { user } = useUserData()
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -17,15 +19,19 @@ export function TableGeneric({structure, structureForm, data, setData, name}) {
   const [filters, setFilters] = useState({
     nombre: "",
     organizador: "",
+    aniversario: "",
   })
   const [sortConfig, setSortConfig] = useState(null)
   const [openFilter, setOpenFilter] = useState(null)
 
   const sortedAndFilteredEvents = useMemo(() => {
-    const filteredEvents = data.filter(
-      (event) =>
-        event.nombre.toLowerCase().includes(filters.nombre.toLowerCase()) &&
-        event.organizador.toLowerCase().includes(filters.organizador.toLowerCase()),
+    const filteredEvents = user[table.key].filter(
+      (event) => {
+        return Object.keys(filters).every((key) => {
+          if (filters[key] === "") return true
+          return event[key].toLowerCase().includes(filters[key].toLowerCase())
+        })
+      }
     )
 
     if (sortConfig !== null) {
@@ -41,17 +47,7 @@ export function TableGeneric({structure, structureForm, data, setData, name}) {
     }
 
     return filteredEvents
-  }, [data, filters, sortConfig])
-
-  const handleCreateRow = (newRow) => {
-    const event = {
-      ...newRow,
-      id: data.length + 1,
-      state: true,
-    }
-    setData([...data, event])
-    setOpenCreate(false)
-  }
+  }, [user[table.key], filters, sortConfig])
 
   const handleQRClick = (event, type) => {
     setSelectedEvent(event)
@@ -71,6 +67,7 @@ export function TableGeneric({structure, structureForm, data, setData, name}) {
     setFilters({
       nombre: "",
       organizador: "",
+      aniversario: "",
     })
     setSortConfig(null)
   }
@@ -96,7 +93,7 @@ export function TableGeneric({structure, structureForm, data, setData, name}) {
               {Object.keys(structure).map((value) => (
                 <TableHead key={value}>
                   {structure[value]}
-                  <Button variant="ghost" onClick={() => setOpenFilter("nombre")} className="ml-2 hover:bg-transparent">
+                  <Button variant="ghost" onClick={() => setOpenFilter(value)} className="ml-2 hover:bg-transparent">
                     <Filter className="h-4 w-4" />
                   </Button>
                 </TableHead>
@@ -158,10 +155,9 @@ export function TableGeneric({structure, structureForm, data, setData, name}) {
       </div>
       
       <CreateEventDialog 
-        data = {{name: name, structureForm: structureForm}}
+        data = {{table: table, structureForm: structureForm}}
         open={openCreate} 
         onOpenChange={setOpenCreate} 
-        onSubmit={handleCreateRow} 
       />
 
       {selectedEvent && <QRDialog open={openQR} onOpenChange={setOpenQR} event={selectedEvent} type={qrType} />}

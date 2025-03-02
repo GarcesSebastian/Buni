@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { use, useEffect, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { useUserData } from "@/hooks/useUserData"
 
 const InputBasic = ({formData, data}) => {
   if(data.type == "text" || data.type == "number" || data.type == "date"){
@@ -53,36 +54,48 @@ const InputBasic = ({formData, data}) => {
   }
 }
 
-export function CreateEventDialog({ data, open, onOpenChange, onSubmit }) {
-  const [formData, setFormData] = useState({
-    nombre: "",
-    organizador: "",
-    fecha: "",
-    facultad: "",
-  })
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSubmit({
-      ...formData,
-      active: true,
-    })
-
-    setFormData({
-      nombre: "",
-      organizador: "",
-      fecha: "",
-      facultad: "",
+export function CreateEventDialog({ data, open, onOpenChange }) {
+  const [formData, setFormData] = useState()
+  const { user, setUser } = useUserData()
+  
+  const RestartFormData = () => {
+    setFormData(() => {
+      let obj = {}
+      Object.keys(data.structureForm).map((value) => {
+        obj[data.structureForm[value].name.toLowerCase()] = ""
+      })
+  
+      return obj
     })
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+
+    setUser({
+      ...user,
+      [data.table.key]: [...(user[data.table.key] || []), {
+        ...formData,
+        state: true,
+      }],
+    })
+
+    RestartFormData()
+    onOpenChange(false)
+  }
+
+  useEffect(() => {
+    console.log(user)
+  }, [user])
+
+  useEffect(RestartFormData, [])
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Crear dato para {data.name}</DialogTitle>
-            <DialogDescription>Complete los datos para {data.name}</DialogDescription>
+            <DialogTitle>Crear dato para {data.table.name}</DialogTitle>
+            <DialogDescription>Complete los datos para {data.table.name}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {Object.keys(data.structureForm).map((value, index) => (

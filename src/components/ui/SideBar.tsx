@@ -10,7 +10,7 @@ import { ChevronDown, ChevronRight, LayoutDashboard, Calendar, Users, BookOpen, 
 
 type NavItem = {
   title: string
-  href: string
+  href?: string
   icon: React.ReactNode
   children?: { title: string; href: string; icon?: React.ReactNode }[]
 }
@@ -23,7 +23,6 @@ const navItems: NavItem[] = [
   },
   {
     title: "Eventos",
-    href: "/events",
     icon: <Calendar className="h-4 w-4" />,
     children: [
       { title: "Evento", href: "/events", icon: <Calendar className="h-4 w-4" /> },
@@ -32,19 +31,21 @@ const navItems: NavItem[] = [
   },  
   {
     title: "Participantes",
-    href: "/participantes",
     icon: <Users className="h-4 w-4" />,
     children: [{ title: "Participante", href: "/participantes", icon: <Users className="h-4 w-4" /> }],
   },
   {
     title: "Prestamos",
-    href: "/prestamos",
     icon: <BookOpen className="h-4 w-4" />,
     children: [{ title: "Prestamo", href: "/prestamos", icon: <BookOpen className="h-4 w-4" /> }],
   },
   {
+    title: "Facultades",
+    href: "/faculties",
+    icon: <LayoutDashboard className="h-4 w-4" />,
+  },
+  {
     title: "Usuarios",
-    href: "/usuarios",
     icon: <UserCog className="h-4 w-4" />,
     children: [
       { title: "Usuario", href: "/usuarios", icon: <UserCog className="h-4 w-4" /> },
@@ -88,24 +89,26 @@ export function SideBar() {
       <nav className={`space-y-2 md:p-2 ${isExpanded ? "max-md:initial" : "max-md:hidden max-md:animate-hidden-element max-md:h-0"}`}>
         {navItems.map((item) => (
           <div key={item.title}>
-            <Button
-              variant="ghost"
-              className={`w-full justify-start text-white hover:text-white hover:bg-white/10 ${
-                pathname === item.href ? "bg-white/10" : ""
-              }`}
-              onClick={() => item.children && toggleItem(item.title)}
-            >
-              {item.icon}
-              <div className={`w-full justify-left items-center max-md:flex ${isExpanded ? "md:flex" : "md:hidden"}`}>
-                <span className="ml-2">{item.title}</span>
-                {item.children &&
-                  (openItems.includes(item.title) ? (
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="ml-auto h-4 w-4" />
-                  ))}
-              </div>
-            </Button>
+            <Link key={item.href} href={item.href || pathname}>
+              <Button
+                variant="ghost"
+                className={`w-full justify-start text-white hover:text-white hover:bg-white/10 ${
+                  pathname === item.href ? "bg-white/10" : ""
+                }`}
+                onClick={() => item.children && toggleItem(item.title)}
+              >
+                {item.icon}
+                <div className={`w-full justify-left items-center max-md:flex ${isExpanded ? "md:flex" : "md:hidden"}`}>
+                  <span className="ml-2">{item.title}</span>
+                  {item.children &&
+                    (openItems.includes(item.title) ? (
+                      <ChevronDown className="ml-auto h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="ml-auto h-4 w-4" />
+                    ))}
+                </div>
+              </Button>
+            </Link>
             {isExpanded && item.children && openItems.includes(item.title) && (
               <div className="ml-4 mt-2 space-y-1 grid">
                 {item.children.map((child) => (
