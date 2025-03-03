@@ -57,7 +57,7 @@ const InputBasic = ({formData, data}) => {
       </>
     )
   }
-}
+} 
 
 export function CreateEventDialog({ data, open, onOpenChange }) {
   const [formData, setFormData] = useState()
