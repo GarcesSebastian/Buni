@@ -157,21 +157,27 @@ export function TableGeneric({structure, structureForm, table}) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem className="text-green-800" onClick={() => handleEditClick(data)}>
-                          <Edit className="mr-2 h-4 w-4 bg-green-100 text-green-800" />
+                          <Edit className="mr-2 h-4 w-4 text-green-800" />
                           Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-red-800" onClick={() => handleDeleteClick(data)}>
-                          <Trash className="mr-2 h-4 w-4 bg-red-100 text-red-800" />
+                          <Trash className="mr-2 h-4 w-4 text-red-800" />
                           Eliminar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
-                          <QrCode className="mr-2 h-4 w-4" />
-                          QR Inscripción
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
-                          <QrCode className="mr-2 h-4 w-4" />
-                          QR Asistencia
-                        </DropdownMenuItem>
+                        {
+                          table.isQR && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
+                                <QrCode className="mr-2 h-4 w-4" />
+                                QR Inscripción
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
+                                <QrCode className="mr-2 h-4 w-4" />
+                                QR Asistencia
+                              </DropdownMenuItem>
+                            </>
+                          )
+                        }
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

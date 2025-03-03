@@ -24,11 +24,18 @@ export default function EventosPage() {
       }
     })
 
-    console.log(optionsFacultades)
+    const optionsScenerys = user.scenerys?.filter((scenery: { state: string }) => scenery.state === "true")
+    .map((scenery: { id: number, nombre: string, state: string }) => {
+      return {
+        value: scenery.nombre,
+        label: scenery.nombre.charAt(0).toUpperCase() + scenery.nombre.slice(1)
+      }
+    })
 
     const table = {
       name: "Eventos",
       key: "events",
+      isQR: true
     }
     
     const structure = {
@@ -62,7 +69,7 @@ export default function EventosPage() {
       scenery: {
         name: "Escenario",
         type: "selection",
-        options: optionsFacultades
+        options: optionsScenerys
       },
       state: {
         name: "Estado",
