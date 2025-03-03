@@ -5,10 +5,7 @@ import Section from "@/components/ui/Section"
 export type Faculty = {
   id: number
   nombre: string
-  organizador: string
   state: boolean
-  fecha: string
-  facultad: string
 }
 
 export default function FacultiesPage() {
@@ -20,8 +17,6 @@ export default function FacultiesPage() {
     const structure = {
       id: "ID",
       nombre: "Nombre",
-      organizador: "Organizador",
-      aniversario: "Aniversario",
       state: "Estados"
     }
 
@@ -30,17 +25,13 @@ export default function FacultiesPage() {
         name: "Nombre",
         type: "text"
       },
-      organizador: {
-        name: "Organizador",
-        type: "text"
-      },
-      aniversario: {
-        name: "Aniversario",
-        type: "date"
-      },
-      facultad: {
-        name: "Facultad",
-        type: "selection"
+      state: {
+        name: "Estado",
+        type: "selection",
+        options: [
+          { value: "true", label: "Activo" },
+          { value: "false", label: "Inactivo" }
+        ]
       }
     }
 

@@ -5,10 +5,7 @@ import Section from "@/components/ui/Section"
 export type Event = {
   id: number
   nombre: string
-  organizador: string
   state: boolean
-  fecha: string
-  facultad: string
 }
 
 export default function Scenerys() {
@@ -20,7 +17,6 @@ export default function Scenerys() {
     const structure = {
       id: "ID",
       nombre: "Nombre",
-      organizador: "Organizador",
       state: "Estados"
     }
 
@@ -29,17 +25,13 @@ export default function Scenerys() {
         name: "Nombre",
         type: "text"
       },
-      organizador: {
-        name: "Organizador",
-        type: "text"
-      },
-      fecha: {
-        name: "Fecha",
-        type: "date"
-      },
-      facultad: {
-        name: "Facultad",
-        type: "selection"
+      state: {
+        name: "Estado",
+        type: "selection",
+        options: [
+          { value: "true", label: "Activo" },
+          { value: "false", label: "Inactivo" }
+        ]
       }
     }
 

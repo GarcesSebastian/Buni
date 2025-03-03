@@ -1,6 +1,7 @@
 "use client"
 import React, { useState} from "react"
 import Section from "@/components/ui/Section"
+import { useUserData } from "@/hooks/useUserData"
 
 export type Event = {
   id: number
@@ -9,9 +10,22 @@ export type Event = {
   state: boolean
   fecha: string
   facultad: string
+  scenery: string
 }
 
 export default function EventosPage() {
+    const { user } = useUserData()
+
+    const optionsFacultades = user.faculties?.filter((faculty: { state: string }) => faculty.state === "true")
+    .map((faculty: { id: number, nombre: string, state: string }) => {
+      return {
+        value: faculty.nombre,
+        label: faculty.nombre.charAt(0).toUpperCase() + faculty.nombre.slice(1)
+      }
+    })
+
+    console.log(optionsFacultades)
+
     const table = {
       name: "Eventos",
       key: "events",
@@ -21,6 +35,9 @@ export default function EventosPage() {
       id: "ID",
       nombre: "Nombre",
       organizador: "Organizador",
+      fecha: "Fecha",
+      facultad: "Facultad",
+      scenery: "Escenario",
       state: "Estados"
     }
 
@@ -39,7 +56,21 @@ export default function EventosPage() {
       },
       facultad: {
         name: "Facultad",
-        type: "selection"
+        type: "selection",
+        options: optionsFacultades
+      },
+      scenery: {
+        name: "Escenario",
+        type: "selection",
+        options: optionsFacultades
+      },
+      state: {
+        name: "Estado",
+        type: "selection",
+        options: [
+          { value: "true", label: "Activo" },
+          { value: "false", label: "Inactivo" }
+        ]
       }
     }
 

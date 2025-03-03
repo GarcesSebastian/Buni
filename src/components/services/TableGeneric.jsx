@@ -88,8 +88,6 @@ export function TableGeneric({structure, structureForm, table}) {
     setSortConfig(null)
   }
 
-  console.log(user)
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -139,9 +137,9 @@ export function TableGeneric({structure, structureForm, table}) {
                         value === "state" ? (
                           <TableCell key={value}>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              data[value] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              data[value] == "true" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                             }`}>
-                              {data[value] ? "Activo" : "No activo"}
+                              {data[value] == "true" ? "Activo" : "No activo"}
                             </span>
                           </TableCell>
                         ) : (

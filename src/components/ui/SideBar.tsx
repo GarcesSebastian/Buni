@@ -72,7 +72,6 @@ export function SideBar() {
     return (<div></div>)
   }
 
-  console.log(isExpanded)
   return (
     <div className={`bg-[#DC2626] text-white transition-all duration-300 ease-in-out max-md:w-full max-md:h-fit ${isExpanded ? "md:w-64" : "md:w-16"}`}>
       <div className={`p-4 flex justify-between items-center`}>

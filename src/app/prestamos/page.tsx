@@ -8,7 +8,7 @@ export type Faculty = {
   organizador: string
   state: boolean
   fecha: string
-  facultad: string
+  escenario: string
 }
 
 export default function FacultiesPage() {
@@ -41,7 +41,19 @@ export default function FacultiesPage() {
       },
       escenario: {
         name: "Escenario",
-        type: "selection"
+        type: "selection",
+        options: [
+          { value: "true", label: "Activo" },
+          { value: "false", label: "Inactivo" }
+        ]
+      },
+      state: {
+        name: "Estado",
+        type: "selection",
+        options: [
+          { value: "true", label: "Activo" },
+          { value: "false", label: "Inactivo" }
+        ]
       }
     }
 
