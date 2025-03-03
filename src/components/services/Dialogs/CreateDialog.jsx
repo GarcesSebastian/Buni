@@ -16,43 +16,48 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useUserData } from "@/hooks/useUserData"
 
 const InputBasic = ({formData, data}) => {
-  if(data.type == "text" || data.type == "number" || data.type == "date"){
+  if(data.form.type == "text" || data.form.type == "number" || data.form.type == "date"){
     return(
       <>
-        <Label>{data.name}</Label>
+        <Label>{data.form.name}</Label>
         <Input
-          key={data.key}
-          type={data.type}
-          value={formData[data.name.toLowerCase()]}
+          key={data.index}
+          type={data.form.type}
+          value={formData[data.key.toLowerCase()]}
           onChange={data.onChange}
           required
         />
       </>
     )
-  }else if(data.type == "selection"){
+  }else if(data.form.type == "selection"){
     return(
       <>
-      <Label htmlFor="faculty">{data.name}</Label>
+      <Label htmlFor="faculty">{data.form.name}</Label>
       <Select
-        key={data.key}
-        value={formData.facultad}
+        key={data.index}
+        value={formData[data.key.toLowerCase()]}
         onValueChange={data.onChange}
         required
       >
         <SelectTrigger>
-          <SelectValue placeholder={`Seleccione una ${data.name.toLowerCase()}`} />
+          <SelectValue placeholder={`Seleccionar ${data.form.name.toLowerCase()}`} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ingenieria">Ingeniería</SelectItem>
-          <SelectItem value="medicina">Medicina</SelectItem>
-          <SelectItem value="derecho">Derecho</SelectItem>
-          <SelectItem value="deportes">Deportes</SelectItem>
+          {data.form.options.length > 0 ? (
+            data.form.options.map((option, index) => (
+              <SelectItem key={index} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm p-2">No se encontraron opciones</p>
+          )}
         </SelectContent>
       </Select>
       </>
     )
   }
-}
+} 
 
 export function CreateEventDialog({ data, open, onOpenChange }) {
   const [formData, setFormData] = useState()
@@ -62,7 +67,7 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
     setFormData(() => {
       let obj = {}
       Object.keys(data.structureForm).map((value) => {
-        obj[data.structureForm[value].name.toLowerCase()] = ""
+        obj[value.toLowerCase()] = ""
       })
   
       return obj
@@ -74,7 +79,6 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
 
     const id = user[data.table.key].length + 1
     formData.id = id
-    formData.state = true
 
     setUser({
       ...user,
@@ -84,10 +88,6 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
     RestartFormData()
     onOpenChange(false)
   }
-
-  useEffect(() => {
-    console.log(user)
-  }, [user])
 
   useEffect(RestartFormData, [])
   return (
@@ -104,10 +104,10 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
                 <InputBasic
                   formData={formData}
                   data={{
-                    name: data.structureForm[value].name,
-                    type: data.structureForm[value].type,
-                    onChange: (e) => setFormData({ ...formData, [data.structureForm[value].name.toLowerCase()]: e.target?.value == undefined ? e : e.target.value }),
-                    key: index
+                    form: data.structureForm[value],
+                    onChange: (e) => setFormData({ ...formData, [value.toLowerCase()]: e.target?.value == undefined ? e : e.target.value }),
+                    key: value,
+                    index: index
                   }}
                 />
               </div>
