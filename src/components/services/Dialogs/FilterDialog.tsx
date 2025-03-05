@@ -18,11 +18,21 @@ interface FilterDialogProps {
 export function FilterDialog({ open, onOpenChange, column, onFilter, onSort }: FilterDialogProps) {
   const [filterValue, setFilterValue] = useState("")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null)
+  const [year, setYear] = useState("")
+  const [month, setMonth] = useState("")
+  const [day, setDay] = useState("")
 
   const handleFilter = () => {
-    onFilter(filterValue)
+    if (column === "fecha") {
+      onFilter(`${year}` || `${month}` || `${day}`)
+    } else {
+      onFilter(filterValue)
+    }
     onSort(sortDirection)
     setFilterValue("")
+    setYear("")
+    setMonth("")
+    setDay("")
     setSortDirection(null)
     onOpenChange(false)
   }
@@ -44,6 +54,33 @@ export function FilterDialog({ open, onOpenChange, column, onFilter, onSort }: F
                 <SelectItem value="inactivo">Inactivo</SelectItem>
               </SelectContent>
             </Select>
+          ) : column === "fecha" ? (
+            <div className="flex gap-2">
+              <Label htmlFor="year"></Label>
+              <Input
+                id="year"
+                type="number"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                placeholder="Año"
+                />
+              <Label htmlFor="month"></Label>
+              <Input
+                id="month"
+                type="number"
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                placeholder="Mes"
+              />
+              <Label htmlFor="day"></Label>
+              <Input
+                id="day"
+                type="number"
+                value={day}
+                onChange={(e) => setDay(e.target.value)}
+                placeholder="Día"
+              />
+            </div>
           ) : (
             <div className="grid gap-2">
               <Label htmlFor="filterValue">Valor de filtro</Label>
