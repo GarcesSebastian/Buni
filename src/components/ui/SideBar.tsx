@@ -40,17 +40,22 @@ const navItems: NavItem[] = [
     children: [{ title: "Prestamo", href: "/prestamos", icon: <BookOpen className="h-4 w-4" /> }],
   },
   {
+    title: "Usuarios",
+    icon: <UserCog className="h-4 w-4" />,
+    children: [
+      { title: "Usuario", href: "/users", icon: <UserCog className="h-4 w-4" /> },
+      { title: "Roles", href: "/users/roles" },
+    ],
+  },
+  {
     title: "Facultades",
     href: "/faculties",
     icon: <LayoutDashboard className="h-4 w-4" />,
   },
   {
-    title: "Usuarios",
-    icon: <UserCog className="h-4 w-4" />,
-    children: [
-      { title: "Usuario", href: "/usuarios", icon: <UserCog className="h-4 w-4" /> },
-      { title: "Roles", href: "/usuarios/roles" },
-    ],
+    title: "Formularios",
+    href: "/formularios",
+    icon: <LayoutDashboard className="h-4 w-4" />,
   },
 ]
 
@@ -73,7 +78,9 @@ export function SideBar() {
   }
 
   return (
-    <div className={`bg-[#DC2626] text-white transition-all duration-300 ease-in-out max-md:w-full max-md:h-fit ${isExpanded ? "md:w-64" : "md:w-16"}`}>
+    <div 
+      className={`bg-[#DC2626] text-white transition-all duration-300 ease-in-out max-md:w-full aboslute max-md:px-2 ${isExpanded ? "w-64" : "w-16"}`}
+    >
       <div className={`p-4 flex justify-between items-center`}>
         <span className={`font-bold text-xl ${isExpanded ? "md:initial" : "md:hidden"}`}>BUNI</span>
         <Button
@@ -85,7 +92,7 @@ export function SideBar() {
           <Menu className="h-4 w-4" />
         </Button>
       </div>
-      <nav className={`space-y-2 md:p-2 ${isExpanded ? "max-md:initial" : "max-md:hidden max-md:animate-hidden-element max-md:h-0"}`}>
+      <nav className={`space-y-2 md:p-2 max-md:pb-2 ${isExpanded ? "max-md:initial" : "max-md:hidden max-md:animate-hidden-element max-md:h-0"}`}>
         {navItems.map((item) => (
           <div key={item.title}>
             <Link key={item.href} href={item.href || pathname}>

@@ -113,7 +113,7 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
               </div>
             ))}
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex flex-row">
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>

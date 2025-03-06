@@ -25,9 +25,9 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="h-full flex items-center justify-center bg-gray-100">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-1 flex flex-col">
           <div className="flex justify-center mb-4">
             <Image src="/logo-buni.png" alt="Description" width={80} height={80}/>
           </div>

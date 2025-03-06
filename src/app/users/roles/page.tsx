@@ -1,18 +1,18 @@
 "use client"
-import React, { useState} from "react"
+import React from "react"
 import Section from "@/components/ui/Section"
 import { TableGeneric } from "@/components/services/TableGeneric"
 
-export type Event = {
+export type Faculty = {
   id: number
   nombre: string
   state: boolean
 }
 
-export default function Scenerys() {
+export default function FacultiesPage() {
     const table = {
-      name: "Escenarios",
-      key: "scenerys",
+      name: "Roles",
+      key: "roles",
     }
 
     const structure = {
@@ -37,15 +37,15 @@ export default function Scenerys() {
     }
 
   return (
-      <div className="flex h-full flex-col">
-          <Section>
-            <div className="space-y-4 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
-                <h1 className="text-2xl font-bold">{table.name}</h1>
-                <p className="text-muted-foreground">Listado de {table.name}</p>
-                <TableGeneric structure={structure} structureForm={structureForm} table={table} />
-            </div>
-          </Section>
-      </div>
+    <div className="flex h-full flex-col">
+        <Section>
+          <div className="space-y-4 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
+              <h1 className="text-2xl font-bold">{table.name}</h1>
+              <p className="text-muted-foreground">Listado de {table.name}</p>
+              <TableGeneric structure={structure} structureForm={structureForm} table={table} />
+          </div>
+        </Section>
+    </div>
   )
 }
 

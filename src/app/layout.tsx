@@ -28,7 +28,7 @@ export default function RootLayout({
           <TopNav/>
           <div className="flex">
             <UserDataProvider>
-              <main className="flex-1 overflow-y-hidden">{children}</main>
+              <main className="w-full" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
             </UserDataProvider>
           </div>
         </div>

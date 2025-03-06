@@ -8,6 +8,7 @@ interface User {
     scenerys?: [];
     loans?: [];
     users?: [];
+    roles?: [];
 }
 
 const UserDataContext = createContext<{
@@ -22,6 +23,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         scenerys: [],
         loans: [],
         users: [],
+        roles: [],
     });
 
     return (

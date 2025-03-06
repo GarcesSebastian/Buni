@@ -1,6 +1,7 @@
 "use client"
 import React, { useState} from "react"
 import Section from "@/components/ui/Section"
+import { TableGeneric } from "@/components/services/TableGeneric"
 
 export type Faculty = {
   id: number
@@ -35,11 +36,15 @@ export default function FacultiesPage() {
       }
     }
 
-    const [faculties, setFaculties] = useState<Faculty[]>([])
-
   return (
-    <div className="min-h-screen flex flex-col">
-        <Section structure={structure} structureForm={structureForm} data={faculties} setData={setFaculties} table={table}/>
+    <div className="flex h-full flex-col">
+        <Section>
+          <div className="space-y-4 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
+              <h1 className="text-2xl font-bold">{table.name}</h1>
+              <p className="text-muted-foreground">Listado de {table.name}</p>
+              <TableGeneric structure={structure} structureForm={structureForm} table={table} />
+          </div>
+        </Section>
     </div>
   )
 }
