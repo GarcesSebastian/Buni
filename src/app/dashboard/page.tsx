@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, JSX } from "react"
+import { useState } from "react"
+
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import {
@@ -15,6 +16,7 @@ import {
   Tooltip,
   Legend,
   Sector,
+  SectorProps
 } from "recharts"
 import { BookOpen, Calendar, LayoutDashboard, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -125,33 +127,22 @@ export default function DashboardPage() {
     setShowDetailChart(true);
   };
 
-  interface ActiveShapeProps {
-    cx: number
-    cy: number
-    innerRadius: number
-    outerRadius: number
-    startAngle: number
-    endAngle: number
-    fill: string
-  }
+  const renderActiveShape = (props: SectorProps) => {
+      const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props
 
-  const renderActiveShape: React.FC<ActiveShapeProps> = (props) => {
-    if (!props) return null
-    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props
-
-    return (
+      return (
       <g>
-        <Sector
-          cx={cx}
-          cy={cy}
-          innerRadius={innerRadius}
-          outerRadius={outerRadius + 6}
-          startAngle={startAngle}
-          endAngle={endAngle}
-          fill={fill}
-        />
+          <Sector
+            cx={cx}
+            cy={cy}
+            innerRadius={innerRadius}
+            outerRadius={outerRadius || 0 + 6}
+            startAngle={startAngle}
+            endAngle={endAngle}
+            fill={fill}
+          />
       </g>
-    )
+      )
   }
 
   return (
@@ -219,7 +210,7 @@ export default function DashboardPage() {
                           <PieChart>
                             <Pie
                               activeIndex={activeIndex !== null ? activeIndex : undefined}
-                              activeShape={renderActiveShape as unknown as (props: any) => JSX.Element}
+                              activeShape={renderActiveShape}
                               data={participantesPorEscuela}
                               cx="50%"
                               cy="50%"
