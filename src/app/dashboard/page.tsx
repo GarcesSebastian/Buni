@@ -120,7 +120,7 @@ export default function DashboardPage() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [showDetailChart, setShowDetailChart] = useState(false)
 
-  const handlePieClick = (data: any, index: number) => {
+  const handlePieClick = (index: number) => {
     setActiveIndex(index)
     setShowDetailChart(true)
   }

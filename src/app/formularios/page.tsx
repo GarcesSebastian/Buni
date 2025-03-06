@@ -527,7 +527,7 @@ export default function FormulariosPage() {
                 <div className="space-y-4">
                   <p>
                     Los formularios creados aquí pueden ser utilizados en diferentes eventos para recopilar información de los
-                    participantes. Para utilizar un formulario en un evento, debe estar marcado como "Activo".
+                    participantes. Para utilizar un formulario en un evento, debe estar marcado como &quot;Activo&quot;.
                   </p>
 
                   <div className="grid gap-4 md:grid-cols-3">
@@ -541,7 +541,7 @@ export default function FormulariosPage() {
                     <div className="border rounded-md p-4">
                       <h3 className="font-medium mb-2">2. Activar Formulario</h3>
                       <p className="text-sm text-muted-foreground">
-                        Marque el formulario como "Activo" para que esté disponible para su uso en eventos.
+                        Marque el formulario como &quot;Activo&quot; para que esté disponible para su uso en eventos.
                       </p>
                     </div>
 
