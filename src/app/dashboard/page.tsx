@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, JSX } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import {
@@ -120,12 +120,23 @@ export default function DashboardPage() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [showDetailChart, setShowDetailChart] = useState(false)
 
-  const handlePieClick = (index: number) => {
-    setActiveIndex(index)
-    setShowDetailChart(true)
+  const handlePieClick = (data: {name: string,  value: number, color: string}, index: number) => {
+    setActiveIndex(index);
+    setShowDetailChart(true);
+  };
+
+  interface ActiveShapeProps {
+    cx: number
+    cy: number
+    innerRadius: number
+    outerRadius: number
+    startAngle: number
+    endAngle: number
+    fill: string
   }
 
-  const renderActiveShape = (props: any) => {
+  const renderActiveShape: React.FC<ActiveShapeProps> = (props) => {
+    if (!props) return null
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props
 
     return (
@@ -208,7 +219,7 @@ export default function DashboardPage() {
                           <PieChart>
                             <Pie
                               activeIndex={activeIndex !== null ? activeIndex : undefined}
-                              activeShape={renderActiveShape}
+                              activeShape={renderActiveShape as unknown as (props: any) => JSX.Element}
                               data={participantesPorEscuela}
                               cx="50%"
                               cy="50%"
