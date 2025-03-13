@@ -45,7 +45,7 @@ const InputBasic = ({formData, data}) => {
         <SelectContent>
           {data.form.options.length > 0 ? (
             data.form.options.map((option, index) => (
-              <SelectItem key={index} value={option.value}>
+              <SelectItem key={index} value={`${option.value}${option.id ? '_' + option.id : ''}`}>
                 {option.label}
               </SelectItem>
             ))
@@ -62,6 +62,10 @@ const InputBasic = ({formData, data}) => {
 export function CreateEventDialog({ data, open, onOpenChange }) {
   const [formData, setFormData] = useState()
   const { user, setUser } = useUserData()
+
+  useEffect(() => {
+    console.log("FormData", formData)
+  }, [formData])
   
   const RestartFormData = () => {
     setFormData(() => {
@@ -89,6 +93,10 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
     onOpenChange(false)
   }
 
+  const getMatch = (value) => {
+    return value
+  }
+
   useEffect(RestartFormData, [])
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -105,7 +113,7 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
                   formData={formData}
                   data={{
                     form: data.structureForm[value],
-                    onChange: (e) => setFormData({ ...formData, [value.toLowerCase()]: e.target?.value == undefined ? e : e.target.value }),
+                    onChange: (e) => setFormData({ ...formData, [value.toLowerCase()]: e.target?.value == undefined ? getMatch(e) : e.target.value }),
                     key: value,
                     index: index
                   }}

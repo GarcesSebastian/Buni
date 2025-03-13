@@ -46,33 +46,22 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { useUserData } from "@/hooks/useUserData"
+import { typesField } from "@/config/Forms"
+import type { CampoFormulario, Form } from "@/types/Forms"
 
-const tiposCampo = [
-  { id: "texto", nombre: "Texto" },
-  { id: "numero", nombre: "Número" },
-  { id: "email", nombre: "Email" },
-  { id: "fecha", nombre: "Fecha" },
-  { id: "seleccion", nombre: "Selección" },
-  { id: "checkbox", nombre: "Casilla de verificación" },
-]
-
-interface CampoFormulario {
-  id: string
-  nombre: string
-  tipo: string
-  requerido: boolean
-  opciones?: string[]
+interface SorteableFieldProps {
+  campo: CampoFormulario,
+  onDelete: (id: string) => void,
+  data: {
+    index: number,
+    moveFieldUp: (index: number) => void,
+    moveFieldDown: (index: number) => void,
+    currentForm: Form
+  }
 }
 
-interface Formulario {
-  id: number
-  nombre: string
-  descripcion: string
-  campos: CampoFormulario[]
-  activo: boolean
-}
-
-function SortableCampo({ campo, onDelete }: { campo: CampoFormulario; onDelete: (id: string) => void }) {
+function SortableCampo({ campo, onDelete, data }: SorteableFieldProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: campo.id })
 
   const style = {
@@ -97,77 +86,62 @@ function SortableCampo({ campo, onDelete }: { campo: CampoFormulario; onDelete: 
         <div>
           <p className="font-medium">{campo.nombre}</p>
           <p className="text-sm text-muted-foreground">
-            Tipo: {tiposCampo.find((t) => t.id === campo.tipo)?.nombre || campo.tipo}
+            Tipo: {typesField.find((t) => t.id === campo.tipo)?.nombre || campo.tipo}
             {campo.requerido && " (Requerido)"}
           </p>
           {campo.opciones && <p className="text-xs text-muted-foreground">Opciones: {campo.opciones.join(", ")}</p>}
         </div>
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onDelete(campo.id)}
-        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
+
+      <div className="flex justify-center items-center gap-2">
+        <div className="flex flex-col justify-center items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 flex justify-center items-center text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            onClick={() => data.moveFieldUp(data.index)}
+            disabled={data.index === 0}
+          >
+            <ArrowUp className="h-4 w-4" />
+            <span className="sr-only">Mover arriba</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 flex justify-center items-center text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            onClick={() => data.moveFieldDown(data.index)}
+            disabled={data.index === data.currentForm.campos.length - 1}
+          >
+            <ArrowDown className="h-4 w-4" />
+            <span className="sr-only">Mover abajo</span>
+          </Button>
+        </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(campo.id)}
+          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   )
 }
 
 export default function FormulariosPage() {
-  const [formularios, setFormularios] = useState<Formulario[]>([
-    {
-      id: 1,
-      nombre: "Registro de Estudiantes",
-      descripcion: "Formulario para registrar estudiantes en eventos",
-      activo: true,
-      campos: [
-        { id: "nombre", nombre: "Nombre", tipo: "texto", requerido: true },
-        { id: "codigo", nombre: "Código Estudiantil", tipo: "numero", requerido: true },
-        {
-          id: "escuela",
-          nombre: "Escuela",
-          tipo: "seleccion",
-          requerido: true,
-          opciones: ["Sistemas", "Psicología", "Medicina", "Derecho"],
-        },
-        { id: "email", nombre: "Correo Electrónico", tipo: "email", requerido: true },
-      ],
-    },
-    {
-      id: 2,
-      nombre: "Registro de Docentes",
-      descripcion: "Formulario para registrar docentes en eventos",
-      activo: false,
-      campos: [
-        { id: "nombre", nombre: "Nombre Completo", tipo: "texto", requerido: true },
-        {
-          id: "facultad",
-          nombre: "Facultad",
-          tipo: "seleccion",
-          requerido: true,
-          opciones: ["Ingeniería", "Humanidades", "Ciencias de la Salud", "Derecho"],
-        },
-        { id: "telefono", nombre: "Teléfono", tipo: "numero", requerido: false },
-      ],
-    },
-  ])
-
-  const [formularioActual, setFormularioActual] = useState<Formulario | null>(null)
-
-  const [nuevoCampo, setNuevoCampo] = useState<CampoFormulario>({
+  const {user, setUser} = useUserData();
+  const [currentForm, setCurrentForm] = useState<Form | null>(null)
+  const [newField, setNewField] = useState<CampoFormulario>({
     id: "",
     nombre: "",
     tipo: "texto",
     requerido: false,
   })
-
-  const [opcionesCampo, setOpcionesCampo] = useState<string>("")
-
-  const [mostrarOpciones, setMostrarOpciones] = useState<boolean>(false)
-
-  const [dialogoAgregarCampo, setDialogoAgregarCampo] = useState<boolean>(false)
+  const [optionsField, setOptionsField] = useState<string>("")
+  const [showOptionsField, setShowOptionsField] = useState<boolean>(false)
+  const [dialogAddField, setDialogAddField] = useState<boolean>(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -183,120 +157,128 @@ export default function FormulariosPage() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
-    if (over && active.id !== over.id && formularioActual) {
-      const oldIndex = formularioActual.campos.findIndex((campo) => campo.id === active.id)
-      const newIndex = formularioActual.campos.findIndex((campo) => campo.id === over.id)
+    if (over && active.id !== over.id && currentForm) {
+      const oldIndex = currentForm.campos.findIndex((campo) => campo.id === active.id)
+      const newIndex = currentForm.campos.findIndex((campo) => campo.id === over.id)
 
-      const newCampos = arrayMove(formularioActual.campos, oldIndex, newIndex)
+      const newCampos = arrayMove(currentForm.campos, oldIndex, newIndex)
 
-      setFormularioActual({
-        ...formularioActual,
+      setCurrentForm({
+        ...currentForm,
         campos: newCampos,
       })
     }
   }
 
-  const moverCampoArriba = (index: number) => {
-    if (!formularioActual || index <= 0) return
+  const moveFieldUp = (index: number) => {
+    if (!currentForm || index <= 0) return
 
-    const newCampos = [...formularioActual.campos]
+    const newCampos = [...currentForm.campos]
     ;[newCampos[index], newCampos[index - 1]] = [newCampos[index - 1], newCampos[index]]
 
-    setFormularioActual({
-      ...formularioActual,
+    setCurrentForm({
+      ...currentForm,
       campos: newCampos,
     })
   }
 
-  const moverCampoAbajo = (index: number) => {
-    if (!formularioActual || index >= formularioActual.campos.length - 1) return
+  const moveFieldDown = (index: number) => {
+    if (!currentForm || index >= currentForm.campos.length - 1) return
 
-    const newCampos = [...formularioActual.campos]
+    const newCampos = [...currentForm.campos]
     ;[newCampos[index], newCampos[index + 1]] = [newCampos[index + 1], newCampos[index]]
 
-    setFormularioActual({
-      ...formularioActual,
+    setCurrentForm({
+      ...currentForm,
       campos: newCampos,
     })
   }
 
-  const crearFormulario = () => {
-    const nuevoFormulario: Formulario = {
+  const createForm = () => {
+    const nuevoFormulario = {
       id: Date.now(),
       nombre: "Nuevo Formulario",
       descripcion: "Descripción del formulario",
       campos: [],
-      activo: false,
+      state: false,
     }
 
-    setFormularios([...formularios, nuevoFormulario])
-    setFormularioActual({ ...nuevoFormulario })
+    setUser({
+      ...user,
+      forms: [...user.forms, nuevoFormulario]
+    })
+    setCurrentForm({ ...nuevoFormulario })
   }
 
-  const editarFormulario = (formulario: Formulario) => {
-    setFormularioActual({ ...formulario })
+  const editForm = (formulario: Form) => {
+    setCurrentForm({ ...formulario })
   }
 
-  const eliminarFormulario = (id: number) => {
-    setFormularios(formularios.filter((f) => f.id !== id))
-    if (formularioActual?.id === id) {
-      setFormularioActual(null)
+  const deleteForm = (id: number) => {
+    setUser({
+      ...user,
+      forms: user.forms.filter((f) => f.id !== id)
+    })
+
+    if (currentForm?.id === id) {
+      setCurrentForm(null)
     }
   }
 
-  const actualizarFormulario = () => {
-    if (!formularioActual) return
+  const updateForm = () => {
+    if (!currentForm) return
+    setUser({
+      ...user,
+      forms: user.forms.map((f) => (f.id === currentForm.id ? currentForm : f))
+    })
 
-    setFormularios(formularios.map((f) => (f.id === formularioActual.id ? formularioActual : f)))
-    setFormularioActual(null)
+    setCurrentForm(null)
   }
 
-  const agregarCampo = () => {
-    if (!formularioActual || !nuevoCampo.nombre) return
+  const addField = () => {
+    if (!currentForm || !newField.nombre) return
 
-    // Generar un ID único para el campo
-    const campoId = nuevoCampo.nombre.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now()
+    const campoId = newField.nombre.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now()
 
-    // Crear el nuevo campo
     const campo: CampoFormulario = {
-      ...nuevoCampo,
+      ...newField,
       id: campoId,
     }
 
-    // Si es un campo de tipo selección, agregar las opciones
-    if (campo.tipo === "seleccion" && opcionesCampo) {
-      campo.opciones = opcionesCampo.split(",").map((opt) => opt.trim())
+    if (campo.tipo === "seleccion" && optionsField) {
+      campo.opciones = optionsField.split(",")
     }
 
-    // Actualizar el formulario actual
-    setFormularioActual({
-      ...formularioActual,
-      campos: [...formularioActual.campos, campo],
+    setCurrentForm({
+      ...currentForm,
+      campos: [...currentForm.campos, campo],
     })
 
-    // Resetear el estado del nuevo campo
-    setNuevoCampo({
+    setNewField({
       id: "",
       nombre: "",
       tipo: "texto",
       requerido: false,
     })
-    setOpcionesCampo("")
-    setMostrarOpciones(false)
-    setDialogoAgregarCampo(false)
+    setOptionsField("")
+    setShowOptionsField(false)
+    setDialogAddField(false)
   }
 
-  const eliminarCampo = (campoId: string) => {
-    if (!formularioActual) return
+  const deleteField = (campoId: string) => {
+    if (!currentForm) return
 
-    setFormularioActual({
-      ...formularioActual,
-      campos: formularioActual.campos.filter((c) => c.id !== campoId),
+    setCurrentForm({
+      ...currentForm,
+      campos: currentForm.campos.filter((c) => c.id !== campoId),
     })
   }
 
-  const toggleEstadoFormulario = (id: number) => {
-    setFormularios(formularios.map((f) => (f.id === id ? { ...f, activo: !f.activo } : f)))
+  const toggleStateForm = (id: number) => {
+    setUser({
+      ...user,
+      forms: user.forms.map((f) => (f.id === id ? { ...f, state: !f.state } : f))
+    })
   }
 
   return (
@@ -305,7 +287,7 @@ export default function FormulariosPage() {
           <div className="space-y-6 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold">Formularios</h1>
-              <Button onClick={crearFormulario} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+              <Button onClick={createForm} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Formulario
               </Button>
@@ -328,16 +310,16 @@ export default function FormulariosPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {formularios.map((formulario) => (
+                      {user.forms.map((formulario) => (
                         <TableRow key={formulario.id}>
                           <TableCell>{formulario.nombre}</TableCell>
                           <TableCell>
                             <span
                               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                formulario.activo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                formulario.state ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                               }`}
                             >
-                              {formulario.activo ? "Activo" : "Inactivo"}
+                              {formulario.state ? "Activo" : "Inactivo"}
                             </span>
                           </TableCell>
                           <TableCell>{formulario.campos.length}</TableCell>
@@ -351,12 +333,12 @@ export default function FormulariosPage() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => editarFormulario(formulario)}>
+                                  <DropdownMenuItem onClick={() => editForm(formulario)}>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => toggleEstadoFormulario(formulario.id)}>
-                                    {formulario.activo ? (
+                                  <DropdownMenuItem onClick={() => toggleStateForm(formulario.id)}>
+                                    {formulario.state ? (
                                       <>
                                         <X className="mr-2 h-4 w-4" />
                                         Desactivar
@@ -386,7 +368,7 @@ export default function FormulariosPage() {
                                       <AlertDialogFooter>
                                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                         <AlertDialogAction
-                                          onClick={() => eliminarFormulario(formulario.id)}
+                                          onClick={() => deleteForm(formulario.id)}
                                           className="bg-[#DC2626] hover:bg-[#DC2626]/90"
                                         >
                                           Eliminar
@@ -400,7 +382,7 @@ export default function FormulariosPage() {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {formularios.length === 0 && (
+                      {user.forms.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={4} className="text-center py-4">
                             No hay formularios disponibles
@@ -414,22 +396,22 @@ export default function FormulariosPage() {
 
               <Card>
                 <CardHeader className="flex flex-col">
-                  <CardTitle>{formularioActual ? `Editar: ${formularioActual.nombre}` : "Detalles del Formulario"}</CardTitle>
+                  <CardTitle>{currentForm ? `Editar: ${currentForm.nombre}` : "Detalles del Formulario"}</CardTitle>
                   <CardDescription>
-                    {formularioActual
+                    {currentForm
                       ? "Modifique los detalles y campos del formulario"
                       : "Seleccione un formulario para editar o cree uno nuevo"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {formularioActual ? (
+                  {currentForm ? (
                     <div className="space-y-4">
                       <div className="grid gap-2">
                         <Label htmlFor="nombre-formulario">Nombre del Formulario</Label>
                         <Input
                           id="nombre-formulario"
-                          value={formularioActual.nombre}
-                          onChange={(e) => setFormularioActual({ ...formularioActual, nombre: e.target.value })}
+                          value={currentForm.nombre}
+                          onChange={(e) => setCurrentForm({ ...currentForm, nombre: e.target.value })}
                         />
                       </div>
 
@@ -437,21 +419,21 @@ export default function FormulariosPage() {
                         <Label htmlFor="descripcion-formulario">Descripción</Label>
                         <Input
                           id="descripcion-formulario"
-                          value={formularioActual.descripcion}
-                          onChange={(e) => setFormularioActual({ ...formularioActual, descripcion: e.target.value })}
+                          value={currentForm.descripcion}
+                          onChange={(e) => setCurrentForm({ ...currentForm, descripcion: e.target.value })}
                         />
                       </div>
 
                       <div className="border rounded-md p-4">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="font-medium">Campos del Formulario</h3>
-                          <Button variant="outline" size="sm" onClick={() => setDialogoAgregarCampo(true)}>
+                          <Button variant="outline" size="sm" onClick={() => setDialogAddField(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             Agregar Campo
                           </Button>
                         </div>
 
-                        {formularioActual.campos.length > 0 ? (
+                        {currentForm.campos.length > 0 ? (
                           <div className="space-y-2">
                             <p className="text-sm text-muted-foreground mb-3">
                               Arrastra y suelta los campos para reordenarlos. El orden aquí determinará cómo se mostrarán en
@@ -459,35 +441,18 @@ export default function FormulariosPage() {
                             </p>
                             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                               <SortableContext
-                                items={formularioActual.campos.map((campo) => campo.id)}
+                                items={currentForm.campos.map((campo) => campo.id)}
                                 strategy={verticalListSortingStrategy}
                               >
                                 <div className="space-y-2">
-                                  {formularioActual.campos.map((campo, index) => (
+                                  {currentForm.campos.map((campo, index) => (
                                     <div key={campo.id} className="relative">
-                                      <SortableCampo campo={campo} onDelete={eliminarCampo} />
-                                      <div className="absolute right-12 top-1/2 -translate-y-1/2 flex flex-col gap-1">
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                                          onClick={() => moverCampoArriba(index)}
-                                          disabled={index === 0}
-                                        >
-                                          <ArrowUp className="h-4 w-4" />
-                                          <span className="sr-only">Mover arriba</span>
-                                        </Button>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                                          onClick={() => moverCampoAbajo(index)}
-                                          disabled={index === formularioActual.campos.length - 1}
-                                        >
-                                          <ArrowDown className="h-4 w-4" />
-                                          <span className="sr-only">Mover abajo</span>
-                                        </Button>
-                                      </div>
+                                      <SortableCampo campo={campo} onDelete={deleteField} data={{
+                                        index: index,
+                                        moveFieldDown,
+                                        moveFieldUp,
+                                        currentForm
+                                      }} />
                                     </div>
                                   ))}
                                 </div>
@@ -505,12 +470,12 @@ export default function FormulariosPage() {
                     </div>
                   )}
                 </CardContent>
-                {formularioActual && (
+                {currentForm && (
                   <CardFooter className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setFormularioActual(null)}>
+                    <Button variant="outline" onClick={() => setCurrentForm(null)}>
                       Cancelar
                     </Button>
-                    <Button onClick={actualizarFormulario} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+                    <Button onClick={updateForm} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
                       <Save className="mr-2 h-4 w-4" />
                       Guardar Formulario
                     </Button>
@@ -557,7 +522,7 @@ export default function FormulariosPage() {
               </CardContent>
             </Card>
 
-            <Dialog open={dialogoAgregarCampo} onOpenChange={setDialogoAgregarCampo}>
+            <Dialog open={dialogAddField} onOpenChange={setDialogAddField}>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Agregar Nuevo Campo</DialogTitle>
@@ -569,25 +534,25 @@ export default function FormulariosPage() {
                     <Label htmlFor="nombre-campo">Nombre del Campo</Label>
                     <Input
                       id="nombre-campo"
-                      value={nuevoCampo.nombre}
-                      onChange={(e) => setNuevoCampo({ ...nuevoCampo, nombre: e.target.value })}
+                      value={newField.nombre}
+                      onChange={(e) => setNewField({ ...newField, nombre: e.target.value })}
                     />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="tipo-campo">Tipo de Campo</Label>
                     <Select
-                      value={nuevoCampo.tipo}
+                      value={newField.tipo}
                       onValueChange={(valor) => {
-                        setNuevoCampo({ ...nuevoCampo, tipo: valor })
-                        setMostrarOpciones(valor === "seleccion")
+                        setNewField({ ...newField, tipo: valor })
+                        setShowOptionsField(valor === "seleccion")
                       }}
                     >
                       <SelectTrigger id="tipo-campo">
                         <SelectValue placeholder="Seleccione un tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                        {tiposCampo.map((tipo) => (
+                        {typesField.map((tipo) => (
                           <SelectItem key={tipo.id} value={tipo.id}>
                             {tipo.nombre}
                           </SelectItem>
@@ -596,14 +561,14 @@ export default function FormulariosPage() {
                     </Select>
                   </div>
 
-                  {mostrarOpciones && (
+                  {showOptionsField && (
                     <div className="grid gap-2">
                       <Label htmlFor="opciones-campo">Opciones (separadas por comas)</Label>
                       <Input
                         id="opciones-campo"
-                        value={opcionesCampo}
-                        onChange={(e) => setOpcionesCampo(e.target.value)}
-                        placeholder="Opción 1, Opción 2, Opción 3"
+                        value={optionsField}
+                        onChange={(e) => setOptionsField(e.target.value)}
+                        placeholder="Opción 1,Opción 2,Opción 3"
                       />
                     </div>
                   )}
@@ -612,8 +577,8 @@ export default function FormulariosPage() {
                     <input
                       type="checkbox"
                       id="campo-requerido"
-                      checked={nuevoCampo.requerido}
-                      onChange={(e) => setNuevoCampo({ ...nuevoCampo, requerido: e.target.checked })}
+                      checked={newField.requerido}
+                      onChange={(e) => setNewField({ ...newField, requerido: e.target.checked })}
                       className="rounded border-gray-300"
                     />
                     <Label htmlFor="campo-requerido">Campo requerido</Label>
@@ -624,20 +589,20 @@ export default function FormulariosPage() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setNuevoCampo({
+                      setNewField({
                         id: "",
                         nombre: "",
                         tipo: "texto",
                         requerido: false,
                       })
-                      setOpcionesCampo("")
-                      setMostrarOpciones(false)
-                      setDialogoAgregarCampo(false)
+                      setOptionsField("")
+                      setShowOptionsField(false)
+                      setDialogAddField(false)
                     }}
                   >
                     Cancelar
                   </Button>
-                  <Button onClick={agregarCampo} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+                  <Button onClick={addField} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
                     Agregar
                   </Button>
                 </DialogFooter>

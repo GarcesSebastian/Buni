@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, ReactNode } from "react";
-
+import type { Form } from "@/types/Forms";
 interface User {
     events?: [];
     faculties?: [];
@@ -9,6 +9,7 @@ interface User {
     loans?: [];
     users?: [];
     roles?: [];
+    forms: Form[];
 }
 
 const UserDataContext = createContext<{
@@ -24,6 +25,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         loans: [],
         users: [],
         roles: [],
+        forms: [],
     });
 
     return (
@@ -33,7 +35,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-export const useUserData = () => {
+export const useUserData = (): { user: User; setUser: (data: User) => void } => {
     const context = useContext(UserDataContext);
     if (!context) {
         throw new Error("useUserData debe estar dentro de un UserDataProvider");

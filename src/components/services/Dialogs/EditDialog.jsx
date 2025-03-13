@@ -30,7 +30,7 @@ const InputBasic = ({formData, data}) => {
       </>
     )
   }else if(data.form.type == "selection"){
-    console.log(data, formData)
+    console.log(formData[data.key.toLowerCase()])
     return(
       <>
       <Label htmlFor="faculty">{data.form.name}</Label>

@@ -31,6 +31,7 @@ export function TableGeneric({structure, structureForm, table}) {
   const [eventToDelete, setEventToDelete] = useState(null)
 
   const sortedAndFilteredEvents = useMemo(() => {
+    console.log(user[table.key])
     const filteredEvents = user[table.key].filter(
       (event) => {
         return Object.keys(filters).every((key) => {
@@ -143,7 +144,7 @@ export function TableGeneric({structure, structureForm, table}) {
                             </span>
                           </TableCell>
                         ) : (
-                          <TableCell key={value}>{data[value]}</TableCell>
+                          <TableCell key={value}>{data[value].split("_").length > 1 ? data[value].split("_")[0] : data[value]}</TableCell>
                         )
                       ) : null
                   )}

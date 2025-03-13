@@ -3,6 +3,7 @@ import React from "react"
 import Section from "@/components/ui/Section"
 import { TableGeneric } from "@/components/services/TableGeneric"
 import { useUserData } from "@/hooks/useUserData"
+import { Form } from "@/types/Forms"
 
 export type Event = {
   id: number
@@ -17,11 +18,23 @@ export type Event = {
 export default function EventosPage() {
   const { user } = useUserData()
 
+  const optionsForms = user.forms.filter((f: Form) => f.state == true)
+  .map((f: Form) => {
+    return {
+      value: f.nombre,
+      label: f.nombre.charAt(0).toUpperCase() + f.nombre.slice(1),
+      id: f.id
+    }
+  })
+
+  console.log(optionsForms)
+
   const optionsFacultades = user.faculties?.filter((faculty: { state: string }) => faculty.state === "true")
   .map((faculty: { id: number, nombre: string, state: string }) => {
     return {
       value: faculty.nombre,
-      label: faculty.nombre.charAt(0).toUpperCase() + faculty.nombre.slice(1)
+      label: faculty.nombre.charAt(0).toUpperCase() + faculty.nombre.slice(1),
+      id: faculty.id
     }
   })
 
@@ -29,7 +42,8 @@ export default function EventosPage() {
   .map((scenery: { id: number, nombre: string, state: string }) => {
     return {
       value: scenery.nombre,
-      label: scenery.nombre.charAt(0).toUpperCase() + scenery.nombre.slice(1)
+      label: scenery.nombre.charAt(0).toUpperCase() + scenery.nombre.slice(1),
+      id: scenery.id
     }
   })
 
@@ -46,6 +60,7 @@ export default function EventosPage() {
     fecha: "Fecha",
     facultad: "Facultad",
     scenery: "Escenario",
+    form: "Formulario",
     state: "Estados"
   }
 
@@ -71,6 +86,11 @@ export default function EventosPage() {
       name: "Escenario",
       type: "selection",
       options: optionsScenerys
+    },
+    form: {
+      name: "Formulario",
+      type: "selection",
+      options: optionsForms
     },
     state: {
       name: "Estado",
