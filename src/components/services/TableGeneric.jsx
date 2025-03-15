@@ -89,6 +89,17 @@ export function TableGeneric({structure, structureForm, table}) {
     setSortConfig(null)
   }
 
+  const normalizeData = (data, value) => {
+    if (data[value].split("_").length <= 1){
+      return data[value]
+    }
+
+    const dataSplit = data[value].split("_")
+    const id = dataSplit[dataSplit.length - 1]
+    const dataFind = user[value].find(f => f.id == id)
+    return dataFind.nombre
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-row justify-between gap-4">
@@ -144,7 +155,7 @@ export function TableGeneric({structure, structureForm, table}) {
                             </span>
                           </TableCell>
                         ) : (
-                          <TableCell key={value}>{data[value].split("_").length > 1 ? data[value].split("_")[0] : data[value]}</TableCell>
+                          <TableCell key={value}>{normalizeData(data, value)}</TableCell>
                         )
                       ) : null
                   )}

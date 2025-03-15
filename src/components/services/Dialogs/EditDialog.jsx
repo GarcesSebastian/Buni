@@ -46,7 +46,7 @@ const InputBasic = ({formData, data}) => {
         <SelectContent>
           {data.form.options.length > 0 ? (
             data.form.options.map((option, index) => (
-              <SelectItem key={index} value={option.value}>
+              <SelectItem key={index} value={`${option.value}${option.id ? '_' + option.id : ''}`}>
                 {option.label}
               </SelectItem>
             ))

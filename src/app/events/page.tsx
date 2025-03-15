@@ -5,16 +5,6 @@ import { TableGeneric } from "@/components/services/TableGeneric"
 import { useUserData } from "@/hooks/useUserData"
 import { Form } from "@/types/Forms"
 
-export type Event = {
-  id: number
-  nombre: string
-  organizador: string
-  state: boolean
-  fecha: string
-  facultad: string
-  scenery: string
-}
-
 export default function EventosPage() {
   const { user } = useUserData()
 
@@ -58,9 +48,9 @@ export default function EventosPage() {
     nombre: "Nombre",
     organizador: "Organizador",
     fecha: "Fecha",
-    facultad: "Facultad",
-    scenery: "Escenario",
-    form: "Formulario",
+    faculties: "Facultad",
+    scenerys: "Escenario",
+    forms: "Formulario",
     state: "Estados"
   }
 
@@ -77,17 +67,17 @@ export default function EventosPage() {
       name: "Fecha",
       type: "date"
     },
-    facultad: {
+    faculties: {
       name: "Facultad",
       type: "selection",
       options: optionsFacultades
     },
-    scenery: {
+    scenerys: {
       name: "Escenario",
       type: "selection",
       options: optionsScenerys
     },
-    form: {
+    forms: {
       name: "Formulario",
       type: "selection",
       options: optionsForms
