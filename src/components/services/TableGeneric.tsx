@@ -5,45 +5,68 @@ import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import { Edit, Filter, MoreVertical, Plus, QrCode, Trash } from "lucide-react"
-import { CreateEventDialog } from "./Dialogs/CreateDialog"
+import { CreateEventDialog } from "./Dialogs/Tables/CreateDialog"
 import { QRDialog } from "./Dialogs/QRDialog"
-import { FilterDialog } from "./Dialogs/FilterDialog"
-import { EditDialog } from "./Dialogs/EditDialog"
-import { DeleteDialog } from "./Dialogs/DeleteDialog"
+import { FilterDialog } from "./Dialogs/Tables/FilterDialog"
+import { EditDialog } from "./Dialogs/Tables/EditDialog"
+import { DeleteDialog } from "./Dialogs/Tables/DeleteDialog"
 import { useUserData } from "@/hooks/useUserData"
+import { useRouter } from "next/navigation"
+import { ConfigEvent, ConfigEventForm } from "@/types/Events"
 
-export function TableGeneric({structure, structureForm, table}) {
+interface Props{
+  structure: { key: string, value: string }[],
+  structureForm: ConfigEventForm,
+  table: {
+    name: string,
+    key: string,
+    isQR: boolean
+  }
+}
+
+interface Filters{
+  nombre: string,
+  organizador: string,
+  aniversario: string,
+}
+
+type QRType = "inscripcion" | "asistencia"
+type SortDirection = "asc" | "desc"
+
+export function TableGeneric({structure, structureForm, table}: Props) {
   const { user } = useUserData()
+  const router = useRouter()
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState(null)
-  const [qrType, setQrType] = useState("inscripcion")
-  const [filters, setFilters] = useState({
+  const [selectedEvent, setSelectedEvent] = useState<ConfigEvent | null>(null)
+  const [qrType, setQrType] = useState<QRType>("inscripcion")
+  const [filters, setFilters] = useState<Filters>({
     nombre: "",
     organizador: "",
     aniversario: "",
   })
-  const [sortConfig, setSortConfig] = useState(null)
-  const [openFilter, setOpenFilter] = useState(null)
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Filters; direction: SortDirection } | null>(null)
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [openEdit, setOpenEdit] = useState(false)
-  const [eventToEdit, setEventToEdit] = useState(null)
+  const [eventToEdit, setEventToEdit] = useState<ConfigEvent | null>(null)
   const [openDelete, setOpenDelete] = useState(false)
-  const [eventToDelete, setEventToDelete] = useState(null)
+  const [eventToDelete, setEventToDelete] = useState<ConfigEvent | null>(null)
 
+  const userTableData = user[table.key as keyof typeof user] as (ConfigEvent & Filters)[];
   const sortedAndFilteredEvents = useMemo(() => {
-    console.log(user[table.key])
-    const filteredEvents = user[table.key].filter(
+    const filteredEvents = userTableData.filter(
       (event) => {
         return Object.keys(filters).every((key) => {
-          if (filters[key] === "") return true
-          return event[key].toLowerCase().includes(filters[key].toLowerCase())
+          const filterKey = key as keyof Filters
+          if (filters[filterKey] === "") return true
+          return event[filterKey]?.toLowerCase().includes(filters[filterKey].toLowerCase())
         })
       }
     )
 
     if (sortConfig !== null) {
       filteredEvents.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        if (a[sortConfig.key as keyof Filters] < b[sortConfig.key as keyof Filters]) {
           return sortConfig.direction === "asc" ? -1 : 1
         }
         if (a[sortConfig.key] > b[sortConfig.key]) {
@@ -53,31 +76,31 @@ export function TableGeneric({structure, structureForm, table}) {
       })
     }
 
-    return filteredEvents
-  }, [user[table.key], filters, sortConfig])
+    return filteredEvents;
+  }, [userTableData, filters, sortConfig]);
 
-  const handleQRClick = (event, type) => {
+  const handleQRClick = (event: ConfigEvent, type: QRType) => {
     setSelectedEvent(event)
     setQrType(type)
     setOpenQR(true)
   }
 
-  const handleEditClick = (event) => {
+  const handleEditClick = (event: ConfigEvent) => {
     setEventToEdit(event)
     setOpenEdit(true)
   }
 
-  const handleDeleteClick = (event) => {
+  const handleDeleteClick = (event: ConfigEvent) => {
     setEventToDelete(event)
     setOpenDelete(true)
   }
 
-  const handleFilter = (column, value) => {
+  const handleFilter = (column: string, value: string) => {
     setFilters((prev) => ({ ...prev, [column]: value }))
   }
 
-  const handleSort = (column, direction) => {
-    setSortConfig(direction ? { key: column, direction } : null)
+  const handleSort = (column: string, direction: SortDirection | null) => {
+    setSortConfig(direction ? { key: column as keyof Filters, direction } : null)
   }
 
   const clearFilters = () => {
@@ -89,15 +112,20 @@ export function TableGeneric({structure, structureForm, table}) {
     setSortConfig(null)
   }
 
-  const normalizeData = (data, value) => {
-    if (data[value].split("_").length <= 1){
-      return data[value]
+  const normalizeData = (data: ConfigEvent, value: string) => {
+    console.log(data)
+    const dataFormatted = typeof data[value as keyof ConfigEvent] === "object" 
+      ? (data[value]).value 
+      : data[value as keyof ConfigEvent];
+    const dataSplit = typeof dataFormatted === "string" ? dataFormatted.split("_") : []
+
+    if (dataSplit.length <= 1){
+      return dataFormatted
     }
 
-    const dataSplit = data[value].split("_")
     const id = dataSplit[dataSplit.length - 1]
-    const dataFind = user[value].find(f => f.id == id)
-    return dataFind.nombre
+    const dataFind = user[value as keyof typeof user]?.find((f) => f.id === Number(id))
+    return dataFind?.nombre
   }
 
   return (
@@ -118,12 +146,10 @@ export function TableGeneric({structure, structureForm, table}) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">N°</TableHead>
-              {Object.keys(structure)
-              .filter((key) => key !== "id")
-              .map((value) => (
-                <TableHead key={value}>
-                  {structure[value]}
-                  <Button variant="ghost" onClick={() => setOpenFilter(value)} className="ml-2 hover:bg-transparent">
+              {structure.filter((value) => value.key !== "id").map((value) => (
+                <TableHead key={value.key}>
+                  {value.value}
+                  <Button variant="ghost" onClick={() => setOpenFilter(value.value)} className="ml-2 hover:bg-transparent">
                     <Filter className="h-4 w-4" />
                   </Button>
                 </TableHead>
@@ -145,17 +171,17 @@ export function TableGeneric({structure, structureForm, table}) {
                   {Object.keys(data)
                     .filter((key) => key !== "id")
                     .map((value) =>
-                      structure[value] ? (
+                      structure[value as keyof typeof structure] ? (
                         value === "state" ? (
                           <TableCell key={value}>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              data[value] == "true" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              data[value] === true ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                             }`}>
-                              {data[value] == "true" ? "Activo" : "No activo"}
+                              {data[value] === true ? "Activo" : "No activo"}
                             </span>
                           </TableCell>
                         ) : (
-                          <TableCell key={value}>{normalizeData(data, value)}</TableCell>
+                          <TableCell key={value}>{String(normalizeData(data, value))}</TableCell>
                         )
                       ) : null
                   )}
@@ -186,6 +212,11 @@ export function TableGeneric({structure, structureForm, table}) {
                               <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
                                 <QrCode className="mr-2 h-4 w-4" />
                                 QR Asistencia
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-800" onClick={() => {
+                               router.push("/forms?id=" + data.id)
+                              }}>
+                                Prueba de Direccion
                               </DropdownMenuItem>
                             </>
                           )

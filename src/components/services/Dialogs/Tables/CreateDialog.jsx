@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useUserData } from "@/hooks/useUserData"
 
 const InputBasic = ({formData, data}) => {
-  if(data.form.type == "text" || data.form.type == "number" || data.form.type == "date"){
+  if(data.form.type == "text" || data.form.type == "number" || data.form.type == "date" || data.form.type == "time"){
     return(
       <>
         <Label>{data.form.name}</Label>
@@ -83,6 +83,23 @@ export function CreateEventDialog({ data, open, onOpenChange }) {
 
     const id = user[data.table.key].length + 1
     formData.id = id
+
+    Object.keys(formData).map((value) => {
+      if(value == "forms"){
+        const form = formData[value]
+        const formSplit = form.split("_")
+        const formId = formSplit[formSplit.length - 1]
+
+        const findFormUser = user.forms.find(f => f.id == formId)
+
+        if(findFormUser){
+          formData[value] = {
+            value: formData[value],
+            data: findFormUser
+          }
+        }
+      }
+    })
 
     setUser({
       ...user,

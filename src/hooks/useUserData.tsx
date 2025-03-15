@@ -1,11 +1,13 @@
-"use client"
+"use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import Cookies from "js-cookie";
 import type { Form } from "@/types/Forms";
+
 interface User {
     events?: [];
-    faculties?: [];
-    scenerys?: [];
+    faculties: { nombre: string; state: string; id: number }[];
+    scenerys: { nombre: string; state: string; id: number }[];
     loans?: [];
     users?: [];
     roles?: [];
@@ -18,15 +20,32 @@ const UserDataContext = createContext<{
 } | null>(null);
 
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User>({
+    const [user, setUserState] = useState<User>({
         events: [],
-        faculties: [],
-        scenerys: [],
+        faculties: [
+            {
+                nombre: 'dwadaw', 
+                state: 'true', 
+                id: 1
+            }
+        ],
+        scenerys: [
+            {
+                nombre: 'dwadwa', 
+                state: 'true', 
+                id: 1
+            }
+        ],
         loans: [],
         users: [],
         roles: [],
         forms: [],
     });
+
+    const setUser = (data: User) => {
+        Cookies.set("events", JSON.stringify(data.events), { expires: 7 });
+        setUserState(data);
+    };
 
     return (
         <UserDataContext.Provider value={{ user, setUser }}>

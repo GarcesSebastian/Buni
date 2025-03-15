@@ -4,6 +4,7 @@ import Section from "@/components/ui/Section"
 import { TableGeneric } from "@/components/services/TableGeneric"
 import { useUserData } from "@/hooks/useUserData"
 import { Form } from "@/types/Forms"
+import { configEvent } from "@/config/Events"
 
 export default function EventosPage() {
   const { user } = useUserData()
@@ -16,8 +17,6 @@ export default function EventosPage() {
       id: f.id
     }
   })
-
-  console.log(optionsForms)
 
   const optionsFacultades = user.faculties?.filter((faculty: { state: string }) => faculty.state === "true")
   .map((faculty: { id: number, nombre: string, state: string }) => {
@@ -43,53 +42,50 @@ export default function EventosPage() {
     isQR: true
   }
   
-  const structure = {
-    id: "ID",
-    nombre: "Nombre",
-    organizador: "Organizador",
-    fecha: "Fecha",
-    faculties: "Facultad",
-    scenerys: "Escenario",
-    forms: "Formulario",
-    state: "Estados"
-  }
-
-  const structureForm = {
-    nombre: {
-      name: "Nombre",
-      type: "text"
-    },
-    organizador: {
-      name: "Organizador",
-      type: "text"
-    },
-    fecha: {
-      name: "Fecha",
-      type: "date"
-    },
-    faculties: {
-      name: "Facultad",
-      type: "selection",
-      options: optionsFacultades
-    },
-    scenerys: {
-      name: "Escenario",
-      type: "selection",
-      options: optionsScenerys
-    },
-    forms: {
-      name: "Formulario",
-      type: "selection",
-      options: optionsForms
-    },
-    state: {
-      name: "Estado",
-      type: "selection",
-      options: [
-        { value: "true", label: "Activo" },
-        { value: "false", label: "Inactivo" }
-      ]
-    }
+  const configEventForm = {
+      nombre: {
+          name: "Nombre",
+          type: "text"
+      },
+      organizador: {
+          name: "Organizador",
+          type: "text"
+      },
+      cupos: {
+          name: "Cupos",
+          type: "number"
+      },
+      hora: {
+          name: "Hora",
+          type: "time"
+      },
+      fecha: {
+          name: "Fecha",
+          type: "date"
+      },
+      faculties: {
+          name: "Facultad",
+          type: "selection",
+          options: optionsFacultades
+      },
+      scenerys: {
+          name: "Escenario",
+          type: "selection",
+          options: optionsScenerys
+      },
+      forms: {
+          name: "Formulario",
+          type: "selection",
+          options: optionsForms
+      },
+      state: {
+          name: "Estado",
+          type: "selection",
+          options: [
+          { value: "true", label: "Activo" },
+          { value: "false", label: "Inactivo" }
+          ]
+      }
   }
 
   return (
@@ -98,7 +94,7 @@ export default function EventosPage() {
             <div className="space-y-4 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
                 <h1 className="text-2xl font-bold">{table.name}</h1>
                 <p className="text-muted-foreground">Listado de {table.name}</p>
-                <TableGeneric structure={structure} structureForm={structureForm} table={table} />
+                <TableGeneric structure={configEvent} structureForm={configEventForm} table={table} />
             </div>
           </Section>
       </div>

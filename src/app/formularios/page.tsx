@@ -2,19 +2,10 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/Button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/Dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +19,8 @@ import {
 } from "@/components/ui/AlertDialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import Section from "@/components/ui/Section"
+import CreateDialog from "@/components/services/Dialogs/Forms/CreateDialog"
+
 import { Plus, MoreVertical, Save, Edit, Check, X, Trash2, GripVertical, ArrowUp, ArrowDown } from "lucide-react"
 import {
   DndContext,
@@ -47,11 +40,11 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { useUserData } from "@/hooks/useUserData"
-import { typesField } from "@/config/Forms"
-import type { CampoFormulario, Form } from "@/types/Forms"
+import { configField } from "@/config/Forms"
+import type { Form, FormField } from "@/types/Forms"
 
 interface SorteableFieldProps {
-  campo: CampoFormulario,
+  campo: FormField,
   onDelete: (id: string) => void,
   data: {
     index: number,
@@ -86,7 +79,7 @@ function SortableCampo({ campo, onDelete, data }: SorteableFieldProps) {
         <div>
           <p className="font-medium">{campo.nombre}</p>
           <p className="text-sm text-muted-foreground">
-            Tipo: {typesField.find((t) => t.id === campo.tipo)?.nombre || campo.tipo}
+            Tipo: {configField.find((t) => t.id === campo.tipo)?.nombre || campo.tipo}
             {campo.requerido && " (Requerido)"}
           </p>
           {campo.opciones && <p className="text-xs text-muted-foreground">Opciones: {campo.opciones.join(", ")}</p>}
@@ -133,14 +126,6 @@ function SortableCampo({ campo, onDelete, data }: SorteableFieldProps) {
 export default function FormulariosPage() {
   const {user, setUser} = useUserData();
   const [currentForm, setCurrentForm] = useState<Form | null>(null)
-  const [newField, setNewField] = useState<CampoFormulario>({
-    id: "",
-    nombre: "",
-    tipo: "texto",
-    requerido: false,
-  })
-  const [optionsField, setOptionsField] = useState<string>("")
-  const [showOptionsField, setShowOptionsField] = useState<boolean>(false)
   const [dialogAddField, setDialogAddField] = useState<boolean>(false)
 
   const sensors = useSensors(
@@ -235,36 +220,6 @@ export default function FormulariosPage() {
     setCurrentForm(null)
   }
 
-  const addField = () => {
-    if (!currentForm || !newField.nombre) return
-
-    const campoId = newField.nombre.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now()
-
-    const campo: CampoFormulario = {
-      ...newField,
-      id: campoId,
-    }
-
-    if (campo.tipo === "seleccion" && optionsField) {
-      campo.opciones = optionsField.split(",")
-    }
-
-    setCurrentForm({
-      ...currentForm,
-      campos: [...currentForm.campos, campo],
-    })
-
-    setNewField({
-      id: "",
-      nombre: "",
-      tipo: "texto",
-      requerido: false,
-    })
-    setOptionsField("")
-    setShowOptionsField(false)
-    setDialogAddField(false)
-  }
-
   const deleteField = (campoId: string) => {
     if (!currentForm) return
 
@@ -327,7 +282,7 @@ export default function FormulariosPage() {
                             <div className="flex justify-end">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 p-0 hover:bg-muted">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 flex justify-center items-center hover:bg-muted">
                                     <span className="sr-only">Abrir menú</span>
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
@@ -471,7 +426,7 @@ export default function FormulariosPage() {
                   )}
                 </CardContent>
                 {currentForm && (
-                  <CardFooter className="flex justify-end space-x-2">
+                  <CardFooter className="flex justify-end space-x-2 p-6 pt-0">
                     <Button variant="outline" onClick={() => setCurrentForm(null)}>
                       Cancelar
                     </Button>
@@ -522,92 +477,12 @@ export default function FormulariosPage() {
               </CardContent>
             </Card>
 
-            <Dialog open={dialogAddField} onOpenChange={setDialogAddField}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Agregar Nuevo Campo</DialogTitle>
-                  <DialogDescription>Defina las propiedades del nuevo campo para el formulario</DialogDescription>
-                </DialogHeader>
-
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="nombre-campo">Nombre del Campo</Label>
-                    <Input
-                      id="nombre-campo"
-                      value={newField.nombre}
-                      onChange={(e) => setNewField({ ...newField, nombre: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="tipo-campo">Tipo de Campo</Label>
-                    <Select
-                      value={newField.tipo}
-                      onValueChange={(valor) => {
-                        setNewField({ ...newField, tipo: valor })
-                        setShowOptionsField(valor === "seleccion")
-                      }}
-                    >
-                      <SelectTrigger id="tipo-campo">
-                        <SelectValue placeholder="Seleccione un tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {typesField.map((tipo) => (
-                          <SelectItem key={tipo.id} value={tipo.id}>
-                            {tipo.nombre}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {showOptionsField && (
-                    <div className="grid gap-2">
-                      <Label htmlFor="opciones-campo">Opciones (separadas por comas)</Label>
-                      <Input
-                        id="opciones-campo"
-                        value={optionsField}
-                        onChange={(e) => setOptionsField(e.target.value)}
-                        placeholder="Opción 1,Opción 2,Opción 3"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="campo-requerido"
-                      checked={newField.requerido}
-                      onChange={(e) => setNewField({ ...newField, requerido: e.target.checked })}
-                      className="rounded border-gray-300"
-                    />
-                    <Label htmlFor="campo-requerido">Campo requerido</Label>
-                  </div>
-                </div>
-
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setNewField({
-                        id: "",
-                        nombre: "",
-                        tipo: "texto",
-                        requerido: false,
-                      })
-                      setOptionsField("")
-                      setShowOptionsField(false)
-                      setDialogAddField(false)
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button onClick={addField} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
-                    Agregar
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <CreateDialog 
+              currentForm={currentForm} 
+              setCurrentForm={setCurrentForm}
+              dialogAddField={dialogAddField}
+              setDialogAddField={setDialogAddField}
+            />
           </div>
         </Section>
     </div>

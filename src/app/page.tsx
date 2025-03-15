@@ -73,7 +73,7 @@ export default function SignInPage() {
           </form>
         </CardContent>
         <CardFooter>
-          <p className="text-sm text-center text-gray-600 mt-4 w-full">
+          <p className="text-sm text-center text-gray-600 mt-4 p-6 pt-0 w-full">
             Este es un sistema de acceso restringido. Si necesita ayuda, contacte al administrador.
           </p>
         </CardFooter>

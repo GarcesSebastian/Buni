@@ -10,12 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
-import type { Event } from "@/types/Events"
+import { GeneralSection } from "@/config/Table"
 
 interface QRDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  event: Event
+  event: GeneralSection
   type: "inscripcion" | "asistencia"
 }
 
