@@ -5,6 +5,7 @@ import "../styles/globals.css"
 
 import { TopNav } from "@/components/ui/TopNav"
 import { UserDataProvider } from "@/hooks/useUserData"
+import { Suspense } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,7 +29,9 @@ export default function RootLayout({
           <TopNav/>
           <div className="flex">
             <UserDataProvider>
-              <main className="w-full" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
+              <Suspense>
+                <main className="w-full" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
+              </Suspense>
             </UserDataProvider>
           </div>
         </div>
