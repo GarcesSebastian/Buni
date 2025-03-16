@@ -2,99 +2,16 @@
 import React from "react"
 import Section from "@/components/ui/Section"
 import { TableGeneric } from "@/components/services/TableGeneric"
-import { useUserData } from "@/hooks/useUserData"
-import { Form } from "@/types/Forms"
-import { configEvent } from "@/config/Events"
+import { configEvent, configFormEvent, tableEvent } from "@/config/Events"
 
 export default function EventosPage() {
-  const { user } = useUserData()
-
-  const optionsForms = user.forms.filter((f: Form) => f.state == true)
-  .map((f: Form) => {
-    return {
-      value: f.nombre,
-      label: f.nombre.charAt(0).toUpperCase() + f.nombre.slice(1),
-      id: f.id
-    }
-  })
-
-  const optionsFacultades = user.faculties?.filter((faculty: { state: string }) => faculty.state === "true")
-  .map((faculty: { id: number, nombre: string, state: string }) => {
-    return {
-      value: faculty.nombre,
-      label: faculty.nombre.charAt(0).toUpperCase() + faculty.nombre.slice(1),
-      id: faculty.id
-    }
-  })
-
-  const optionsScenerys = user.scenerys?.filter((scenery: { state: string }) => scenery.state === "true")
-  .map((scenery: { id: number, nombre: string, state: string }) => {
-    return {
-      value: scenery.nombre,
-      label: scenery.nombre.charAt(0).toUpperCase() + scenery.nombre.slice(1),
-      id: scenery.id
-    }
-  })
-
-  const table = {
-    name: "Eventos",
-    key: "events",
-    isQR: true
-  }
-  
-  const configEventForm = {
-      nombre: {
-          name: "Nombre",
-          type: "text"
-      },
-      organizador: {
-          name: "Organizador",
-          type: "text"
-      },
-      cupos: {
-          name: "Cupos",
-          type: "number"
-      },
-      hora: {
-          name: "Hora",
-          type: "time"
-      },
-      fecha: {
-          name: "Fecha",
-          type: "date"
-      },
-      faculties: {
-          name: "Facultad",
-          type: "selection",
-          options: optionsFacultades
-      },
-      scenerys: {
-          name: "Escenario",
-          type: "selection",
-          options: optionsScenerys
-      },
-      forms: {
-          name: "Formulario",
-          type: "selection",
-          options: optionsForms
-      },
-      state: {
-          name: "Estado",
-          type: "selection",
-          options: [
-          { value: "true", label: "Activo" },
-          { value: "false", label: "Inactivo" }
-          ]
-      }
-  }
-
   return (
       <div className="flex h-full flex-col">
           <Section>
             <div className="space-y-4 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
-                <h1 className="text-2xl font-bold">{table.name}</h1>
-                <p className="text-muted-foreground">Listado de {table.name}</p>
-                <TableGeneric structure={configEvent} structureForm={configEventForm} table={table} />
+                <h1 className="text-2xl font-bold">{tableEvent.name}</h1>
+                <p className="text-muted-foreground">Listado de {tableEvent.name}</p>
+                <TableGeneric structure={configEvent} structureForm={configFormEvent} table={tableEvent} />
             </div>
           </Section>
       </div>

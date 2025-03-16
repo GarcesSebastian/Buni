@@ -190,7 +190,7 @@ export default function FormulariosPage() {
 
     setUser({
       ...user,
-      forms: [...user.forms, nuevoFormulario]
+      form: [...user.form, nuevoFormulario]
     })
     setCurrentForm({ ...nuevoFormulario })
   }
@@ -202,7 +202,7 @@ export default function FormulariosPage() {
   const deleteForm = (id: number) => {
     setUser({
       ...user,
-      forms: user.forms.filter((f) => f.id !== id)
+      form: user.form.filter((f) => f.id !== id)
     })
 
     if (currentForm?.id === id) {
@@ -214,7 +214,7 @@ export default function FormulariosPage() {
     if (!currentForm) return
     setUser({
       ...user,
-      forms: user.forms.map((f) => (f.id === currentForm.id ? currentForm : f))
+      form: user.form.map((f) => (f.id === currentForm.id ? currentForm : f))
     })
 
     setCurrentForm(null)
@@ -232,7 +232,7 @@ export default function FormulariosPage() {
   const toggleStateForm = (id: number) => {
     setUser({
       ...user,
-      forms: user.forms.map((f) => (f.id === id ? { ...f, state: !f.state } : f))
+      form: user.form.map((f) => (f.id === id ? { ...f, state: !f.state } : f))
     })
   }
 
@@ -265,7 +265,7 @@ export default function FormulariosPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {user.forms.map((formulario) => (
+                      {user.form.map((formulario) => (
                         <TableRow key={formulario.id}>
                           <TableCell>{formulario.nombre}</TableCell>
                           <TableCell>
@@ -337,7 +337,7 @@ export default function FormulariosPage() {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {user.forms.length === 0 && (
+                      {user.form.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={4} className="text-center py-4">
                             No hay formularios disponibles

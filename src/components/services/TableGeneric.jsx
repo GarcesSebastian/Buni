@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
@@ -12,52 +12,32 @@ import { EditDialog } from "./Dialogs/Tables/EditDialog"
 import { DeleteDialog } from "./Dialogs/Tables/DeleteDialog"
 import { useUserData } from "@/hooks/useUserData"
 import { useRouter } from "next/navigation"
-import { ConfigEvent, ConfigEventForm } from "@/types/Events"
 
-interface Props{
-  structure: { key: string, value: string }[],
-  structureForm: ConfigEventForm,
-  table: {
-    name: string,
-    key: string,
-    isQR: boolean
-  }
-}
-
-interface Filters{
-  nombre: string,
-  organizador: string,
-  aniversario: string,
-}
-
-type QRType = "inscripcion" | "asistencia"
-type SortDirection = "asc" | "desc"
-
-export function TableGeneric({structure, structureForm, table}: Props) {
+export function TableGeneric({structure, structureForm, table}) {
   const { user } = useUserData()
   const router = useRouter()
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<ConfigEvent | null>(null)
-  const [qrType, setQrType] = useState<QRType>("inscripcion")
-  const [filters, setFilters] = useState<Filters>({
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [qrType, setQrType] = useState("inscripcion")
+  const [filters, setFilters] = useState({
     nombre: "",
     organizador: "",
     aniversario: "",
   })
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Filters; direction: SortDirection } | null>(null)
-  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  const [sortConfig, setSortConfig] = useState(null)
+  const [openFilter, setOpenFilter] = useState(null)
   const [openEdit, setOpenEdit] = useState(false)
-  const [eventToEdit, setEventToEdit] = useState<ConfigEvent | null>(null)
+  const [eventToEdit, setEventToEdit] = useState(null)
   const [openDelete, setOpenDelete] = useState(false)
-  const [eventToDelete, setEventToDelete] = useState<ConfigEvent | null>(null)
+  const [eventToDelete, setEventToDelete] = useState(null)
 
-  const userTableData = user[table.key as keyof typeof user] as (ConfigEvent & Filters)[];
+  const userTableData = user[table.key];
   const sortedAndFilteredEvents = useMemo(() => {
     const filteredEvents = userTableData.filter(
       (event) => {
         return Object.keys(filters).every((key) => {
-          const filterKey = key as keyof Filters
+          const filterKey = key
           if (filters[filterKey] === "") return true
           return event[filterKey]?.toLowerCase().includes(filters[filterKey].toLowerCase())
         })
@@ -66,7 +46,7 @@ export function TableGeneric({structure, structureForm, table}: Props) {
 
     if (sortConfig !== null) {
       filteredEvents.sort((a, b) => {
-        if (a[sortConfig.key as keyof Filters] < b[sortConfig.key as keyof Filters]) {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
           return sortConfig.direction === "asc" ? -1 : 1
         }
         if (a[sortConfig.key] > b[sortConfig.key]) {
@@ -79,28 +59,28 @@ export function TableGeneric({structure, structureForm, table}: Props) {
     return filteredEvents;
   }, [userTableData, filters, sortConfig]);
 
-  const handleQRClick = (event: ConfigEvent, type: QRType) => {
+  const handleQRClick = (event, type) => {
     setSelectedEvent(event)
     setQrType(type)
     setOpenQR(true)
   }
 
-  const handleEditClick = (event: ConfigEvent) => {
+  const handleEditClick = (event) => {
     setEventToEdit(event)
     setOpenEdit(true)
   }
 
-  const handleDeleteClick = (event: ConfigEvent) => {
+  const handleDeleteClick = (event) => {
     setEventToDelete(event)
     setOpenDelete(true)
   }
 
-  const handleFilter = (column: string, value: string) => {
+  const handleFilter = (column, value) => {
     setFilters((prev) => ({ ...prev, [column]: value }))
   }
 
-  const handleSort = (column: string, direction: SortDirection | null) => {
-    setSortConfig(direction ? { key: column as keyof Filters, direction } : null)
+  const handleSort = (column, direction) => {
+    setSortConfig(direction ? { key: column, direction } : null)
   }
 
   const clearFilters = () => {
@@ -112,11 +92,10 @@ export function TableGeneric({structure, structureForm, table}: Props) {
     setSortConfig(null)
   }
 
-  const normalizeData = (data: ConfigEvent, value: string) => {
-    console.log(data)
-    const dataFormatted = typeof data[value as keyof ConfigEvent] === "object" 
+  const normalizeData = (data, value) => {
+    const dataFormatted = typeof data[value] === "object" 
       ? (data[value]).value 
-      : data[value as keyof ConfigEvent];
+      : data[value];
     const dataSplit = typeof dataFormatted === "string" ? dataFormatted.split("_") : []
 
     if (dataSplit.length <= 1){
@@ -124,9 +103,25 @@ export function TableGeneric({structure, structureForm, table}: Props) {
     }
 
     const id = dataSplit[dataSplit.length - 1]
-    const dataFind = user[value as keyof typeof user]?.find((f) => f.id === Number(id))
+    const dataFind = user[value]?.find((f) => f.id === Number(id))
     return dataFind?.nombre
   }
+
+  useEffect(() => {
+    Object.keys(structureForm).forEach(value => {
+      if(structureForm[value].type == "selection" && user[value]){
+        const rest = user[value].filter(v => v.state == true || v.state == "true").map(s => {
+          return {
+            value: s.nombre,
+            label: s.nombre.charAt(0).toUpperCase() + s.nombre.slice(1),
+            id: s.id
+          }
+        })
+
+        structureForm[value].options = rest
+      }
+    })
+  },[])
 
   return (
     <div className="space-y-4">
@@ -171,17 +166,17 @@ export function TableGeneric({structure, structureForm, table}: Props) {
                   {Object.keys(data)
                     .filter((key) => key !== "id")
                     .map((value) =>
-                      structure[value as keyof typeof structure] ? (
+                      structure.find(st => st.key == value) ? (
                         value === "state" ? (
                           <TableCell key={value}>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              data[value] === true ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              data[value] === "true" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                             }`}>
-                              {data[value] === true ? "Activo" : "No activo"}
+                              {data[value] === "true" ? "Activo" : "No activo"}
                             </span>
                           </TableCell>
                         ) : (
-                          <TableCell key={value}>{String(normalizeData(data, value))}</TableCell>
+                          <TableCell key={value}>{normalizeData(data, value)}</TableCell>
                         )
                       ) : null
                   )}

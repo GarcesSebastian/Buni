@@ -3,15 +3,14 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import Cookies from "js-cookie";
 import type { Form } from "@/types/Forms";
+import { Event, Scenery } from "@/types/Events";
+import { Faculty } from "@/types/Faculty";
 
-interface User {
-    events?: [];
-    faculties: { nombre: string; state: string; id: number }[];
-    scenerys: { nombre: string; state: string; id: number }[];
-    loans?: [];
-    users?: [];
-    roles?: [];
-    forms: Form[];
+export interface User {
+    events?: Event | [];
+    faculty: Faculty[];
+    scenery: Scenery[];
+    form: Form[];
 }
 
 const UserDataContext = createContext<{
@@ -22,24 +21,27 @@ const UserDataContext = createContext<{
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUserState] = useState<User>({
         events: [],
-        faculties: [
+        faculty: [
             {
                 nombre: 'dwadaw', 
-                state: 'true', 
+                state: true, 
                 id: 1
             }
         ],
-        scenerys: [
+        scenery: [
             {
                 nombre: 'dwadwa', 
-                state: 'true', 
+                state: true, 
                 id: 1
             }
         ],
-        loans: [],
-        users: [],
-        roles: [],
-        forms: [],
+        form: [{
+            "id": 1742107027189,
+            "nombre": "Nuevo Formulario",
+            "descripcion": "Descripción del formulario",
+            "campos": [],
+            "state": true
+        }],
     });
 
     const setUser = (data: User) => {

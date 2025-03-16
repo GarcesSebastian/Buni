@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/test.jsx", "src/components/services/Dialogs/Tables/CreateDialog.jsx", "src/components/services/Dialogs/Tables/CreateDialog.jsx", "src/components/services/TableGeneric.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/test.jsx", "src/components/services/Dialogs/Tables/CreateDialog.tsx", "src/components/services/Dialogs/Tables/CreateDialog.tsx", "src/components/services/TableGeneric.tsx"],
   "exclude": ["node_modules"]
 }

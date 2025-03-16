@@ -44,22 +44,22 @@ export default function FormsPage() {
   const [isActive] = useState<boolean>(true)
 
   const secciones = {
-    personal: formulario.forms.data.campos.filter((campo) => campo.seccion === "personal") || [],
-    academica: formulario.forms.data.campos.filter((campo) => campo.seccion === "academica") || [],
-    adicional: formulario.forms.data.campos.filter((campo) => campo.seccion === "adicional") || [],
+    personal: formulario.form.data.campos.filter((campo) => campo.seccion === "personal") || [],
+    academica: formulario.form.data.campos.filter((campo) => campo.seccion === "academica") || [],
+    adicional: formulario.form.data.campos.filter((campo) => campo.seccion === "adicional") || [],
   }
 
   useEffect(() => {
     const initialValues: Record<string, (string | boolean)> = {}
-    formulario.forms.data.campos.forEach((campo) => {
+    formulario.form.data.campos.forEach((campo) => {
       initialValues[campo.id] = campo.tipo === "checkbox" ? false : ""
     })
     setFormValues(initialValues)
   }, [formulario])
 
   useEffect(() => {
-    const totalFields = formulario.forms.data.campos.filter((campo) => campo.requerido).length
-    const completedFields = formulario.forms.data.campos
+    const totalFields = formulario.form.data.campos.filter((campo) => campo.requerido).length
+    const completedFields = formulario.form.data.campos
       .filter((campo) => campo.requerido)
       .filter((campo) => {
         if (campo.tipo === "checkbox") return formValues[campo.id] === true
@@ -68,14 +68,14 @@ export default function FormsPage() {
 
     const calculatedProgress = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0
     setProgress(calculatedProgress)
-  }, [formValues, formulario.forms.data.campos])
+  }, [formValues, formulario.form.data.campos])
 
   const validateForm = (sectionToValidate?: string) => {
     const newErrors: Record<string, string> = {}
 
     const camposAValidar = sectionToValidate
-      ? formulario.forms.data.campos.filter((campo) => campo.seccion === sectionToValidate)
-      : formulario.forms.data.campos
+      ? formulario.form.data.campos.filter((campo) => campo.seccion === sectionToValidate)
+      : formulario.form.data.campos
 
     camposAValidar.forEach((campo) => {
       if (campo.requerido) {
@@ -141,7 +141,7 @@ export default function FormsPage() {
             <div className="flex max-md:flex-col gap-2 justify-start items-center mb-6">
               <div className="max-md:flex gap-2">
                 <h1 className="text-2xl font-bold">{formulario.nombre}</h1>
-                <p className="text-muted-foreground">{formulario.forms.data.descripcion}</p>
+                <p className="text-muted-foreground">{formulario.form.data.descripcion}</p>
               </div>
             </div>
 
@@ -157,7 +157,7 @@ export default function FormsPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-xl">{formulario?.nombre}</CardTitle>
-                  <CardDescription>{formulario.forms.data.descripcion}</CardDescription>
+                  <CardDescription>{formulario.form.data.descripcion}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                   <div className="flex items-center">
@@ -222,7 +222,7 @@ export default function FormsPage() {
             <Card className="mb-8 print:shadow-none">
               <CardHeader className="flex flex-col">
                 <CardTitle>{formulario.nombre}</CardTitle>
-                <CardDescription>{formulario.forms.data.descripcion}</CardDescription>
+                <CardDescription>{formulario.form.data.descripcion}</CardDescription>
               </CardHeader>
 
               {submitted ? (

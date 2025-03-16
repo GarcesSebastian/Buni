@@ -1,5 +1,11 @@
 import { Form } from "./Forms"
 
+export interface TableEvent {
+  name: string,
+  key: string,
+  isQR: boolean
+}
+
 export interface Event {
   id: number
   nombre: string
@@ -10,23 +16,15 @@ export interface Event {
   fecha: string
   hora: string
   state: boolean
-  forms: {
+  form: {
     value: string,
     data: Form
   }
 }
 
 export interface ConfigEvent {
-    id: number
-    nombre: string
-    organizador: string
-    scenery: string
-    faculty: string
-    cupos: number
-    fecha: string
-    hora: string
-    state: boolean
-    form: string
+  key: string;
+  value: string;
 }
 
 export interface ConfigEventForm {
@@ -50,24 +48,52 @@ export interface ConfigEventForm {
     name: string
     type: string
   }
-  faculties: {
+  faculty: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[]
+    options: { value: string, label: string, id: number }[] | []
   }
-  scenerys: {
+  scenery: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[]
+    options: { value: string, label: string, id: number }[] | []
   }
-  forms: {
+  form: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[]
+    options: { value: string, label: string, id: number }[] | []
   }
   state: {
     name: string
     type: string
     options: { value: string, label: string }[]
   }
+}
+
+export interface TableScenery {
+  name: string;
+  key: string;
+}
+
+export interface Scenery {
+  id: number;
+  nombre: string;
+  state: boolean;
+}
+
+export interface ConfigScenery {
+  key: string;
+  value: string;
+}
+
+export interface ConfigFormScenery {
+  nombre: {
+    name: string;
+    type: string;
+  };
+  state: {
+    name: string;
+    type: string;
+    options: { value: string; label: string }[];
+  };
 }
