@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useUserData } from "@/hooks/useUserData"
 import { Form } from "@/types/Forms"
 import { User } from "@/hooks/useUserData"
-import { GeneralStructureForm } from "@/config/Table"
+import { GeneralStructureForm } from "@/types/Table"
 
 interface Props {
   data: {

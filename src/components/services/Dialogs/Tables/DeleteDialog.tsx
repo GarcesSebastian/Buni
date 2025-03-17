@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
-import { GeneralStructureForm, GeneralTable } from "@/config/Table"
+import { GeneralStructureForm } from "@/types/Table"
 import { User, useUserData } from "@/hooks/useUserData"
 
 interface Props {

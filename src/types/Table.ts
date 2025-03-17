@@ -1,6 +1,3 @@
-import { Event, Scenery } from "@/types/Events";
-import { Faculty } from "@/types/Faculty";
-
 export interface GeneralStructureForm {
     [key: string]: {
       name: string;
@@ -8,5 +5,3 @@ export interface GeneralStructureForm {
       options: { value: string; label: string; id?: number }[];
     };
 }
-
-export type GeneralTable = Event | Faculty | Scenery

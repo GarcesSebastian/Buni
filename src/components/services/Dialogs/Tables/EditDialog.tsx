@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { User, useUserData } from "@/hooks/useUserData"
-import { GeneralStructureForm, GeneralTable } from "@/config/Table"
+import { GeneralStructureForm } from "@/types/Table"
 import { Form } from "@/types/Forms"
 
 interface Props {
