@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useUserData } from "@/hooks/useUserData"
 import { Form } from "@/types/Forms"
 import { User } from "@/hooks/useUserData"
+import { GeneralStructureForm } from "@/config/Table"
 
 interface Props {
   data: {
@@ -42,14 +43,6 @@ interface PropsInputBasic {
     onChange: (e: React.ChangeEvent<HTMLInputElement> | string) => void;
   };
   formData: Record<string, string>;
-}
-
-interface GeneralStructureForm {
-  [key: string]: {
-    name: string;
-    type: "text" | "number" | "date" | "time" | "selection";
-    options: { value: string; label: string; id?: number }[];
-  };
 }
 
 const InputBasic = ({ formData, data }: PropsInputBasic) => {

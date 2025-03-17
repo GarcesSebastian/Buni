@@ -135,11 +135,11 @@ export default function FormsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-col sm:flex-row bg-gray-100 h-full overflow-y-auto">
-        <main className="w-full overflow-y-auto p-4 sm:p-8">
+      <div className="flex flex-col md:flex-row bg-gray-100 h-full overflow-y-auto">
+        <main className="w-full overflow-y-auto p-4 md:p-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex max-md:flex-col gap-2 justify-start items-center mb-6">
-              <div className="max-md:flex gap-2">
+              <div className="flex flex-col items-start justify-start gap-2 w-full">
                 <h1 className="text-2xl font-bold">{formulario.nombre}</h1>
                 <p className="text-muted-foreground">{formulario.form.data.descripcion}</p>
               </div>
@@ -148,18 +148,18 @@ export default function FormsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <Card className="md:col-span-2">
                 <CardHeader className="pb-3 flex flex-col">
-                  <div className="flex justify-between items-center">
-                    <Badge variant="outline" className="mb-2">
+                  <div className="flex justify-between items-center gap-2">
+                    <Badge variant="outline" className="mb-2 flex justify-center items-center text-center">
                       {formulario?.organizador}
                     </Badge>
-                    <Badge variant={isActive ? "secondary" : "default"}>
+                    <Badge variant={isActive ? "secondary" : "default"} className="flex justify-center items-center text-center">
                       {isActive ? "Registro abierto" : "Registro cerrado"}
                     </Badge>
                   </div>
                   <CardTitle className="text-xl">{formulario?.nombre}</CardTitle>
                   <CardDescription>{formulario.form.data.descripcion}</CardDescription>
                 </CardHeader>
-                <CardContent className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">{formulario?.fecha}</span>
@@ -170,7 +170,7 @@ export default function FormsPage() {
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{formulario.scenerys}</span>
+                    <span className="text-sm">{formulario.scenery.split("_")[0]}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />

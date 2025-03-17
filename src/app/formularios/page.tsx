@@ -240,7 +240,7 @@ export default function FormulariosPage() {
     <div className="flex h-full flex-col">
         <Section>
           <div className="space-y-6 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center max-md:flex-col max-md:items-start max-md:gap-2">
               <h1 className="text-2xl font-bold">Formularios</h1>
               <Button onClick={createForm} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
                 <Plus className="mr-2 h-4 w-4" />
@@ -248,7 +248,7 @@ export default function FormulariosPage() {
               </Button>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
               <Card>
                 <CardHeader className="flex flex-col">
                   <CardTitle>Formularios Disponibles</CardTitle>

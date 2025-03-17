@@ -13,9 +13,43 @@ import {
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
-import { useUserData } from "@/hooks/useUserData"
+import { User, useUserData } from "@/hooks/useUserData"
+import { GeneralStructureForm, GeneralTable } from "@/config/Table"
+import { Form } from "@/types/Forms"
 
-const InputBasic = ({formData, data}) => {
+interface Props {
+  data: {
+    table: {
+      name: string,
+      key: string,
+      isQR?: boolean
+    }
+    structureForm: GeneralStructureForm;
+  }
+  open: boolean
+  onOpenChange: (value: boolean) => void
+  initialData: Record<string, string>
+}
+
+interface PropsInputBasic {
+  data: {
+    form: {
+      name: string;
+      options: { value: string; label: string; id?: number }[];
+      type: "text" | "number" | "date" | "time" | "selection";
+    };
+    key: string;
+    index: number;
+    onChange: (e: React.ChangeEvent<HTMLInputElement> | string) => void;
+  };
+  formData: Record<string, string>;
+}
+
+interface HandleSubmitProps {
+  preventDefault: () => void;
+}
+
+const InputBasic = ({formData, data}: PropsInputBasic) => {
   if(data.form.type == "text" || data.form.type == "number" || data.form.type == "date"){
     return(
       <>
@@ -59,20 +93,17 @@ const InputBasic = ({formData, data}) => {
   }
 }
 
-export function EditDialog({ data, open, onOpenChange, initialData }) {
-  const { user, setUser } = useUserData()
-  const [formData, setFormData] = useState()
+export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
   
   const RestartFormData = () => {
-    setFormData(() => {
-      let obj = {}
-      Object.keys(data.structureForm).map((value) => {
-        obj[value.toLowerCase()] = ""
-      })
-  
-      return obj
-    })
-  }
+    const rest: Record<string, string> = {};
+    Object.keys(data.structureForm).forEach((key) => {
+      rest[key.toLowerCase()] = "";
+    });
+    setFormData(rest);
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -80,21 +111,40 @@ export function EditDialog({ data, open, onOpenChange, initialData }) {
     }
   }, [initialData])
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setUser({
-      ...user,
-      [data.table.key]: user[data.table.key].map((item) =>
-        item.id === initialData.id ? { ...item, ...{
-          ...formData,
-          active: true,
-        } } : item
-      ),
-    })
+  const handleSubmit = (e: HandleSubmitProps) => {
+    e.preventDefault();
+    const keyData = user[data.table.key as keyof typeof user];
+    const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
+    const updatedFormData: { id: number; form?: string | { value: string; data: Form } } = { ...formData, id };
 
-    RestartFormData()
-    onOpenChange(false)
-  }
+    if (typeof updatedFormData.form === 'string') {
+      const formSplit = updatedFormData.form.split("_");
+      const formId = formSplit[formSplit.length - 1];
+      const findFormUser = user.form.find((f: Form) => f.id === Number(formId));
+      if (findFormUser) {
+        updatedFormData.form = {
+          value: updatedFormData.form,
+          data: findFormUser,
+        };
+      }
+    }
+    
+    const key = data.table.key as keyof User;
+    if (Array.isArray(user[key])) {  
+      setUser({
+        ...user,
+        [data.table.key]: user[key].map((item) =>
+          item.id === Number(initialData.id) ? { ...item, ...{
+            ...updatedFormData,
+            active: true,
+          } } : item
+        ),
+      });
+    }
+
+    RestartFormData();
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -111,7 +161,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }) {
                   formData={formData}
                   data={{
                     form: data.structureForm[value],
-                    onChange: (e) => setFormData({ ...formData, [value.toLowerCase()]: e.target?.value == undefined ? e : e.target.value }),
+                    onChange: (e) => setFormData({ ...formData, [value.toLowerCase()]: typeof e === 'string' ? e : e.target.value }),
                     key: value,
                     index: index
                   }}

@@ -6,7 +6,7 @@ export interface TableFaculty {
 export interface Faculty {
   id: number;
   nombre: string;
-  state: boolean;
+  state: string;
 }
 
 export interface ConfigFaculty {

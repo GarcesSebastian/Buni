@@ -9,20 +9,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
-import { useUserData } from "@/hooks/useUserData"
+import { GeneralStructureForm, GeneralTable } from "@/config/Table"
+import { User, useUserData } from "@/hooks/useUserData"
 
-export function DeleteDialog({ open, onOpenChange, data, initialData }) {
+interface Props {
+  data: {
+    table: {
+      name: string,
+      key: string,
+      isQR?: boolean
+    }
+    structureForm: GeneralStructureForm;
+  }
+  open: boolean
+  onOpenChange: (value: boolean) => void
+  initialData: Record<string, string>
+}
+
+export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
   const { user, setUser } = useUserData()
 
   const handleDelete = () => {
-    const updatedData = user[data.table.key].filter((item) => item.id !== initialData.id)
+    const key = data.table.key as keyof User;
+    if (Array.isArray(user[key])) {
+      const updatedData = user[key].filter((item) => item.id !== Number(initialData.id))
 
-    setUser({
-      ...user,
-      [data.table.key]: updatedData,
-    })
+      setUser({
+        ...user,
+        [data.table.key]: updatedData,
+      })
+  
+      onOpenChange(false)
+    } 
 
-    onOpenChange(false)
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

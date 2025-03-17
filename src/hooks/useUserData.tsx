@@ -24,14 +24,14 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         faculty: [
             {
                 nombre: 'dwadaw', 
-                state: true, 
+                state: "true", 
                 id: 1
             }
         ],
         scenery: [
             {
                 nombre: 'dwadwa', 
-                state: true, 
+                state: "true", 
                 id: 1
             }
         ],

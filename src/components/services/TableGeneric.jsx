@@ -125,12 +125,12 @@ export function TableGeneric({structure, structureForm, table}) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-row justify-between gap-4">
-        <Button onClick={() => setOpenCreate(true)} className="bg-[#DC2626] hover:bg-[#DC2626]/90 w-fit sm:w-auto">
+      <div className="flex flex-row justify-between gap-4 max-md:flex-col">
+        <Button onClick={() => setOpenCreate(true)} className="bg-[#DC2626] hover:bg-[#DC2626]/90 w-auto max-md:w-full">
           <Plus className="mr-2 h-4 w-4" />
           Agregar
         </Button>
-        <Button variant="outline" onClick={clearFilters} className="w-fit sm:w-auto">
+        <Button variant="outline" onClick={clearFilters} className="w-auto max-md:w-full">
           <Filter className="mr-2 h-4 w-4" />
           Limpiar Filtros
         </Button>

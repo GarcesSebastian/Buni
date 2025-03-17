@@ -10,12 +10,12 @@ export interface Event {
   id: number
   nombre: string
   organizador: string
-  scenerys: string
+  scenery: string
   faculties: string
   cupos: number
   fecha: string
   hora: string
-  state: boolean
+  state: string
   form: {
     value: string,
     data: Form
@@ -78,7 +78,7 @@ export interface TableScenery {
 export interface Scenery {
   id: number;
   nombre: string;
-  state: boolean;
+  state: string;
 }
 
 export interface ConfigScenery {

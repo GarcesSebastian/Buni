@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/Button"
@@ -65,6 +65,10 @@ export function SideBar() {
   const pathname = usePathname()
   const isAuthenticated = pathname == "/"
 
+  useEffect(() => {
+    console.log("New state", isExpanded)
+  },[isExpanded])
+
   const toggleExpand = () => setIsExpanded(!isExpanded)
 
   const toggleItem = (title: string) => {
@@ -79,7 +83,7 @@ export function SideBar() {
 
   return (
     <div 
-      className={`bg-[#DC2626] text-white transition-all duration-300 ease-in-out max-md:w-full aboslute max-md:px-2 ${isExpanded ? "w-64" : "w-16"}`}
+      className={`bg-[#DC2626] text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 ${isExpanded ? "w-64" : "w-16"}`}
     >
       <div className={`p-4 flex justify-between items-center`}>
         <span className={`font-bold text-xl ${isExpanded ? "md:initial" : "md:hidden"}`}>BUNI</span>
