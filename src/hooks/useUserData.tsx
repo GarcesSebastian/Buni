@@ -7,7 +7,7 @@ import { Event, Scenery } from "@/types/Events";
 import { Faculty } from "@/types/Faculty";
 
 export interface User {
-    events?: Event | [];
+    events?: Event[];
     faculty: Faculty[];
     scenery: Scenery[];
     form: Form[];
@@ -20,10 +20,58 @@ const UserDataContext = createContext<{
 
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUserState] = useState<User>({
-        events: [],
-        faculty: [],
-        scenery: [],
-        form: [],
+        events: [{
+            "nombre": "da",
+            "organizador": "de",
+            "cupos": 2,
+            "hora": "05:03",
+            "fecha": "2025-02-27",
+            "faculty": {
+                "value": "da_1",
+                "data": {
+                    "nombre": "da",
+                    "state": "true",
+                    "id": 1
+                }
+            },
+            "scenery": {
+                "value": "DA_1",
+                "data": {
+                    "nombre": "DA",
+                    "state": "true",
+                    "id": 1
+                }
+            },
+            "form": {
+                "value": "Nuevo Formulario_1742291990002",
+                "data": {
+                    "id": 1742291990002,
+                    "nombre": "Nuevo Formulario",
+                    "descripcion": "Descripción del formulario",
+                    "campos": [],
+                    "state": true
+                }
+            },
+            "state": "true",
+            "id": 1
+        }],
+        faculty: [{
+            "nombre": "da",
+            "state": "true",
+            "id": 1
+        }],
+        scenery: [{
+            "nombre": "DA",
+            "state": "true",
+            "id": 1
+        }],
+        form: [{
+            "id": 1742291990002,
+            "nombre": "Nuevo Formulario",
+            "descripcion": "Descripción del formulario",
+            "campos": [],
+            "state": true
+        }],
     });
 
     const setUser = (data: User) => {

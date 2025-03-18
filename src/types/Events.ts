@@ -1,3 +1,4 @@
+import { Faculty } from "./Faculty"
 import { Form } from "./Forms"
 
 export interface TableEvent {
@@ -12,11 +13,11 @@ export interface Event {
   organizador: string
   scenery: {
     value: string,
-    data: Form
+    data: Scenery
   }
   faculty: {
     value: string,
-    data: Form
+    data: Faculty
   }
   cupos: number
   fecha: string
