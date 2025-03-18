@@ -97,6 +97,13 @@ const InputBasic = ({formData, data, user}: PropsInputBasic) => {
   }
 }
 
+interface FormattedData {
+  value: string;
+  data: { id: number; nombre: string };
+}
+
+type UpdatedFormData = Record<string, string | number | FormattedData>;
+
 export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
@@ -117,11 +124,9 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
 
   const handleSubmit = (e: HandleSubmitProps) => {
     e.preventDefault();
-    const keyData = user[data.table.key as keyof User] as (Form | { id: number; nombre: string })[];
-    const foundData = keyData.find(d => d.id == Number(initialData.id))
-    if (!foundData) return;
-    const updatedFormData: Record<string, any> = foundData
-
+    formData.id = initialData.id
+    const updatedFormData: UpdatedFormData = { ...formData } as UpdatedFormData;
+    
     Object.keys(updatedFormData).forEach((key: string) => {
       if (typeof updatedFormData[key] == "string"){
         const dataSplit = updatedFormData[key].split("_")
@@ -142,8 +147,8 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
     if (Array.isArray(user[key])) {  
       setUser({
         ...user,
-        [data.table.key]: user[key].map((item) =>
-          item.id === Number(initialData.id) ? formData : item
+        [data.table.key]: (user[key] as (Form | { id: number; nombre: string })[]).map((item: Form | { id: number; nombre: string }) =>
+          item.id === Number(initialData.id) ? updatedFormData : item
         ),
       });
     }

@@ -21,14 +21,11 @@ import {
 import { useSearchParams } from "next/navigation"
 import { Event } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
-import Cookies from "js-cookie"
 import { User, useUserData } from "@/hooks/useUserData"
 
 const getFormById = (user: User, eventId: number): Event => {
-  const events = JSON.parse(Cookies.get("events") || "[]")
-  console.log(events)
-  console.log(user)
-  const eventFind = events.find((evt:{id: number | string}) => evt.id == eventId)
+  const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId)
+  console.log(eventFind, user)
   return eventFind
 }
 

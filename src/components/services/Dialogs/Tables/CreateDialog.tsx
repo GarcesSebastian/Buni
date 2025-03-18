@@ -45,6 +45,10 @@ interface PropsInputBasic {
   formData: Record<string, string>;
 }
 
+interface UpdatedFormData {
+  [key: string]: string | number | { value: string; data: Form | { id: number; nombre: string } };
+}
+
 const InputBasic = ({ formData, data }: PropsInputBasic) => {
   if (["text", "number", "date", "time"].includes(data.form.type)) {
     return (
@@ -106,8 +110,8 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
     e.preventDefault();
     const keyData = user[data.table.key as keyof typeof user];
     const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
-    const updatedFormData: Record<string, any> = { ...formData, id };
-
+    const updatedFormData: UpdatedFormData = { ...formData, id };
+    
     Object.keys(updatedFormData).forEach((key: string) => {
       if (typeof updatedFormData[key] == "string"){
         const dataSplit = updatedFormData[key].split("_")
