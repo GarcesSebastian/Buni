@@ -8,8 +8,12 @@ export function middleware(req: NextRequest) {
     const storedEvents = storedEventsCookie ? JSON.parse(storedEventsCookie) : undefined;
     const eventFinded = storedEvents.find((evt:{id: string}) => evt.id == id);
 
-    if(!eventFinded){
+    if(id == "1"){ // Test Production
         return NextResponse.next();
+    }
+
+    if(!eventFinded){
+        return NextResponse.redirect(new URL('/', req.url));
     }
 
     if (url.pathname.startsWith('/forms')) {
