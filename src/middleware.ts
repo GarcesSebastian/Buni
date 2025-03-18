@@ -9,7 +9,7 @@ export function middleware(req: NextRequest) {
     const eventFinded = storedEvents.find((evt:{id: string}) => evt.id == id);
 
     if(!eventFinded){
-        return NextResponse.redirect(new URL('/', req.url));
+        return NextResponse.next();
     }
 
     if (url.pathname.startsWith('/forms')) {
