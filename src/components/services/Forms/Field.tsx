@@ -93,7 +93,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                 <SelectValue placeholder="Seleccione una opción" />
                 </SelectTrigger>
                 <SelectContent>
-                {field.opciones?.map((opcion, index) => (
+                {field.opciones?.map((opcion) => (
                     <SelectItem key={opcion} value={opcion}>
                     {opcion}
                     </SelectItem>
