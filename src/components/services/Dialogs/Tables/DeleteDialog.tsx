@@ -32,7 +32,7 @@ export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
   const handleDelete = () => {
     const key = data.table.key as keyof User;
     if (Array.isArray(user[key])) {
-      const updatedData = user[key].filter((item) => item.id !== Number(initialData.id))
+      const updatedData = (user[key] as Array<{ id: number }>).filter((item) => item.id !== Number(initialData.id))
 
       setUser({
         ...user,

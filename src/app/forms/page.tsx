@@ -22,18 +22,21 @@ import { useSearchParams } from "next/navigation"
 import { Event } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
 import Cookies from "js-cookie"
+import { User, useUserData } from "@/hooks/useUserData"
 
-const getFormById = (eventId: number | string): Event => {
+const getFormById = (user: User, eventId: number): Event => {
   const events = JSON.parse(Cookies.get("events") || "[]")
+  console.log(events)
+  console.log(user)
   const eventFind = events.find((evt:{id: number | string}) => evt.id == eventId)
   return eventFind
 }
 
 export default function FormsPage() {
+  const { user } = useUserData()
   const searchParams = useSearchParams()
   const formId = searchParams.get("id") as string
-  const formFound: Event = getFormById(Number(formId))
-
+  const formFound: Event = getFormById(user, Number(formId))
   const [formulario] = useState<Event>(formFound)
   const [formValues, setFormValues] = useState<Record<string, (string | boolean)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -170,7 +173,7 @@ export default function FormsPage() {
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{formulario.scenery.split("_")[0]}</span>
+                    <span className="text-sm">{formulario.scenery.value.split("_")[0]}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />

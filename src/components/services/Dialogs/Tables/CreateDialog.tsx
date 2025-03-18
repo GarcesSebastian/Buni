@@ -106,19 +106,23 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
     e.preventDefault();
     const keyData = user[data.table.key as keyof typeof user];
     const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
-    const updatedFormData: { id: number; form?: string | { value: string; data: Form } } = { ...formData, id };
+    const updatedFormData: Record<string, any> = { ...formData, id };
 
-    if (typeof updatedFormData.form === 'string') {
-      const formSplit = updatedFormData.form.split("_");
-      const formId = formSplit[formSplit.length - 1];
-      const findFormUser = user.form.find((f: Form) => f.id === Number(formId));
-      if (findFormUser) {
-        updatedFormData.form = {
-          value: updatedFormData.form,
-          data: findFormUser,
-        };
+    Object.keys(updatedFormData).forEach((key: string) => {
+      if (typeof updatedFormData[key] == "string"){
+        const dataSplit = updatedFormData[key].split("_")
+        if (dataSplit.length <= 1) return;
+
+        const dataId = dataSplit[dataSplit.length - 1]
+        const findDataUser = (user[key as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+        if(findDataUser){
+          updatedFormData[key] = {
+            value: updatedFormData[key],
+            data: findDataUser
+          }
+        }
       }
-    }
+    })
 
     const key = data.table.key as keyof User;
     if (Array.isArray(user[key])) {
@@ -148,7 +152,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
                 <InputBasic
                   formData={formData}
                   data={{
-                    form: data.structureForm[value as keyof GeneralStructureForm],
+                    form: data.structureForm[value],
                     onChange: (e: React.ChangeEvent<HTMLInputElement> | string) =>
                       setFormData({
                         ...formData,

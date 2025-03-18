@@ -43,13 +43,17 @@ interface PropsInputBasic {
     onChange: (e: React.ChangeEvent<HTMLInputElement> | string) => void;
   };
   formData: Record<string, string>;
+  user: User
 }
 
 interface HandleSubmitProps {
   preventDefault: () => void;
 }
 
-const InputBasic = ({formData, data}: PropsInputBasic) => {
+const InputBasic = ({formData, data, user}: PropsInputBasic) => {
+  const valueInit = formData[data.key.toLowerCase()]
+  const userData = user[data.key as keyof User] as (Form | { id: number; nombre: string })[];
+  const valueFormatted = typeof valueInit == "object" ? userData?.find((d: { id: number }) => d.id == Number((valueInit as { data: { id: string} }).data.id)) : valueInit
   if(data.form.type == "text" || data.form.type == "number" || data.form.type == "date"){
     return(
       <>
@@ -57,7 +61,7 @@ const InputBasic = ({formData, data}: PropsInputBasic) => {
         <Input
           key={data.index}
           type={data.form.type}
-          value={formData[data.key.toLowerCase()]}
+          value={valueFormatted as string}
           onChange={data.onChange}
           required
         />
@@ -69,7 +73,7 @@ const InputBasic = ({formData, data}: PropsInputBasic) => {
       <Label htmlFor="faculty">{data.form.name}</Label>
       <Select
         key={data.index}
-        value={formData[data.key.toLowerCase()]}
+        value={typeof valueFormatted == "object" ? valueFormatted.nombre + "_" + valueFormatted.id : valueFormatted}
         onValueChange={data.onChange}
         required
       >
@@ -113,31 +117,33 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
 
   const handleSubmit = (e: HandleSubmitProps) => {
     e.preventDefault();
-    const keyData = user[data.table.key as keyof typeof user];
-    const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
-    const updatedFormData: { id: number; form?: string | { value: string; data: Form } } = { ...formData, id };
+    const keyData = user[data.table.key as keyof User] as (Form | { id: number; nombre: string })[];
+    const foundData = keyData.find(d => d.id == Number(initialData.id))
+    if (!foundData) return;
+    const updatedFormData: Record<string, any> = foundData
 
-    if (typeof updatedFormData.form === 'string') {
-      const formSplit = updatedFormData.form.split("_");
-      const formId = formSplit[formSplit.length - 1];
-      const findFormUser = user.form.find((f: Form) => f.id === Number(formId));
-      if (findFormUser) {
-        updatedFormData.form = {
-          value: updatedFormData.form,
-          data: findFormUser,
-        };
+    Object.keys(updatedFormData).forEach((key: string) => {
+      if (typeof updatedFormData[key] == "string"){
+        const dataSplit = updatedFormData[key].split("_")
+        if (dataSplit.length <= 1) return;
+
+        const dataId = dataSplit[dataSplit.length - 1]
+        const findDataUser = (user[key as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+        if(findDataUser){
+          updatedFormData[key] = {
+            value: updatedFormData[key],
+            data: findDataUser
+          }
+        }
       }
-    }
-    
+    })
+
     const key = data.table.key as keyof User;
     if (Array.isArray(user[key])) {  
       setUser({
         ...user,
         [data.table.key]: user[key].map((item) =>
-          item.id === Number(initialData.id) ? { ...item, ...{
-            ...updatedFormData,
-            active: true,
-          } } : item
+          item.id === Number(initialData.id) ? formData : item
         ),
       });
     }
@@ -165,6 +171,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
                     key: value,
                     index: index
                   }}
+                  user={user}
                 />
               </div>
             ))}

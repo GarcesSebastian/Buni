@@ -21,27 +21,9 @@ const UserDataContext = createContext<{
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUserState] = useState<User>({
         events: [],
-        faculty: [
-            {
-                nombre: 'dwadaw', 
-                state: "true", 
-                id: 1
-            }
-        ],
-        scenery: [
-            {
-                nombre: 'dwadwa', 
-                state: "true", 
-                id: 1
-            }
-        ],
-        form: [{
-            "id": 1742107027189,
-            "nombre": "Nuevo Formulario",
-            "descripcion": "Descripción del formulario",
-            "campos": [],
-            "state": true
-        }],
+        faculty: [],
+        scenery: [],
+        form: [],
     });
 
     const setUser = (data: User) => {

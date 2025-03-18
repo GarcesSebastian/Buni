@@ -10,8 +10,14 @@ export interface Event {
   id: number
   nombre: string
   organizador: string
-  scenery: string
-  faculties: string
+  scenery: {
+    value: string,
+    data: Form
+  }
+  faculty: {
+    value: string,
+    data: Form
+  }
   cupos: number
   fecha: string
   hora: string
