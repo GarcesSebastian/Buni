@@ -5,12 +5,14 @@ import Cookies from "js-cookie";
 import type { Form } from "@/types/Forms";
 import { Event, Scenery } from "@/types/Events";
 import { Faculty } from "@/types/Faculty";
+import { User as UserType } from "@/types/User"; 
 
 export interface User {
     events?: Event[];
     faculty: Faculty[];
     scenery: Scenery[];
     form: Form[];
+    users: UserType[]; 
 }
 
 const UserDataContext = createContext<{
@@ -216,10 +218,39 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
             ],
             "state": true
         }],
+        // Añadir usuarios de ejemplo
+        users: [
+            {
+                id: 1,
+                nombre: "Admin Usuario",
+                email: "admin@example.com",
+                password: "admin123", // En producción nunca guardar contraseñas en texto plano
+                role: "admin",
+                state: "true"
+            },
+            {
+                id: 2,
+                nombre: "Usuario Regular",
+                email: "usuario@example.com",
+                password: "usuario123",
+                role: "user",
+                state: "true"
+            },
+            {
+                id: 3,
+                nombre: "Usuario Inactivo",
+                email: "inactivo@example.com",
+                password: "inactivo123",
+                role: "user",
+                state: "false"
+            }
+        ]
     });
 
     const setUser = (data: User) => {
         Cookies.set("events", JSON.stringify(data.events), { expires: 7 });
+        // También puedes guardar los usuarios si es necesario
+        Cookies.set("users", JSON.stringify(data.users), { expires: 7 });
         setUserState(data);
     };
 

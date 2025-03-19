@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
+import { InputPassword } from "@/components/ui/InputPassword"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
@@ -36,7 +37,7 @@ interface PropsInputBasic {
     form: {
       name: string;
       options: { value: string; label: string; id?: number }[];
-      type: "text" | "number" | "date" | "time" | "selection";
+      type: "text" | "number" | "date" | "time" | "selection" | "password";
     };
     key: string;
     index: number;
@@ -54,7 +55,7 @@ const InputBasic = ({formData, data, user}: PropsInputBasic) => {
   const valueInit = formData[data.key.toLowerCase()]
   const userData = user[data.key as keyof User] as (Form | { id: number; nombre: string })[];
   const valueFormatted = typeof valueInit == "object" ? userData?.find((d: { id: number }) => d.id == Number((valueInit as { data: { id: string} }).data.id)) : valueInit
-  if(data.form.type == "text" || data.form.type == "number" || data.form.type == "date"){
+  if(data.form.type == "text" || data.form.type == "number" || data.form.type == "date" || data.form.type == "time"){
     return(
       <>
         <Label>{data.form.name}</Label>
@@ -67,7 +68,18 @@ const InputBasic = ({formData, data, user}: PropsInputBasic) => {
         />
       </>
     )
-  }else if(data.form.type == "selection"){
+  } else if (data.form.type === "password") {
+      return (
+        <InputPassword
+          data={{
+            key: data.key,
+            value: formData[data.key.toLowerCase()] || "",
+            label: data.form.name,
+            onChange: data.onChange as (e: React.ChangeEvent<HTMLInputElement>) => void,
+          }}
+        />
+      )
+    } else if(data.form.type == "selection"){
     return(
       <>
       <Label htmlFor="faculty">{data.form.name}</Label>
