@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
+import { InputPassword } from "@/components/ui/InputPassword"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
@@ -36,7 +37,7 @@ interface PropsInputBasic {
     form: {
       name: string;
       options: { value: string; label: string; id?: number }[];
-      type: "text" | "number" | "date" | "time" | "selection";
+      type: "text" | "number" | "date" | "time" | "selection" | "password";
     };
     key: string;
     index: number;
@@ -63,6 +64,17 @@ const InputBasic = ({ formData, data }: PropsInputBasic) => {
         />
       </>
     );
+  } else if (data.form.type === "password") {
+    return (
+      <InputPassword
+        data={{
+          key: data.key,
+          value: formData[data.key.toLowerCase()] || "",
+          label: data.form.name,
+          onChange: data.onChange as (e: React.ChangeEvent<HTMLInputElement>) => void,
+        }}
+      />
+    )
   } else if (data.form.type === "selection") {
     return (
       <>
