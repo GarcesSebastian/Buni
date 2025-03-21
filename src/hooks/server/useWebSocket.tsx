@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { handleUserConnected, handleCustomMessage, handleUpdateUserData } from "@/controllers/WebSocketController";
+import { useEffect } from "react";
+import { handleUpdateUserData } from "@/controllers/WebSocketController";
 import { type User, useUserData } from "../useUserData";
 
 const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
@@ -11,21 +11,11 @@ interface WebSocketMessage<T> {
   payload: T;
 }
 
-interface UserConnectedPayload {
-  username: string;
-  message: string;
-}
-
-interface CustomMessagePayload {
-  content: string;
-}
-
 interface UpdateUserDataPayLoad {
   users: User;
 }
 
 export function useWebSocket() {
-  const [notifications, setNotifications] = useState<{ id: number; message: string }[]>([]);
   const { setUser } = useUserData();
 
   useEffect(() => {
@@ -45,12 +35,6 @@ export function useWebSocket() {
           console.log("Mensaje recibido:", data);
 
           switch (data.type) {
-            case "USER_CONNECTED":
-              handleUserConnected(data.payload as UserConnectedPayload, setNotifications);
-              break;
-            case "CUSTOM_MESSAGE":
-              handleCustomMessage(data.payload as CustomMessagePayload, setNotifications);
-              break;
             case "UPDATE_DATA":
               handleUpdateUserData(data.payload as UpdateUserDataPayLoad, setUser);
               break;
@@ -80,9 +64,5 @@ export function useWebSocket() {
     }
   };
 
-  const removeNotification = (id: number) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
-  };
-
-  return { notifications, removeNotification, sendMessage };
+  return { sendMessage };
 }
