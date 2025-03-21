@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import Section from "@/components/ui/Section";
 import { TableGeneric } from "@/components/services/TableGeneric";
 import { configEvent, configFormEvent, tableEvent } from "@/config/Events";
