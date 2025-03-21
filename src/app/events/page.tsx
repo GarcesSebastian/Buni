@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Section from "@/components/ui/Section";
 import { TableGeneric } from "@/components/services/TableGeneric";
 import { configEvent, configFormEvent, tableEvent } from "@/config/Events";
@@ -9,90 +9,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import Notification from "@/components/ui/Notification";
 import { AnimatePresence } from "framer-motion";
 import FloatingUsers from "@/components/ui/FloatingUsers";
-
-const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { useFetchUsers } from "@/hooks/server/useUsers";
+import { useWebSocket } from "@/hooks/server/useWebSocket";
+import { Button } from "@/components/ui/Button";
 
 export default function EventosPage() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [notifications, setNotifications] = useState([]);
+  const { users, loading, error } = useFetchUsers();
+  const { notifications, removeNotification, sendMessage } = useWebSocket();
 
-  useEffect(() => {
-    if (!WEBSOCKET_URL) {
-      console.error("WebSocket URL no definida en las variables de entorno.");
-      return;
-    }
-
-    const socket = new WebSocket(WEBSOCKET_URL);
-
-    socket.onopen = () => {
-      console.log("Conectado al WebSocket");
-    };
-
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log("Mensaje recibido:", data);
-
-        if (data.type === "new_connection") {
-          setNotifications((prev) => [
-            ...prev,
-            { id: Date.now(), message: "Nuevo usuario conectado" },
-          ]);
-        }
-
-        if (data.users) {
-          setUsers(data.users);
-        }
-      } catch (error) {
-        console.error("Error al procesar el mensaje:", error);
-      }
-    };
-
-    socket.onerror = (error) => {
-      console.error("Error en WebSocket:", error);
-    };
-
-    socket.onclose = () => {
-      console.log("Conexión WebSocket cerrada");
-    };
-
-    return () => {
-      socket.close();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!API_URL) {
-      console.error("API URL no definida en las variables de entorno.");
-      setError("No se pudo cargar la API");
-      setLoading(false);
-      return;
-    }
-
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(`${API_URL}/users/get`);
-        if (!response.ok) {
-          throw new Error("Error al obtener los datos");
-        }
-        const data = await response.json();
-        setUsers(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  const removeNotification = (id) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
-  };
+  const handleClick = () => {
+    sendMessage("CUSTOM_MESSAGE", { content: "Hi there :3" });
+  }
 
   return (
     <div className="flex h-full flex-col relative">
@@ -135,6 +62,12 @@ export default function EventosPage() {
         </Card>
       </Section>
 
+      <Button 
+        className="absolute top-5 right-3 p-3"
+        onClick={handleClick}
+      >
+        Prueba
+      </Button>
       <FloatingUsers users={users} />
     </div>
   );

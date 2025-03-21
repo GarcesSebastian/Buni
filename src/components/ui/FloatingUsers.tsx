@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 export default function FloatingUsers({ users }) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   return (
     <AnimatePresence>

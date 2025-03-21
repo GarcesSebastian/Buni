@@ -14,9 +14,9 @@ import { InputPassword } from "@/components/ui/InputPassword"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
-import { useUserData } from "@/hooks/useUserData"
 import { Form } from "@/types/Forms"
-import { User } from "@/hooks/useUserData"
+import { type User, useUserData } from "@/hooks/useUserData"
+import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { GeneralStructureForm } from "@/types/Table"
 
 interface Props {
@@ -109,6 +109,7 @@ const InputBasic = ({ formData, data }: PropsInputBasic) => {
 export function CreateEventDialog({ data, open, onOpenChange }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
+  const { sendMessage } = useWebSocket()
 
   const RestartFormData = () => {
     const rest: Record<string, string> = {};
@@ -117,7 +118,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
     });
     setFormData(rest);
   };
-
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const keyData = user[data.table.key as keyof typeof user];
@@ -141,15 +142,18 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
     })
 
     const key = data.table.key as keyof User;
+    const newData = {
+      ...user,
+      [key]: [...user[key], updatedFormData],
+    }
+
     if (Array.isArray(user[key])) {
-      setUser({
-        ...user,
-        [key]: [...user[key], updatedFormData],
-      });
+      setUser(newData);
     }      
 
     RestartFormData();
     onOpenChange(false);
+    sendMessage("UPDATE_DATA", {users: newData})
   };
 
   useEffect(RestartFormData, [data.structureForm]);
