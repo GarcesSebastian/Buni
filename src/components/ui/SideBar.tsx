@@ -65,10 +65,6 @@ export function SideBar() {
   const pathname = usePathname()
   const isAuthenticated = pathname == "/"
 
-  useEffect(() => {
-    console.log("New state", isExpanded)
-  },[isExpanded])
-
   const toggleExpand = () => setIsExpanded(!isExpanded)
 
   const toggleItem = (title: string) => {

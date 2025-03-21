@@ -8,6 +8,7 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import Notification from "@/components/ui/Notification";
 import { AnimatePresence } from "framer-motion";
+import FloatingUsers from "@/components/ui/FloatingUsers";
 
 const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -133,6 +134,8 @@ export default function EventosPage() {
           </CardContent>
         </Card>
       </Section>
+
+      <FloatingUsers users={users} />
     </div>
   );
 }
