@@ -8,7 +8,7 @@ import { Faculty } from "@/types/Faculty";
 import { User as UserType } from "@/types/User"; 
 
 export interface User {
-    events?: Event[];
+    events: Event[];
     faculty: Faculty[];
     scenery: Scenery[];
     form: Form[];

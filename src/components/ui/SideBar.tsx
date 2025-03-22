@@ -9,7 +9,7 @@ import { ConfigSideBar } from "@/config/components/SideBar"
 
 export function SideBar() {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [isDeviceMobile, setIsDeviceMobile] = useState(window.innerWidth <= 768)
+  const [isDeviceMobile, setIsDeviceMobile] = useState(false)
   const [openItems, setOpenItems] = useState<string[]>([])
   const pathname = usePathname()
   const isAuthenticated = pathname === "/"
