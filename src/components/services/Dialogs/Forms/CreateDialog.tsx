@@ -158,7 +158,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                 >
                     Cancelar
                 </Button>
-                <Button onClick={addField} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+                <Button onClick={addField} className="bg-primary hover:bg-primary/90">
                     Agregar
                 </Button>
             </DialogFooter>

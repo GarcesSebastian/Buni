@@ -56,7 +56,7 @@ export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button className="bg-[#DC2626] hover:bg-[#DC2626]/90" onClick={handleDelete}>
+          <Button className="bg-primary hover:bg-primary/90" onClick={handleDelete}>
             Eliminar
           </Button>
         </DialogFooter>

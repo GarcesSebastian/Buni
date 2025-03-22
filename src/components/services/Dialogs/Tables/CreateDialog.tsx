@@ -189,7 +189,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+            <Button type="submit" className="bg-primary hover:bg-primary/90">
               Crear
             </Button>
           </DialogFooter>

@@ -54,7 +54,7 @@ export function QRDialog({ open, onOpenChange, event, type }: QRDialogProps) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cerrar
           </Button>
-          <Button onClick={handleDownload} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+          <Button onClick={handleDownload} className="bg-primary hover:bg-primary/90">
             Descargar
           </Button>
         </DialogFooter>

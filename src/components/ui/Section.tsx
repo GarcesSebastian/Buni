@@ -12,7 +12,7 @@ export default function Section({ children }: SectionProps) {
   const { loading, error } = useFetchUsers();
 
   return (
-    <div className="flex flex-col md:flex-row bg-gray-100 h-full">
+    <div className="flex flex-col md:flex-row bg-muted h-full">
       <SideBar />
       <main className="w-full h-full overflow-y-auto p-4 md:p-8">
         {loading ? (

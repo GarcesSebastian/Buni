@@ -34,7 +34,9 @@ export function SideBar() {
 
   const toggleItem = (title: string) => {
     setOpenItems((current) =>
-      current.includes(title) ? current.filter((item) => item !== title) : [...current, title],
+      current.includes(title)
+        ? current.filter((item) => item !== title)
+        : [...current, title],
     )
   }
 
@@ -60,7 +62,7 @@ export function SideBar() {
         </Button>
       </div>
       <nav 
-        className={`space-y-2 md:p-2 transition-all duration-300 ease-in-out ${isExpanded ? "max-md:initial max-md:pb-2" : "max-md:max-h-0"}`}
+        className={`overflow-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out ${isExpanded ? "max-md:initial max-md:pb-2" : "max-md:max-h-0"}`}
         style={{ maxHeight: isDeviceMobile ? (isExpanded ? "500px" : "0px") : undefined }}
       >
         {ConfigSideBar.map((item) => (
@@ -68,17 +70,18 @@ export function SideBar() {
             <Link key={item.href} href={item.href || pathname}>
               <Button
                 variant="ghost"
-                className={`w-full justify-center items-center text-white hover:text-white hover:bg-white/10 ${pathname === item.href ? "bg-white/10" : ""}`}
+                className={`w-full justify-left items-center text-white hover:text-white hover:bg-white/10 ${pathname === item.href ? "bg-white/10" : ""}`}
                 onClick={() => item.children && toggleItem(item.title)}
               >
-                <span className="flex-shrink-0">{item.icon}</span>
-                <div className={`w-full justify-left items-center max-md:flex ${isExpanded ? "md:flex" : "md:hidden"}`}>
+                <span className={`flex-shrink-0 ${isExpanded ? "max-md:flex" : "max-md:hidden"}`}>{item.icon}</span>
+                <div className={`w-full flex justify-left items-center ${isExpanded ? "flex" : "hidden"}`}>
                   <span className="ml-2 whitespace-nowrap">{item.title}</span>
-                  {item.children && (openItems.includes(item.title) ? (
+                  {item.children &&
+                    (openItems.includes(item.title) ? (
                       <ChevronDown className="ml-auto h-4 w-4 flex-shrink-0" />
-                  ) : (
+                    ) : (
                       <ChevronRight className="ml-auto h-4 w-4 flex-shrink-0" />
-                  ))}
+                    ))}
                 </div>
               </Button>
             </Link>

@@ -3,35 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  --background: rgb(255, 255, 255);
+  --foreground: rgb(2, 17, 23);
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: rgb(241, 245, 249);
+  --muted-foreground: rgb(100, 123, 139);
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
+  --popover: rgb(255, 255, 255);
+  --popover-foreground: rgb(2, 17, 23);
 
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card: rgb(255, 255, 255);
+  --card-foreground: rgb(2, 17, 23);
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
+  --border: rgb(226, 234, 240);
+  --input: rgb(226, 234, 240);
 
-  --primary: 0 74% 51%;
-  --primary-test: 120 100% 25%;
-  --primary-foreground: 210 40% 98%;
+  --primary: rgb(222, 38, 38);
+  --primary-foreground: rgb(248, 250, 252);
 
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
+  --secondary: rgb(241, 245, 249);
+  --secondary-foreground: rgb(15, 34, 42);
 
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --accent: rgb(241, 245, 249);
+  --accent-foreground: rgb(15, 34, 42);
 
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: rgb(239, 68, 68);
+  --destructive-foreground: rgb(248, 250, 252);
 
-  --ring: 215 20.2% 65.1%;
+  --ring: rgb(148, 169, 184);
 
   --radius: 0.5rem;
 }

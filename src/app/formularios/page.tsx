@@ -242,7 +242,7 @@ export default function FormulariosPage() {
           <div className="space-y-6 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
             <div className="flex justify-between items-center max-md:flex-col max-md:items-start max-md:gap-2">
               <h1 className="text-2xl font-bold">Formularios</h1>
-              <Button onClick={createForm} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+              <Button onClick={createForm} className="bg-primary hover:bg-primary/90">
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Formulario
               </Button>
@@ -324,7 +324,7 @@ export default function FormulariosPage() {
                                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                         <AlertDialogAction
                                           onClick={() => deleteForm(formulario.id)}
-                                          className="bg-[#DC2626] hover:bg-[#DC2626]/90"
+                                          className="bg-primary hover:bg-primary/90"
                                         >
                                           Eliminar
                                         </AlertDialogAction>
@@ -430,7 +430,7 @@ export default function FormulariosPage() {
                     <Button variant="outline" onClick={() => setCurrentForm(null)}>
                       Cancelar
                     </Button>
-                    <Button onClick={updateForm} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+                    <Button onClick={updateForm} className="bg-primary hover:bg-primary/90">
                       <Save className="mr-2 h-4 w-4" />
                       Guardar Formulario
                     </Button>

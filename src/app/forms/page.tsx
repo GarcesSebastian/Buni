@@ -306,12 +306,12 @@ export default function FormsPage() {
                     </Button>
 
                     {showPreview ? (
-                      <Button type="submit" className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+                      <Button type="submit" className="bg-primary hover:bg-primary/90">
                         <Save className="mr-2 h-4 w-4" />
                         Enviar formulario
                       </Button>
                     ) : (
-                      <Button type="button" onClick={handleNextSection} className="bg-[#DC2626] hover:bg-[#DC2626]/90">
+                      <Button type="button" onClick={handleNextSection} className="bg-primary hover:bg-primary/90">
                         Siguiente
                         <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>

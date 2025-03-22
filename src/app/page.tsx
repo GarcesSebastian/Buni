@@ -67,7 +67,7 @@ export default function SignInPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full justify-center bg-[#DC2626] hover:bg-[#DC2626]/90">
+            <Button type="submit" className="w-full justify-center bg-primary hover:bg-primary/90">
               Iniciar sesión
             </Button>
           </form>

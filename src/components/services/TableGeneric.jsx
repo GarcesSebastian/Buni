@@ -126,7 +126,7 @@ export function TableGeneric({structure, structureForm, table}) {
   return (
     <div className="space-y-4">
       <div className="flex flex-row justify-between gap-4 max-md:flex-col">
-        <Button onClick={() => setOpenCreate(true)} className="bg-[#DC2626] hover:bg-[#DC2626]/90 w-auto max-md:w-full">
+        <Button onClick={() => setOpenCreate(true)} className="bg-primary hover:bg-primary/90 w-auto max-md:w-full">
           <Plus className="mr-2 h-4 w-4" />
           Agregar
         </Button>
@@ -136,7 +136,7 @@ export function TableGeneric({structure, structureForm, table}) {
         </Button>
       </div>
 
-      <div className="rounded-md border overflow-x-auto">
+      <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -144,7 +144,7 @@ export function TableGeneric({structure, structureForm, table}) {
               {structure.filter((value) => value.key !== "id").map((value) => (
                 <TableHead key={value.key} className="whitespace-nowrap">
                     <div className="w-full" style={{ display: "table" }}>
-                      <span style={{ display: "table-cell", verticalAlign: "middle" }}>
+                      <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
                         {value.value}
                       </span>
                       <span
@@ -158,13 +158,13 @@ export function TableGeneric({structure, structureForm, table}) {
                         <Button
                           variant="ghost"
                           onClick={() => setOpenFilter(value.value)}
-                          className="hover:bg-transparent"
+                          className="hover:bg-transparent !p-1 !h-fit align-middle"
                         >
                           <Filter className="h-4 w-4" />
                         </Button>
                       </span>
                     </div>
-                  </TableHead>
+                </TableHead>
                 ))}
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
