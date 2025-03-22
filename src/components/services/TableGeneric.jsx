@@ -140,15 +140,32 @@ export function TableGeneric({structure, structureForm, table}) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">N°</TableHead>
+              <TableHead>N°</TableHead>
               {structure.filter((value) => value.key !== "id").map((value) => (
-                <TableHead key={value.key}>
-                  {value.value}
-                  <Button variant="ghost" onClick={() => setOpenFilter(value.value)} className="ml-2 hover:bg-transparent">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </TableHead>
-              ))}
+                <TableHead key={value.key} className="whitespace-nowrap">
+                    <div className="w-full" style={{ display: "table" }}>
+                      <span style={{ display: "table-cell", verticalAlign: "middle" }}>
+                        {value.value}
+                      </span>
+                      <span
+                        style={{
+                          display: "table-cell",
+                          verticalAlign: "middle",
+                          textAlign: "right",
+                          width: "1%",
+                        }}
+                      >
+                        <Button
+                          variant="ghost"
+                          onClick={() => setOpenFilter(value.value)}
+                          className="hover:bg-transparent"
+                        >
+                          <Filter className="h-4 w-4" />
+                        </Button>
+                      </span>
+                    </div>
+                  </TableHead>
+                ))}
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
