@@ -38,18 +38,20 @@ export function TableGeneric({structure, structureForm, table}) {
       (event) => {
         return Object.keys(filters).every((key) => {
           const filterKey = key
+          console.log(filterKey)
+          console.log(filters[filterKey])
           if (filters[filterKey] === "") return true
-          return event[filterKey]?.toLowerCase().includes(filters[filterKey].toLowerCase())
+          return event[filterKey]?.toString().toLowerCase().includes(filters[filterKey].toLowerCase())
         })
       }
     )
 
     if (sortConfig !== null) {
       filteredEvents.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        if (Number(a[sortConfig.key]) < Number(b[sortConfig.key])) {
           return sortConfig.direction === "asc" ? -1 : 1
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (Number(a[sortConfig.key]) > Number(b[sortConfig.key])) {
           return sortConfig.direction === "asc" ? 1 : -1
         }
         return 0
@@ -157,7 +159,7 @@ export function TableGeneric({structure, structureForm, table}) {
                       >
                         <Button
                           variant="ghost"
-                          onClick={() => setOpenFilter(value.value)}
+                          onClick={() => setOpenFilter(value.key)}
                           className="hover:bg-transparent !p-1 !h-fit align-middle"
                         >
                           <Filter className="h-4 w-4" />

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/Dialog"
 import { GeneralStructureForm } from "@/types/Table"
 import { User, useUserData } from "@/hooks/useUserData"
+import { useWebSocket } from "@/hooks/server/useWebSocket"
 
 interface Props {
   data: {
@@ -28,18 +29,21 @@ interface Props {
 
 export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
   const { user, setUser } = useUserData()
+  const { sendMessage } = useWebSocket()
 
   const handleDelete = () => {
     const key = data.table.key as keyof User;
     if (Array.isArray(user[key])) {
       const updatedData = (user[key] as Array<{ id: number }>).filter((item) => item.id !== Number(initialData.id))
 
-      setUser({
+      const newData = {
         ...user,
         [data.table.key]: updatedData,
-      })
-  
+      }
+
+      setUser(newData)
       onOpenChange(false)
+      sendMessage("UPDATE_DATA", {users: newData})
     } 
 
   }

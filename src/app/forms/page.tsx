@@ -134,9 +134,9 @@ export default function FormsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-col md:flex-row bg-gray-100 h-full overflow-y-auto">
-        <main className="w-full overflow-y-auto p-4 md:p-8">
+    <div className="h-full">
+      <div className="h-full bg-gray-100">
+        <main className="h-full overflow-y-auto p-4 md:p-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex max-md:flex-col gap-2 justify-start items-center mb-6">
               <div className="flex flex-col items-start justify-start gap-2 w-full">
@@ -290,8 +290,7 @@ export default function FormsPage() {
                           ))}
                         </TabsContent>
                       </Tabs>
-                    )
-                  }
+                    )}
                   </CardContent>
 
                   <CardFooter className="flex justify-between border-t px-6 py-4">
@@ -321,7 +320,7 @@ export default function FormsPage() {
               )}
             </Card>
 
-            <div className="text-sm text-muted-foreground text-center print:hidden">
+            <div className="text-sm text-muted-foreground text-center print:hidden pb-6">
               <p>
                 Los campos marcados con <span className="text-red-500">*</span> son obligatorios.
               </p>

@@ -15,12 +15,22 @@ export interface User {
     users: UserType[]; 
 }
 
+export interface States {
+    sidebarExpanded?: boolean;
+    sidebarOpenItems?: string[];
+    isDeviceMobile?: boolean;
+    userToggled?: boolean;
+}
+
 const UserDataContext = createContext<{
     user: User;
     setUser: (data: User) => void;
+    states: States,
+    setStates: (data: States) => void;
 } | null>(null);
 
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
+    const [states, setStates] = useState<States>({});
     const [user, setUserState] = useState<User>({
         events: [{
             "nombre": "Induccion de Ingenieria, Gastronomia y Psicologia",
@@ -228,13 +238,13 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <UserDataContext.Provider value={{ user, setUser }}>
+        <UserDataContext.Provider value={{ user, setUser, states, setStates }}>
             {children}
         </UserDataContext.Provider>
     );
 };
 
-export const useUserData = (): { user: User; setUser: (data: User) => void } => {
+export const useUserData = (): { user: User; setUser: (data: User) => void, states: States, setStates: (data: States) => void } => {
     const context = useContext(UserDataContext);
     if (!context) {
         throw new Error("useUserData debe estar dentro de un UserDataProvider");

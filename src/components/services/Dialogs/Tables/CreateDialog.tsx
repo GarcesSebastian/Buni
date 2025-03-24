@@ -10,14 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
-import { InputPassword } from "@/components/ui/InputPassword"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { Form } from "@/types/Forms"
 import { type User, useUserData } from "@/hooks/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { GeneralStructureForm } from "@/types/Table"
+import { InputBasic } from "../../InputGeneric"
 
 interface Props {
   data: {
@@ -32,79 +29,9 @@ interface Props {
   onOpenChange: (value: boolean) => void
 }
 
-interface PropsInputBasic {
-  data: {
-    form: {
-      name: string;
-      options: { value: string; label: string; id?: number }[];
-      type: "text" | "number" | "date" | "time" | "selection" | "password";
-    };
-    key: string;
-    index: number;
-    onChange: (e: React.ChangeEvent<HTMLInputElement> | string) => void;
-  };
-  formData: Record<string, string>;
-}
-
 interface UpdatedFormData {
   [key: string]: string | number | { value: string; data: Form | { id: number; nombre: string } };
 }
-
-const InputBasic = ({ formData, data }: PropsInputBasic) => {
-  if (["text", "number", "date", "time"].includes(data.form.type)) {
-    return (
-      <>
-        <Label>{data.form.name}</Label>
-        <Input
-          key={data.index}
-          type={data.form.type}
-          value={formData[data.key.toLowerCase()] || ""}
-          onChange={data.onChange as (e: React.ChangeEvent<HTMLInputElement>) => void}
-          required
-        />
-      </>
-    );
-  } else if (data.form.type === "password") {
-    return (
-      <InputPassword
-        data={{
-          key: data.key,
-          value: formData[data.key.toLowerCase()] || "",
-          label: data.form.name,
-          onChange: data.onChange as (e: React.ChangeEvent<HTMLInputElement>) => void,
-        }}
-      />
-    )
-  } else if (data.form.type === "selection") {
-    return (
-      <>
-        <Label>{data.form.name}</Label>
-        <Select
-          key={data.index}
-          value={formData[data.key.toLowerCase()] || ""}
-          onValueChange={data.onChange}
-          required
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={`Seleccionar ${data.form.name.toLowerCase()}`} />
-          </SelectTrigger>
-          <SelectContent>
-            {data.form.options.length > 0 ? (
-              data.form.options.map((option, index) => (
-                <SelectItem key={index} value={`${option.value}${option.id ? "_" + option.id : ""}`}>
-                  {option.label}
-                </SelectItem>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm p-2">No se encontraron opciones</p>
-            )}
-          </SelectContent>
-        </Select>
-      </>
-    );
-  }
-  return null;
-};
 
 export function CreateEventDialog({ data, open, onOpenChange }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -160,15 +87,15 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Crear dato para {data.table.name}</DialogTitle>
             <DialogDescription>Complete los datos para {data.table.name}</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4">
             {Object.keys(data.structureForm).map((value, index) => (
-              <div key={index} className="grid gap-2">
+              <div key={index}>
                 <InputBasic
                   formData={formData}
                   data={{
@@ -185,7 +112,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
               </div>
             ))}
           </div>
-          <DialogFooter className="flex flex-row">
+          <DialogFooter className="flex flex-row mt-4">
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>

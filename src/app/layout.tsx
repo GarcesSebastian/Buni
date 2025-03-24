@@ -27,10 +27,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="h-screen overflow-hidden">
           <TopNav/>
-          <div className="flex">
+          <div className="flex overflow-hidden">
             <UserDataProvider>
               <Suspense>
-                <main className="w-full" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
+                <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
               </Suspense>
             </UserDataProvider>
           </div>

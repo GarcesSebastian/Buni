@@ -1,48 +1,67 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { ChevronDown, ChevronRight, Menu } from "lucide-react"
 import { ConfigSideBar } from "@/config/components/SideBar"
+import { useUserData } from "@/hooks/useUserData"
 
 export function SideBar() {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isDeviceMobile, setIsDeviceMobile] = useState(false)
-  const [openItems, setOpenItems] = useState<string[]>([])
+  const { states, setStates } = useUserData()
   const pathname = usePathname()
   const isAuthenticated = pathname === "/"
-
-  const handleResize = () => {
-    const mobile = window.innerWidth <= 768
-    setIsDeviceMobile(mobile)
-    if (window.innerWidth > 768) {
-      setIsExpanded(true)
-    } else {
-      setIsExpanded(false)
-    }
-  }
-
+  
   useEffect(() => {
-    handleResize()
+    if (states.sidebarExpanded === undefined) {
+      const isDesktop = window.innerWidth > 768
+      setStates({
+        ...states,
+        sidebarExpanded: isDesktop,
+        sidebarOpenItems: [],
+        isDeviceMobile: window.innerWidth <= 768
+      })
+    }
+    
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768
+      setStates({
+        ...states,
+        isDeviceMobile: mobile,
+        sidebarExpanded: states.userToggled ? states.sidebarExpanded : window.innerWidth > 768
+      })
+    }
+    
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  const toggleExpand = () => setIsExpanded(!isExpanded)
+  const toggleExpand = () => {
+    setStates({
+      ...states,
+      sidebarExpanded: !states.sidebarExpanded,
+      userToggled: true
+    })
+  }
 
   const toggleItem = (title: string) => {
-    setOpenItems((current) =>
-      current.includes(title)
-        ? current.filter((item) => item !== title)
-        : [...current, title],
-    )
+    const currentOpenItems = states.sidebarOpenItems || []
+    setStates({
+      ...states,
+      sidebarOpenItems: currentOpenItems.includes(title)
+        ? currentOpenItems.filter(item => item !== title)
+        : [...currentOpenItems, title]
+    })
   }
 
   if (isAuthenticated) {
     return <div></div>
   }
+
+  const isExpanded = states.sidebarExpanded !== undefined ? states.sidebarExpanded : true
+  const isDeviceMobile = states.isDeviceMobile !== undefined ? states.isDeviceMobile : false
+  const openItems = states.sidebarOpenItems || []
 
   return (
     <div 

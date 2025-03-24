@@ -39,6 +39,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-y: hidden;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
