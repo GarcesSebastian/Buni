@@ -42,6 +42,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { useUserData } from "@/hooks/useUserData"
 import { configField } from "@/config/Forms"
 import type { Form, FormField } from "@/types/Forms"
+import { useWebSocket } from "@/hooks/server/useWebSocket"
 
 interface SorteableFieldProps {
   campo: FormField,
@@ -125,6 +126,7 @@ function SortableCampo({ campo, onDelete, data }: SorteableFieldProps) {
 
 export default function FormulariosPage() {
   const {user, setUser} = useUserData();
+  const { sendMessage } = useWebSocket()
   const [currentForm, setCurrentForm] = useState<Form | null>(null)
   const [dialogAddField, setDialogAddField] = useState<boolean>(false)
 
@@ -188,11 +190,14 @@ export default function FormulariosPage() {
       state: false,
     }
 
-    setUser({
+    const newData = {
       ...user,
       form: [...user.form, nuevoFormulario]
-    })
+    }
+    
+    setUser(newData)
     setCurrentForm({ ...nuevoFormulario })
+    sendMessage("UPDATE_DATA", {users: newData})
   }
 
   const editForm = (formulario: Form) => {
@@ -200,24 +205,30 @@ export default function FormulariosPage() {
   }
 
   const deleteForm = (id: number) => {
-    setUser({
+    const newData = {
       ...user,
       form: user.form.filter((f) => f.id !== id)
-    })
+    }
+    setUser(newData)
 
     if (currentForm?.id === id) {
       setCurrentForm(null)
     }
+
+    sendMessage("UPDATE_DATA", {users: newData})
   }
 
   const updateForm = () => {
     if (!currentForm) return
-    setUser({
+
+    const newData = {
       ...user,
       form: user.form.map((f) => (f.id === currentForm.id ? currentForm : f))
-    })
+    }
 
+    setUser(newData)
     setCurrentForm(null)
+    sendMessage("UPDATE_DATA", {users: newData})
   }
 
   const deleteField = (campoId: string) => {
@@ -230,10 +241,13 @@ export default function FormulariosPage() {
   }
 
   const toggleStateForm = (id: number) => {
-    setUser({
+    const newData = {
       ...user,
       form: user.form.map((f) => (f.id === id ? { ...f, state: !f.state } : f))
-    })
+    }
+
+    setUser(newData)
+    sendMessage("UPDATE_DATA", {users: newData})
   }
 
   return (
