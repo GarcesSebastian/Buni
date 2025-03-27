@@ -31,11 +31,11 @@ export interface Event {
   formAssists: {
     value: string,
     data: Form
-  } | {}
+  }
   formInscriptions: {
     value: string,
     data: Form
-  } | {}
+  }
   assists?: Assists[]
   inscriptions?: Assists[]
 }

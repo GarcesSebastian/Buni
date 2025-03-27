@@ -76,10 +76,10 @@ export default function EventDetailPage() {
         })
     }) || []
 
-    const getColumnsForm = (formUse: { value: string; data: Form; } | {}): {[key: string]: string | number | boolean}[] | [] => {
+    const getColumnsForm = (formUse: { value: string; data: Form; }): {[key: string]: string | number | boolean}[] | [] => {
         if (!formUse) return []
 
-        let structure: {[key: string]: string | number | boolean}[] = []
+        const structure: {[key: string]: string | number | boolean}[] = []
 
         if ("data" in formUse) {
             formUse.data.campos.forEach((campo) => {
@@ -90,6 +90,7 @@ export default function EventDetailPage() {
                 })
             })
         }
+
         return structure
     }
 
@@ -405,7 +406,7 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type="assists"
                                             data={filteredAssists}
-                                            columns={getColumnsForm(event.formAssists) || []}
+                                            columns={getColumnsForm(event.formAssists)}
                                             pagination={assistsPagination}
                                             onPageChange={(page) => handlePageChange("assists", page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange("assists", rows)}
@@ -442,7 +443,7 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type="inscriptions"
                                             data={filteredInscriptions}
-                                            columns={getColumnsForm(event.formInscriptions) || {}}
+                                            columns={event.formInscriptions && "value" in event.formInscriptions ? getColumnsForm(event.formInscriptions) : []}
                                             pagination={inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange("inscriptions", page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange("inscriptions", rows)}

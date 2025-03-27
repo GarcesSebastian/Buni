@@ -76,7 +76,6 @@ function getPositionClasses(position: NotificationPosition): string {
 }
 
 function NotificationItem({
-  id,
   title,
   message,
   type = "default",
