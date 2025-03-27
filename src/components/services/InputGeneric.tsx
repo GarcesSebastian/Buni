@@ -10,7 +10,7 @@ interface PropsInputBasic {
         form: {
         name: string;
         options: { value: string; label: string; id?: number }[];
-        type: "text" | "number" | "date" | "time" | "selection" | "password";
+        type: "text" | "number" | "date" | "time" | "selection" | "password" | "email";
         };
         key: string;
         index: number;

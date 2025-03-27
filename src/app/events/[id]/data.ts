@@ -1,7 +1,7 @@
 import type { Event } from "@/types/Events";
 
 // Función para generar datos de ejemplo
-function generateSampleData(count: number, type: "asistencia" | "inscripcion") {
+function generateSampleData(count: number) {
   const data = [];
   const facultades = [
     "Ingeniería",
@@ -241,7 +241,7 @@ export const eventosEjemplo: Event[] = [
         state: true,
       },
     },
-    assists: generateSampleData(10, "asistencia"),
-    inscriptions: generateSampleData(10, "inscripcion"),
+    assists: generateSampleData(10),
+    inscriptions: generateSampleData(10),
   },
 ];

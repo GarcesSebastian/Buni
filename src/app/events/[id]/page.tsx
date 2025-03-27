@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { AlertTriangle, ArrowLeft, Calendar, Clock, Loader, Loader2, MapPin, Users } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Calendar, Clock, Loader, MapPin, Users } from "lucide-react"
 import Link from "next/link"
 import type { Event } from "@/types/Events"
 
@@ -14,7 +14,7 @@ import { DataTable } from "@/components/services/Events/TableEvent"
 import { DataImportExport } from "@/components/services/Events/ManageExcel"
 import { ChartSection, FacultyFilter } from "@/components/services/Events/CharSection"
 
-import { useUserData } from "@/hooks/useUserData"
+//import { useUserData } from "@/hooks/useUserData"
 
 import { COLORS } from "@/lib/ManageEvents"
 import { getDataForCharts, getFaculties, handleFilter } from "@/lib/ManageEvents"
@@ -29,7 +29,7 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    const {user} = useUserData()
+    //const {user} = useUserData()
     const [event, setEvent] = useState<Event | null>(null)
     const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
