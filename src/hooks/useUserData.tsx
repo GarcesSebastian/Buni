@@ -133,11 +133,13 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             "seccion": "adicional"
                         }
                     ],
-                    "state": true
+                    "state": true,
                 }
             },
             "state": "true",
-            "id": 1
+            "id": 1,
+            "assists": [],
+            "inscriptions": []
         }],
         faculty: [{
             "nombre": "Ingenieria",

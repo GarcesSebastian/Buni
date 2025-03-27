@@ -5,6 +5,7 @@ import "../styles/globals.css"
 
 import { TopNav } from "@/components/ui/TopNav"
 import { UserDataProvider } from "@/hooks/useUserData"
+import { NotificationProvider } from "@/components/ui/Notification"
 import { Suspense } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -29,9 +30,11 @@ export default function RootLayout({
           <TopNav/>
           <div className="flex overflow-hidden">
             <UserDataProvider>
-              <Suspense>
-                <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
-              </Suspense>
+              <NotificationProvider>
+                <Suspense>
+                  <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
+                </Suspense>
+              </NotificationProvider>
             </UserDataProvider>
           </div>
         </div>

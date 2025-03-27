@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
-import { Edit, Filter, MoreVertical, Plus, QrCode, Trash } from "lucide-react"
+import { Edit, Filter, MoreVertical, Plus, QrCode, Trash, Eye } from "lucide-react"
 import { CreateEventDialog } from "./Dialogs/Tables/CreateDialog"
 import { QRDialog } from "./Dialogs/QRDialog"
 import { FilterDialog } from "./Dialogs/Tables/FilterDialog"
@@ -109,6 +109,10 @@ export function TableGeneric({structure, structureForm, table}) {
     return dataFind?.nombre
   }
 
+  const handleViewData = (data) => {
+    router.push(`/${table.key}/${data.id}`)
+  }
+
   useEffect(() => {
     Object.keys(structureForm).forEach(value => {
       if(structureForm[value].type == "selection" && user[value]){
@@ -149,19 +153,8 @@ export function TableGeneric({structure, structureForm, table}) {
                       <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
                         {value.value}
                       </span>
-                      <span
-                        style={{
-                          display: "table-cell",
-                          verticalAlign: "middle",
-                          textAlign: "right",
-                          width: "1%",
-                        }}
-                      >
-                        <Button
-                          variant="ghost"
-                          onClick={() => setOpenFilter(value.key)}
-                          className="hover:bg-transparent !p-1 !h-fit align-middle"
-                        >
+                      <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
+                        <Button variant="ghost" onClick={() => setOpenFilter(value.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
                           <Filter className="h-4 w-4" />
                         </Button>
                       </span>
@@ -216,6 +209,16 @@ export function TableGeneric({structure, structureForm, table}) {
                           <Trash className="mr-2 h-4 w-4 text-red-800" />
                           Eliminar
                         </DropdownMenuItem>
+                        {
+                          table.isView && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleViewData(data)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver Evento
+                              </DropdownMenuItem>
+                            </>
+                          )
+                        }
                         {
                           table.isQR && (
                             <>

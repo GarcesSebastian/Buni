@@ -3,7 +3,8 @@ import { ConfigEvent, ConfigEventForm, ConfigFormScenery, ConfigScenery, TableEv
 export const tableEvent: TableEvent = {
     name: "Eventos",
     key: "events",
-    isQR: true
+    isQR: true,
+    isView: true,
 }
 
 export const configEvent: ConfigEvent[] = [

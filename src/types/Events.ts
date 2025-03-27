@@ -4,7 +4,8 @@ import { Form } from "./Forms"
 export interface TableEvent {
   name: string,
   key: string,
-  isQR: boolean
+  isQR: boolean,
+  isView: boolean
 }
 
 export interface Event {
@@ -27,6 +28,8 @@ export interface Event {
     value: string,
     data: Form
   }
+  assists: Array<Record<string, any>>
+  inscriptions: Array<Record<string, any>>
 }
 
 export interface ConfigEvent {

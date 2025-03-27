@@ -17,11 +17,13 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { Event } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
 import { User, useUserData } from "@/hooks/useUserData"
+import Link from "next/link"
 
 const getFormById = (user: User, eventId: number): Event => {
   const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId)
@@ -139,6 +141,11 @@ export default function FormsPage() {
         <main className="h-full overflow-y-auto p-4 md:p-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex max-md:flex-col gap-2 justify-start items-center mb-6">
+              <Link href="/events" className="mr-4">
+                  <Button variant="outline" size="icon" className="flex justify-center items-center">
+                      <ArrowLeft className="h-4 w-4" />
+                  </Button>
+              </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
                 <h1 className="text-2xl font-bold">{formulario.nombre}</h1>
                 <p className="text-muted-foreground">{formulario.form.data.descripcion}</p>
