@@ -38,8 +38,6 @@ export function TableGeneric({structure, structureForm, table}) {
       (event) => {
         return Object.keys(filters).every((key) => {
           const filterKey = key
-          console.log(filterKey)
-          console.log(filters[filterKey])
           if (filters[filterKey] === "") return true
           return event[filterKey]?.toString().toLowerCase().includes(filters[filterKey].toLowerCase())
         })
@@ -105,7 +103,9 @@ export function TableGeneric({structure, structureForm, table}) {
     }
 
     const id = dataSplit[dataSplit.length - 1]
-    const dataFind = user[value]?.find((f) => f.id === Number(id))
+    const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
+    
+    const dataFind = user[valueFormatted]?.find((f) => f.id === Number(id))
     return dataFind?.nombre
   }
 
@@ -115,8 +115,10 @@ export function TableGeneric({structure, structureForm, table}) {
 
   useEffect(() => {
     Object.keys(structureForm).forEach(value => {
-      if(structureForm[value].type == "selection" && user[value]){
-        const rest = user[value].filter(v => v.state == true || v.state == "true").map(s => {
+      const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
+      if(structureForm[value].type == "selection" && user[valueFormatted]){
+
+        const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {
           return {
             value: s.nombre,
             label: s.nombre.charAt(0).toUpperCase() + s.nombre.slice(1),
@@ -231,9 +233,14 @@ export function TableGeneric({structure, structureForm, table}) {
                                 QR Asistencia
                               </DropdownMenuItem>
                               <DropdownMenuItem className="text-red-800" onClick={() => {
-                               router.push("/forms?id=" + data.id)
+                               router.push(`forms/assists/${data.id}`)
                               }}>
-                                Prueba de Direccion
+                                Prueba de Asistencia
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-800" onClick={() => {
+                               router.push(`forms/inscriptions/${data.id}`)
+                              }}>
+                                Prueba de Inscripcion
                               </DropdownMenuItem>
                             </>
                           )

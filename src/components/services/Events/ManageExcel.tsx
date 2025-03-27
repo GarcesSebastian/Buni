@@ -11,12 +11,13 @@ import { AssistsColumns } from "@/config/Assists"
 import { InscriptionsColumns } from "@/config/Inscriptions"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
+import { Assists } from "@/types/Events"
 
 interface DataImportExportProps {
   type: TabsEvent
-  data: any[]
+  data: Assists[]
   fileName: string
-  onImport: (data: any[]) => void
+  onImport: (data: Assists[]) => void
 }
 
 export function DataImportExport({ type, data, fileName, onImport }: DataImportExportProps) {
@@ -71,7 +72,7 @@ export function DataImportExport({ type, data, fileName, onImport }: DataImportE
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const jsonData = XLSX.utils.sheet_to_json<{ [key: string]: string }>(worksheet);
 
         const requiredKeys = type === "assists"  ? AssistsColumns.map((col) => col.key.toLowerCase()) : InscriptionsColumns.map((col) => col.key.toLowerCase());
 
@@ -94,8 +95,8 @@ export function DataImportExport({ type, data, fileName, onImport }: DataImportE
           return;
         }
 
-        const processedData = jsonData.map((item: any, index) => ({
-          id: item.id || index + 1,
+        const processedData = jsonData.map((item: Record<string, string>, index) => ({
+          id: String(item.id || index + 1),
           ...item,
         }));
 
@@ -105,11 +106,12 @@ export function DataImportExport({ type, data, fileName, onImport }: DataImportE
           message: `Datos de ${ type === "assists" ? "asistencias" : "inscripciones" } importados correctamente.`,
           type: "success",
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error al importar el archivo:", error);
+        const errorMessage = error instanceof Error ? error.message : "Error desconocido";
         showNotification({
           title: "Error al importar",
-          message: `Ocurrió un error al importar el archivo. Por favor, intenta de nuevo. ${error.message}`,
+          message: `Ocurrió un error al importar el archivo. Por favor, intenta de nuevo. ${errorMessage}`,
           type: "error",
         });
       }

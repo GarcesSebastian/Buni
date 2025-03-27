@@ -8,20 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { AlertTriangle, ArrowLeft, Calendar, Clock, Loader, MapPin, Users } from "lucide-react"
 import Link from "next/link"
-import type { Event } from "@/types/Events"
+import type { Assists, Event } from "@/types/Events"
 
 import { DataTable } from "@/components/services/Events/TableEvent"
 import { DataImportExport } from "@/components/services/Events/ManageExcel"
 import { ChartSection, FacultyFilter } from "@/components/services/Events/CharSection"
 
-//import { useUserData } from "@/hooks/useUserData"
+import { useUserData } from "@/hooks/useUserData"
 
 import { COLORS } from "@/lib/ManageEvents"
 import { getDataForCharts, getFaculties, handleFilter } from "@/lib/ManageEvents"
-import { AssistsColumns } from "@/config/Assists"
-import { InscriptionsColumns } from "@/config/Inscriptions"
 import { Alert, AlertTitle } from "@/components/ui/Alert"
-import { eventosEjemplo } from "./data"
+import { Form } from "@/types/Forms"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 
@@ -29,7 +27,7 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    //const {user} = useUserData()
+    const {user} = useUserData()
     const [event, setEvent] = useState<Event | null>(null)
     const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
@@ -39,21 +37,21 @@ export default function EventDetailPage() {
 
     const [selectedFaculty, setSelectedFaculty] = useState<string>("todas")
 
-    const [assistsPagination, setAssistsPagination] = useState({
+    const [assistsPagination, setAssistsPagination] = useState<Record<string, number>>({
         currentPage: 1,
         rowsPerPage: 10,
     })
 
-    const [inscriptionsPagination, setInscriptionsPagination] = useState({
+    const [inscriptionsPagination, setInscriptionsPagination] = useState<Record<string, number>>({
         currentPage: 1,
         rowsPerPage: 10,
     })
 
-    const { assistData, inscriptionData } = getDataForCharts(event, selectedFaculty)
+    const { assistData, inscriptionData } = getDataForCharts(event as Event, selectedFaculty)
 
     useEffect(() => {
         setLoading(true)
-        const foundEvent = eventosEjemplo.find((e) => e.id === Number(eventId))
+        const foundEvent = user.events.find((e) => e.id === Number(eventId))
 
         if (foundEvent) {
             setEvent(foundEvent)
@@ -77,6 +75,23 @@ export default function EventDetailPage() {
             return inscription[key]?.toString().toLowerCase().includes(value.toLowerCase())
         })
     }) || []
+
+    const getColumnsForm = (formUse: { value: string; data: Form; } | {}): {[key: string]: string | number | boolean}[] | [] => {
+        if (!formUse) return []
+
+        let structure: {[key: string]: string | number | boolean}[] = []
+
+        if ("data" in formUse) {
+            formUse.data.campos.forEach((campo) => {
+                structure.push({
+                    key: campo.id.split("_")[0],
+                    label: campo.nombre,
+                    filterable: true,
+                })
+            })
+        }
+        return structure
+    }
 
     const handlePageChange = (type: TabsEvent, page: number) => {
         if (type === "assists") {
@@ -106,13 +121,13 @@ export default function EventDetailPage() {
         }
     }
 
-    const handleImportData = (type: TabsEvent, data: any[]) => {
+    const handleImportData = (type: TabsEvent, data: Assists[]) => {
         if (!event) return
 
         if (type === "assists") {
             setEvent({
                 ...event,
-                assists: [...event.assists, ...data],
+                assists: [...event.assists || [], ...data],
             })
             setAssistsFilter({})
             setAssistsPagination({
@@ -122,7 +137,7 @@ export default function EventDetailPage() {
         } else {
             setEvent({
                 ...event,
-                inscriptions: [...event.inscriptions, ...data],
+                inscriptions: [...event.inscriptions || [], ...data],
             })
             setInscriptionsFilter({})
             setInscriptionsPagination({
@@ -306,7 +321,7 @@ export default function EventDetailPage() {
                                     </CardContent>
                                 </Card>
 
-                                {event.assists?.length > 0 || event.inscriptions?.length > 0 ? (
+                                {event.assists?.length || 0 > 0 || event.inscriptions?.length || 0 > 0 ? (
                                     <>
                                         <FacultyFilter
                                             selectedFaculty={selectedFaculty}
@@ -390,7 +405,7 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type="assists"
                                             data={filteredAssists}
-                                            columns={AssistsColumns}
+                                            columns={getColumnsForm(event.formAssists) || []}
                                             pagination={assistsPagination}
                                             onPageChange={(page) => handlePageChange("assists", page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange("assists", rows)}
@@ -427,7 +442,7 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type="inscriptions"
                                             data={filteredInscriptions}
-                                            columns={InscriptionsColumns}
+                                            columns={getColumnsForm(event.formInscriptions) || {}}
                                             pagination={inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange("inscriptions", page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange("inscriptions", rows)}

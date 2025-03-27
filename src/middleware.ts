@@ -13,14 +13,14 @@ export function middleware(req: NextRequest) {
     }
 
     if(!eventFinded){
-        return NextResponse.redirect(new URL('/', req.url));
+        //return NextResponse.redirect(new URL('/', req.url));
     }
 
     if (url.pathname.startsWith('/forms')) {
         if (id && eventFinded) {
             return NextResponse.next();
         }
-        return NextResponse.redirect(new URL('/', req.url));
+        //return NextResponse.redirect(new URL('/', req.url));
     }
 
     return NextResponse.next();

@@ -37,8 +37,6 @@ export function FilterDialog({ open, onOpenChange, column, onFilter, onSort }: F
     onOpenChange(false)
   }
 
-  console.log(column)
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[300px]">

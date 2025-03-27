@@ -23,13 +23,18 @@ interface PropsInputBasic {
 const options = ["text", "number", "date", "time"]
 
 export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
-    let valueFormatted: string | { id: number; nombre: string; };
-    
+    let valueFormatted: string | { id: number; nombre: string; } = "";
+
     if(user){
-        const valueInit = formData[data.key.toLowerCase()]
-        const userData = user[data.key as keyof User] as (Form | { id: number; nombre: string })[];
-        valueFormatted = typeof valueInit == "object" ? userData?.find((d: { id: number }) => d.id == Number((valueInit as { data: { id: string} }).data.id)) : valueInit
+        const keyFormatted = data.key == "formAssists" || data.key == "formInscriptions" ? "form" : data.key
+        const valueInit = formData[data.key]
+        const userData = user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[];
+        valueFormatted = typeof valueInit == "object" 
+            ? userData?.find((d: { id: number }) => d.id == Number((valueInit as { data: { id: string } }).data.id)) || { id: 0, nombre: "" } 
+            : valueInit
     }
+
+    console.log(user)
 
     if (options.includes(data.form.type)) {
         return(
@@ -49,7 +54,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
             <InputPassword
             data={{
                 key: data.key,
-                value: formData[data.key.toLowerCase()] || "",
+                value: formData[data.key] || "",
                 label: data.form.name,
                 onChange: data.onChange as (e: React.ChangeEvent<HTMLInputElement>) => void,
             }}
@@ -66,7 +71,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
             required
         >
             <SelectTrigger>
-            <SelectValue placeholder={`Seleccione una ${data.form.name.toLowerCase()}`} />
+            <SelectValue placeholder={`Seleccione una ${data.form.name}`} />
             </SelectTrigger>
             <SelectContent>
             {data.form.options.length > 0 ? (

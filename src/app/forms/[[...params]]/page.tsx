@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
@@ -19,24 +20,24 @@ import {
   ChevronRight,
   ArrowLeft,
 } from "lucide-react"
-import { useSearchParams } from "next/navigation"
 import { Event } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
 import { User, useUserData } from "@/hooks/useUserData"
 import Link from "next/link"
+import { Form } from "@/types/Forms"
 
-const getFormById = (user: User, eventId: number): Event => {
-  const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId)
-  console.log(eventFind, user)
+const getEventId = (user: User, eventId: number): Event => {
+  const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId) as Event
   return eventFind
 }
 
 export default function FormsPage() {
-  const { user } = useUserData()
-  const searchParams = useSearchParams()
-  const formId = searchParams.get("id") as string
-  const formFound: Event = getFormById(user, Number(formId))
-  const [formulario] = useState<Event>(formFound)
+  const params = useParams();
+  const { params: dynamicParams } = params || {}; 
+  const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
+  const idForm: string | undefined = dynamicParams?.[1] ?? undefined
+  const {user} = useUserData()
+  const [event] = useState<Event>(getEventId(user, Number(idForm as string)))
   const [formValues, setFormValues] = useState<Record<string, (string | boolean)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -45,23 +46,25 @@ export default function FormsPage() {
   const [showPreview, setShowPreview] = useState(false)
   const [isActive] = useState<boolean>(true)
 
+  const form = event[`form${typeForm?.charAt(0).toUpperCase().concat(typeForm?.slice(1))}` as keyof Event] as { value: string, data: Form}
+
   const secciones = {
-    personal: formulario.form.data.campos.filter((campo) => campo.seccion === "personal") || [],
-    academica: formulario.form.data.campos.filter((campo) => campo.seccion === "academica") || [],
-    adicional: formulario.form.data.campos.filter((campo) => campo.seccion === "adicional") || [],
+      personal: form.data.campos.filter((campo) => campo.seccion === "personal") || [],
+      academica: form.data.campos.filter((campo) => campo.seccion === "academica") || [],
+      adicional: form.data.campos.filter((campo) => campo.seccion === "adicional") || [],
   }
 
   useEffect(() => {
     const initialValues: Record<string, (string | boolean)> = {}
-    formulario.form.data.campos.forEach((campo) => {
+    form.data.campos.forEach((campo) => {
       initialValues[campo.id] = campo.tipo === "checkbox" ? false : ""
     })
     setFormValues(initialValues)
-  }, [formulario])
+  }, [event])
 
   useEffect(() => {
-    const totalFields = formulario.form.data.campos.filter((campo) => campo.requerido).length
-    const completedFields = formulario.form.data.campos
+    const totalFields = form.data.campos.filter((campo) => campo.requerido).length
+    const completedFields = form.data.campos
       .filter((campo) => campo.requerido)
       .filter((campo) => {
         if (campo.tipo === "checkbox") return formValues[campo.id] === true
@@ -70,14 +73,14 @@ export default function FormsPage() {
 
     const calculatedProgress = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0
     setProgress(calculatedProgress)
-  }, [formValues, formulario.form.data.campos])
+  }, [formValues, form.data.campos])
 
   const validateForm = (sectionToValidate?: string) => {
     const newErrors: Record<string, string> = {}
 
     const camposAValidar = sectionToValidate
-      ? formulario.form.data.campos.filter((campo) => campo.seccion === sectionToValidate)
-      : formulario.form.data.campos
+      ? form.data.campos.filter((campo) => campo.seccion === sectionToValidate)
+      : form.data.campos
 
     camposAValidar.forEach((campo) => {
       if (campo.requerido) {
@@ -147,8 +150,8 @@ export default function FormsPage() {
                   </Button>
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
-                <h1 className="text-2xl font-bold">{formulario.nombre}</h1>
-                <p className="text-muted-foreground">{formulario.form.data.descripcion}</p>
+                <h1 className="text-2xl font-bold">{form.data.nombre}</h1>
+                <p className="text-muted-foreground">{form.data.descripcion}</p>
               </div>
             </div>
 
@@ -157,32 +160,32 @@ export default function FormsPage() {
                 <CardHeader className="pb-3 flex flex-col">
                   <div className="flex justify-between items-center gap-2">
                     <Badge variant="outline" className="mb-2 flex justify-center items-center text-center">
-                      {formulario?.organizador}
+                      {event?.organizador}
                     </Badge>
                     <Badge variant={isActive ? "secondary" : "default"} className="flex justify-center items-center text-center">
                       {isActive ? "Registro abierto" : "Registro cerrado"}
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl">{formulario?.nombre}</CardTitle>
-                  <CardDescription>{formulario.form.data.descripcion}</CardDescription>
+                  <CardTitle className="text-xl">{event?.nombre}</CardTitle>
+                  <CardDescription>{form.data.descripcion}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{formulario?.fecha}</span>
+                    <span className="text-sm">{event?.fecha}</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{formulario.hora}</span>
+                    <span className="text-sm">{event.hora}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{formulario.scenery.value.split("_")[0]}</span>
+                    <span className="text-sm">{event.scenery.value.split("_")[0]}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">
-                      {formulario?.cupos == -1 && formulario?.cupos ? "Cupos ilimitados" : formulario?.cupos + " Cupos"}
+                      {event?.cupos == -1 && event?.cupos ? "Cupos ilimitados" : event?.cupos + " Cupos"}
                     </span>
                   </div>
                 </CardContent>
@@ -228,8 +231,8 @@ export default function FormsPage() {
 
             <Card className="mb-8 print:shadow-none">
               <CardHeader className="flex flex-col">
-                <CardTitle>{formulario.nombre}</CardTitle>
-                <CardDescription>{formulario.form.data.descripcion}</CardDescription>
+                <CardTitle>{event.nombre}</CardTitle>
+                <CardDescription>{form.data.descripcion}</CardDescription>
               </CardHeader>
 
               {submitted ? (

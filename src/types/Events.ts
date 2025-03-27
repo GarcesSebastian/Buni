@@ -8,6 +8,10 @@ export interface TableEvent {
   isView: boolean
 }
 
+export interface Assists {
+  [key: string]: string | number; 
+}
+
 export interface Event {
   id: number
   nombre: string
@@ -24,12 +28,16 @@ export interface Event {
   fecha: string
   hora: string
   state: string
-  form: {
+  formAssists: {
     value: string,
     data: Form
-  }
-  assists: Array<Record<string, any>>
-  inscriptions: Array<Record<string, any>>
+  } | {}
+  formInscriptions: {
+    value: string,
+    data: Form
+  } | {}
+  assists?: Assists[]
+  inscriptions?: Assists[]
 }
 
 export interface ConfigEvent {
@@ -68,7 +76,12 @@ export interface ConfigEventForm {
     type: string
     options: { value: string, label: string, id: number }[] | []
   }
-  form: {
+  formAssists: {
+    name: string
+    type: string
+    options: { value: string, label: string, id: number }[] | []
+  }
+  formInscriptions: {
     name: string
     type: string
     options: { value: string, label: string, id: number }[] | []

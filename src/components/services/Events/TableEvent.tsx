@@ -8,19 +8,13 @@ import { FilterDialog } from "./FilterEvent"
 import { Pagination } from "@/components/services/Pagination"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
+import { Assists } from "@/types/Events"
 
 interface DataTableProps {
   type: TabsEvent
-  data: any[]
-  columns: {
-    key: string
-    label: string
-    filterable?: boolean
-  }[]
-  pagination: {
-    currentPage: number
-    rowsPerPage: number
-  }
+  data: Assists[]
+  columns: {[key: string]: string | number | boolean}[]
+  pagination: Record<string, number>
   onPageChange: (page: number) => void
   onRowsPerPageChange: (rows: number) => void
   onFilter: (column: string, value: string) => void
@@ -62,14 +56,14 @@ export function DataTable({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key} className="whitespace-nowrap">
+                <TableHead key={column.key as string} className="whitespace-nowrap">
                   <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
                     {column.label}
                   </span>
                   
                   {column.filterable && (
                     <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
-                      <Button variant="ghost" onClick={() => setActiveFilter(column.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
+                      <Button variant="ghost" onClick={() => setActiveFilter(column.key as string)} className="hover:bg-transparent !p-1 !h-fit align-middle">
                         <Filter className="h-4 w-4" />
                       </Button>
                     </span>
@@ -83,7 +77,7 @@ export function DataTable({
               paginatedData.map((item) => (
                 <TableRow key={item.id}>
                   {columns.map((column) => (
-                    <TableCell key={`${item.id}-${column.key}`}>{item[column.key]}</TableCell>
+                    <TableCell key={`${item.id}-${column.key}`}>{item[column.key as string]}</TableCell>
                   ))}
                 </TableRow>
               ))

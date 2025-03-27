@@ -8,7 +8,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, PieChart, Pie, Cell, 
 interface ChartSectionProps {
   title: string
   description?: string
-  data: Array<{ name: string; value: number }>
+  data: Array<{ name: string; value: string | number }>
   type: "pie" | "bar"
   colors: string[]
   totalLabel?: string
@@ -93,8 +93,8 @@ export function FacultyFilter({ selectedFaculty, faculties, onChange }: FacultyF
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="todas">Todas las facultades</SelectItem>
-          {faculties.map((facultad) => (
-            <SelectItem key={facultad} value={facultad}>
+          {faculties.map((facultad, index) => (
+            <SelectItem key={index} value={facultad}>
               {facultad}
             </SelectItem>
           ))}

@@ -49,7 +49,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
   const RestartFormData = () => {
     const rest: Record<string, string> = {};
     Object.keys(data.structureForm).forEach((key) => {
-      rest[key.toLowerCase()] = "";
+      rest[key] = "";
     });
     setFormData(rest);
   };
@@ -70,8 +70,9 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
         const dataSplit = updatedFormData[key].split("_")
         if (dataSplit.length <= 1) return;
 
+        const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
         const dataId = dataSplit[dataSplit.length - 1]
-        const findDataUser = (user[key as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+        const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
         if(findDataUser){
           updatedFormData[key] = {
             value: updatedFormData[key],
@@ -113,7 +114,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
                   formData={formData}
                   data={{
                     form: data.structureForm[value],
-                    onChange: (e) => setFormData({ ...formData, [value.toLowerCase()]: typeof e === 'string' ? e : e.target.value }),
+                    onChange: (e) => setFormData({ ...formData, [value]: typeof e === 'string' ? e : e.target.value }),
                     key: value,
                     index: index
                   }}

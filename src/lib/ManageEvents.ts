@@ -6,14 +6,14 @@ interface FilterProps{
     column: string
     value: string
     functions: {
-      setAssistsFilter: (value: any) => void
-      setAssistsPagination: (value: any) => void
-      setInscriptionsFilter: (value: any) => void
-      setInscriptionsPagination: (value: any) => void
+      setAssistsFilter: (value: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void
+      setAssistsPagination: (value: Record<string, number>) => void
+      setInscriptionsFilter: (value: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void
+      setInscriptionsPagination: (value: Record<string, number>) => void
     }
     data: {
-      assistsPagination: any,
-      inscriptionsPagination: any,
+      assistsPagination: Record<string, number>,
+      inscriptionsPagination: Record<string, number>,
     }
 }
 
@@ -35,31 +35,31 @@ export const getFaculties = (event: Event) => {
     if (!event?.assists) return []
 
     const faculties = new Set<string>()
-    event.assists.forEach((a) => faculties.add(a.faculty))
+    event.assists.forEach((a) => faculties.add(String(a.faculty)))
     return Array.from(faculties)
 }
 
 export const handleFilter = ({type, column, value, functions, data}: FilterProps) => {
     if (type === "assists") {
-    functions.setAssistsFilter((prev) => ({
+      functions.setAssistsFilter((prev: Record<string, string>) => ({
         ...prev,
         [column]: value,
-    }))
+      }))
 
-    functions.setAssistsPagination({
-        ...data.assistsPagination,
-        currentPage: 1,
-    })
+      functions.setAssistsPagination({
+          ...data.assistsPagination,
+          currentPage: 1,
+      })
     } else {
-    functions.setInscriptionsFilter((prev) => ({
-        ...prev,
-        [column]: value,
-    }))
+      functions.setInscriptionsFilter((prev: Record<string, string>) => ({
+          ...prev,
+          [column]: value,
+      }))
 
-    functions.setInscriptionsPagination({
-        ...data.inscriptionsPagination,
-        currentPage: 1,
-    })
+      functions.setInscriptionsPagination({
+          ...data.inscriptionsPagination,
+          currentPage: 1,
+      })
     }
 }
 
@@ -77,7 +77,7 @@ export const getDataForCharts = (event: Event, selectedFacultad: string) => {
         : event.inscriptions.filter((i) => i.facultad === selectedFacultad)
 
     const assistsPorCarrera = assistsFiltradas.reduce(
-      (acc, asistencia) => {
+      (acc: Record<string, number>, asistencia) => {
         const carrera = asistencia.carrera
         acc[carrera] = (acc[carrera] || 0) + 1
         return acc
@@ -86,7 +86,7 @@ export const getDataForCharts = (event: Event, selectedFacultad: string) => {
     )
 
     const inscriptionsPorCarrera = inscriptionsFiltradas.reduce(
-      (acc, inscripcion) => {
+      (acc: Record<string, number>, inscripcion) => {
         const carrera = inscripcion.carrera
         acc[carrera] = (acc[carrera] || 0) + 1
         return acc
