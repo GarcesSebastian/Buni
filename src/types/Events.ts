@@ -36,8 +36,8 @@ export interface Event {
     value: string,
     data: Form
   }
-  assists?: Assists[]
-  inscriptions?: Assists[]
+  assists: Assists[]
+  inscriptions: Assists[]
 }
 
 export interface ConfigEvent {

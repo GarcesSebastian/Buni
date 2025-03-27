@@ -19,7 +19,7 @@ export function TableGeneric({structure, structureForm, table}) {
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
-  const [qrType, setQrType] = useState("inscripcion")
+  const [qrType, setQrType] = useState("inscriptions")
   const [filters, setFilters] = useState({
     nombre: "",
     organizador: "",
@@ -224,11 +224,11 @@ export function TableGeneric({structure, structureForm, table}) {
                         {
                           table.isQR && (
                             <>
-                              <DropdownMenuItem onClick={() => handleQRClick(data, "inscripcion")}>
+                              <DropdownMenuItem onClick={() => handleQRClick(data, "inscriptions")}>
                                 <QrCode className="mr-2 h-4 w-4" />
                                 QR Inscripción
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleQRClick(data, "asistencia")}>
+                              <DropdownMenuItem onClick={() => handleQRClick(data, "assists")}>
                                 <QrCode className="mr-2 h-4 w-4" />
                                 QR Asistencia
                               </DropdownMenuItem>

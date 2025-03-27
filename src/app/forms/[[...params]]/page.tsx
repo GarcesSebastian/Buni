@@ -25,19 +25,21 @@ import Field from "@/components/services/Forms/Field"
 import { User, useUserData } from "@/hooks/useUserData"
 import Link from "next/link"
 import { Form } from "@/types/Forms"
+import { useWebSocket } from "@/hooks/server/useWebSocket"
 
-const getEventId = (user: User, eventId: number): Event => {
+const getEvent = (user: User, eventId: number): Event => {
   const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId) as Event
   return eventFind
 }
 
 export default function FormsPage() {
   const params = useParams();
+  const {user} = useUserData()
+  const { sendMessage } = useWebSocket()
   const { params: dynamicParams } = params || {}; 
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
-  const idForm: string | undefined = dynamicParams?.[1] ?? undefined
-  const {user} = useUserData()
-  const [event] = useState<Event>(getEventId(user, Number(idForm as string)))
+  const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
+  const [event] = useState<Event>( getEvent(user, Number(idEvent as string)))
   const [formValues, setFormValues] = useState<Record<string, (string | boolean)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -46,7 +48,8 @@ export default function FormsPage() {
   const [showPreview, setShowPreview] = useState(false)
   const [isActive] = useState<boolean>(true)
 
-  const form = event[`form${typeForm?.charAt(0).toUpperCase().concat(typeForm?.slice(1))}` as keyof Event] as { value: string, data: Form}
+  const keyForm = `form${typeForm?.charAt(0).toUpperCase().concat(typeForm?.slice(1))}`
+  const form = event[keyForm as keyof Event] as { value: string, data: Form}
 
   const secciones = {
       personal: form.data.campos.filter((campo) => campo.seccion === "personal") || [],
@@ -107,8 +110,27 @@ export default function FormsPage() {
     e.preventDefault()
 
     if (validateForm()) {
-      console.log("Formulario enviado:", formValues)
+      const newFormValues: Record<string, string | boolean> = {}
+      Object.keys(formValues).forEach((key) => {
+        newFormValues[key.split("_")[0]] = formValues[key]
+      })
+      
+      const event = user.events.find((evt) => evt.id == Number(idEvent))
+      const sanitizedFormValues: Record<string, string | number> = {};
+      Object.keys(newFormValues).forEach((key) => {
+        const value = newFormValues[key];
+        if (typeof value === "boolean") {
+          sanitizedFormValues[key] = value ? 1 : 0;
+        } else {
+          sanitizedFormValues[key] = value;
+        }
+      });
+
+      if (typeForm === "inscriptions") event?.inscriptions?.push(sanitizedFormValues);
+      if (typeForm === "assists") event?.assists?.push(sanitizedFormValues);
+
       setSubmitted(true)
+      sendMessage("UPDATE_DATA", {users: user})
     }
   }
 

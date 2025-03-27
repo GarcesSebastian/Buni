@@ -23,7 +23,7 @@ interface QRDialogProps {
 export function QRDialog({ open, onOpenChange, event, type }: QRDialogProps) {
   const qrRef = useRef<HTMLCanvasElement | null>(null)
 
-  const qrUrl = `${window.location.origin}/forms?id=${event.id}`
+  const qrUrl = `${window.location.origin}/forms/${type}/${event.id}`
 
   const handleDownload = () => {
     if (qrRef.current) {
