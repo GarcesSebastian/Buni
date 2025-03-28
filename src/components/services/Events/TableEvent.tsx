@@ -27,7 +27,6 @@ interface DataTableProps {
   onFilter: (column: string, value: string | string[]) => void
   onClearFilters: () => void
   hasActiveFilters?: boolean
-  formFields?: Record<string, { type: "texto" | "numero" | "email" | "seleccion"; options?: string[] }>
   form?: Form
 }
 
@@ -41,7 +40,6 @@ export function DataTable({
   onFilter,
   onClearFilters,
   hasActiveFilters = false,
-  formFields = {},
   form
 }: DataTableProps) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
