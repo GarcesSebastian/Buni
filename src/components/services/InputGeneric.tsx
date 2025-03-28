@@ -34,8 +34,6 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
             : valueInit
     }
 
-    console.log(user)
-
     if (options.includes(data.form.type)) {
         return(
         <>

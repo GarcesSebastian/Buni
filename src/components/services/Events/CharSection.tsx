@@ -15,20 +15,24 @@ interface ChartSectionProps {
   totalValue?: number
 }
 
-interface FacultyFilterProps {
-  selectedFaculty: string
-  faculties: string[]
-  onChange: (facultad: string) => void
-}
-
-export function ChartSection({ title, description, data, type, colors, totalLabel, totalValue }: ChartSectionProps) {
+export function ChartSection({ 
+  title, 
+  description, 
+  data, 
+  type, 
+  colors, 
+  totalLabel, 
+  totalValue
+}: ChartSectionProps) {
   const hasData = data && data.length > 0
 
   return (
     <Card>
-      <CardHeader className="flex flex-col">
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+      <CardHeader className="flex flex-col space-y-4">
+        <div>
+          <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
+          {description && <CardDescription className="text-sm">{description}</CardDescription>}
+        </div>
       </CardHeader>
       <CardContent>
         {hasData ? (
@@ -82,25 +86,3 @@ export function ChartSection({ title, description, data, type, colors, totalLabe
     </Card>
   )
 }
-
-export function FacultyFilter({ selectedFaculty, faculties, onChange }: FacultyFilterProps) {
-  return (
-    <div className="mb-4">
-      <Label htmlFor="facultad-filter">Filtrar por Facultad</Label>
-      <Select value={selectedFaculty} onValueChange={onChange}>
-        <SelectTrigger className="w-full sm:w-[250px] mt-1">
-          <SelectValue placeholder="Seleccionar facultad" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="todas">Todas las facultades</SelectItem>
-          {faculties.map((facultad, index) => (
-            <SelectItem key={index} value={facultad}>
-              {facultad}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
-}
-

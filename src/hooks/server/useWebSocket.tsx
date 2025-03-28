@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { handleUpdateUserData } from "@/controllers/WebSocketController";
 import { type User, useUserData } from "../useUserData";
 
@@ -17,6 +17,7 @@ interface UpdateUserDataPayLoad {
 
 export function useWebSocket() {
   const { setUser } = useUserData();
+  const [lastMessage, setLastMessage] = useState<WebSocketMessage<unknown> | null>(null);
 
   useEffect(() => {
     if (!WEBSOCKET_URL) {
@@ -33,6 +34,7 @@ export function useWebSocket() {
         try {
           const data: WebSocketMessage<unknown> = JSON.parse(event.data);
           console.log("Mensaje recibido:", data);
+          setLastMessage(data);
 
           switch (data.type) {
             case "UPDATE_DATA":
@@ -64,5 +66,5 @@ export function useWebSocket() {
     }
   };
 
-  return { sendMessage };
+  return { sendMessage, lastMessage };
 }

@@ -7,6 +7,14 @@ export interface Form {
   descripcion: string
   campos: FormField[]
   state: boolean
+  value?: string
+  data?: {
+    id: number
+    nombre: string
+    descripcion: string
+    campos: FormField[]
+    state: boolean
+  }
 }
 
 export interface FormField {

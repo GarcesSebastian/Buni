@@ -23,7 +23,6 @@ import { Button } from "@/components/ui/Button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import Section from "@/components/ui/Section"
 
-// Datos de ejemplo
 const participantesPorEscuela = [
   { name: "Sistemas", value: 45, color: "#0088FE" },
   { name: "Psicología", value: 30, color: "#00C49F" },

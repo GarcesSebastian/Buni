@@ -9,6 +9,7 @@ import { Pagination } from "@/components/services/Pagination"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
+import { Form } from "@/types/Forms"
 
 interface DataTableProps {
   type: TabsEvent
@@ -17,9 +18,11 @@ interface DataTableProps {
   pagination: Record<string, number>
   onPageChange: (page: number) => void
   onRowsPerPageChange: (rows: number) => void
-  onFilter: (column: string, value: string) => void
+  onFilter: (column: string, value: string | string[]) => void
   onClearFilters: () => void
   hasActiveFilters?: boolean
+  formFields?: Record<string, { type: "texto" | "numero" | "email" | "seleccion"; options?: string[] }>
+  form?: Form
 }
 
 export function DataTable({
@@ -32,6 +35,8 @@ export function DataTable({
   onFilter,
   onClearFilters,
   hasActiveFilters = false,
+  formFields = {},
+  form
 }: DataTableProps) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
 
@@ -39,6 +44,14 @@ export function DataTable({
     (pagination.currentPage - 1) * pagination.rowsPerPage,
     pagination.currentPage * pagination.rowsPerPage,
   )
+
+  const getFieldType = (columnKey: string): "texto" | "numero" | "email" | "seleccion" => {
+    return formFields[columnKey]?.type || "texto"
+  }
+
+  const getFieldOptions = (columnKey: string) => {
+    return formFields[columnKey]?.options || []
+  }
 
   return (
     <div className="space-y-4">
@@ -56,7 +69,7 @@ export function DataTable({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key as string} className="whitespace-nowrap">
+                <TableHead key={`header-${column.key}`} className="whitespace-nowrap">
                   <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
                     {column.label}
                   </span>
@@ -74,10 +87,12 @@ export function DataTable({
           </TableHeader>
           <TableBody>
             {paginatedData.length > 0 ? (
-              paginatedData.map((item) => (
-                <TableRow key={item.id}>
+              paginatedData.map((item, index) => (
+                <TableRow key={`row-${item.id || index}`}>
                   {columns.map((column) => (
-                    <TableCell key={`${item.id}-${column.key}`}>{item[column.key as string]}</TableCell>
+                    <TableCell key={`cell-${item.id || index}-${column.key}`}>
+                      {item[column.key as string]}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
@@ -119,6 +134,7 @@ export function DataTable({
           }}
           onClose={() => setActiveFilter(null)}
           open={activeFilter !== null}
+          form={form}
         />
       )}
     </div>

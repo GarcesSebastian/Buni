@@ -16,7 +16,6 @@ export function UserNav() {
   const router = useRouter()
 
   const handleSignOut = () => {
-    // Aquí iría la lógica de cierre de sesión real
     router.push("/")
   }
 

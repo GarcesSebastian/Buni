@@ -15,6 +15,9 @@ import { type User, useUserData } from "@/hooks/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { GeneralStructureForm } from "@/types/Table"
 import { InputBasic } from "../../InputGeneric"
+import { dataExtra } from "@/config/Data"
+
+type DataExtraValue = string | number | boolean | null | DataExtraValue[] | { [key: string]: DataExtraValue }
 
 interface Props {
   data: {
@@ -30,7 +33,7 @@ interface Props {
 }
 
 interface UpdatedFormData {
-  [key: string]: string | number | { value: string; data: Form | { id: number; nombre: string } };
+  [key: string]: string | number | { value: string; data: Form | { id: number; nombre: string } } | DataExtraValue;
 }
 
 export function CreateEventDialog({ data, open, onOpenChange }: Props) {
@@ -68,6 +71,14 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
         }
       }
     })
+    
+    const tableKey = data.table.key as keyof typeof dataExtra;
+    const extraData = dataExtra[tableKey];
+    if (extraData) {
+      Object.entries(extraData).forEach(([key, value]) => {
+        updatedFormData[key] = value as DataExtraValue;
+      });
+    }
 
     const key = data.table.key as keyof User;
     const newData = {

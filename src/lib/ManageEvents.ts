@@ -17,7 +17,6 @@ interface FilterProps{
     }
 }
 
-// Colores para gráficas
 export const COLORS = [
   "#0088FE",
   "#00C49F",
@@ -30,14 +29,6 @@ export const COLORS = [
   "#92400E",
   "#1E3A8A",
 ];
-
-export const getFaculties = (event: Event) => {
-    if (!event?.assists) return []
-
-    const faculties = new Set<string>()
-    event.assists.forEach((a) => faculties.add(String(a.faculty)))
-    return Array.from(faculties)
-}
 
 export const handleFilter = ({type, column, value, functions, data}: FilterProps) => {
     if (type === "assists") {
@@ -63,7 +54,12 @@ export const handleFilter = ({type, column, value, functions, data}: FilterProps
     }
 }
 
-export const getDataForCharts = (event: Event, selectedFacultad: string) => {
+export const getDataForCharts = (
+    event: Event, 
+    selectedFacultad: string, 
+    assistsDistributionField: string = "carrera",
+    inscriptionsDistributionField: string = "carrera"
+) => {
     if (!event?.assists || !event?.inscriptions) return { assistData: [], inscriptionData: [] }
 
     const assistsFiltradas =
@@ -76,30 +72,30 @@ export const getDataForCharts = (event: Event, selectedFacultad: string) => {
         ? event.inscriptions
         : event.inscriptions.filter((i) => i.facultad === selectedFacultad)
 
-    const assistsPorCarrera = assistsFiltradas.reduce(
+    const assistsPorCampo = assistsFiltradas.reduce(
       (acc: Record<string, number>, asistencia) => {
-        const carrera = asistencia.carrera
-        acc[carrera] = (acc[carrera] || 0) + 1
+        const valor = asistencia[assistsDistributionField]
+        acc[valor] = (acc[valor] || 0) + 1
         return acc
       },
       {} as Record<string, number>,
     )
 
-    const inscriptionsPorCarrera = inscriptionsFiltradas.reduce(
+    const inscriptionsPorCampo = inscriptionsFiltradas.reduce(
       (acc: Record<string, number>, inscripcion) => {
-        const carrera = inscripcion.carrera
-        acc[carrera] = (acc[carrera] || 0) + 1
+        const valor = inscripcion[inscriptionsDistributionField]
+        acc[valor] = (acc[valor] || 0) + 1
         return acc
       },
       {} as Record<string, number>,
     )
 
-    const assistData = Object.entries(assistsPorCarrera).map(([name, value]) => ({
+    const assistData = Object.entries(assistsPorCampo).map(([name, value]) => ({
       name,
       value,
     }))
 
-    const inscriptionData = Object.entries(inscriptionsPorCarrera).map(([name, value]) => ({
+    const inscriptionData = Object.entries(inscriptionsPorCampo).map(([name, value]) => ({
       name,
       value,
     }))

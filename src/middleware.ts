@@ -1,26 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function middleware(req: NextRequest) {
-    const url = new URL(req.url);
-    const id = url.searchParams.get('id');
+export async function middleware(req: NextRequest) {
+    const path = req.nextUrl.pathname;
+    const params = path.split('/').filter(Boolean);
 
-    const storedEventsCookie = req.cookies.get("events")?.value;
-    const storedEvents = storedEventsCookie ? JSON.parse(storedEventsCookie) : undefined;
-    const eventFinded = storedEvents.find((evt:{id: string}) => evt.id == id);
+    if (params[0] === 'forms') {
+        const formType = params[1];
+        const eventId = params[2];
 
-    if(id == "1"){
-        return NextResponse.next();
-    }
-
-    if(!eventFinded){
-        //return NextResponse.redirect(new URL('/', req.url));
-    }
-
-    if (url.pathname.startsWith('/forms')) {
-        if (id && eventFinded) {
-            return NextResponse.next();
+        if (!eventId || !formType) {
+            return NextResponse.redirect(new URL('/events', req.url));
         }
-        //return NextResponse.redirect(new URL('/', req.url));
+
+        try {
+            const eventsCookie = req.cookies.get('events')?.value;
+            if (!eventsCookie) {
+                return NextResponse.redirect(new URL('/events', req.url));
+            }
+
+            const events = JSON.parse(eventsCookie);
+            const event = events.find((e: any) => e.id === Number(eventId));
+
+            if (!event) {
+                return NextResponse.redirect(new URL('/events', req.url));
+            }
+
+            const formKey = `form${formType.charAt(0).toUpperCase() + formType.slice(1)}`;
+            if (!event[formKey]) {
+                return NextResponse.redirect(new URL(`/events/${eventId}`, req.url));
+            }
+
+            return NextResponse.next();
+        } catch (error) {
+            console.error('Error en middleware:', error);
+            return NextResponse.redirect(new URL('/events', req.url));
+        }
     }
 
     return NextResponse.next();
