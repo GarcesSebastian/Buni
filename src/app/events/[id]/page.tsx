@@ -19,10 +19,10 @@ import { useUserData } from "@/hooks/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
 
 import { COLORS } from "@/lib/ManageEvents"
-import { getDataForCharts, handleFilter } from "@/lib/ManageEvents"
+import { getDataForCharts } from "@/lib/ManageEvents"
 import { Alert, AlertTitle } from "@/components/ui/Alert"
 import { Form } from "@/types/Forms"
-import { eventosEjemplo, generateSampleData } from "./data"
+import { generateSampleData } from "./data"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
