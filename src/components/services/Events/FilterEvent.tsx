@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog"
 import { ScrollArea } from "@/components/ui/ScrollArea"
-import { Form } from "@/types/Forms"
+import { Form, FormField } from "@/types/Forms"
 
 interface FilterDialogProps {
   column: string | null
@@ -41,11 +41,11 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
     )
   }
 
-  const getFieldInfo = () => {
+  const getFieldInfo = (): FormField | null => {
     if (!column || !form) return null
 
     const fieldKey = column.split("_")[0]
-    return form.campos.find(campo => campo.id.split("_")[0] === fieldKey)
+    return form.campos.find(campo => campo.id.split("_")[0] === fieldKey) || null
   }
 
   const fieldInfo = getFieldInfo()

@@ -5,10 +5,15 @@ import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, PieChart, Pie, Cell, Tooltip, Legend } from "recharts"
 
+interface ChartData {
+  name: string;
+  value: string | number;
+}
+
 interface ChartSectionProps {
   title: string
   description?: string
-  data: Array<{ name: string; value: string | number }>
+  data: ChartData[]
   type: "pie" | "bar"
   colors: string[]
   totalLabel?: string

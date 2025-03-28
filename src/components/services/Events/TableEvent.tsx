@@ -11,10 +11,16 @@ import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
 import { Form } from "@/types/Forms"
 
+interface Column {
+  key: string;
+  label: string;
+  filterable?: boolean;
+}
+
 interface DataTableProps {
   type: TabsEvent
   data: Assists[]
-  columns: {[key: string]: string | number | boolean}[]
+  columns: Column[]
   pagination: Record<string, number>
   onPageChange: (page: number) => void
   onRowsPerPageChange: (rows: number) => void
@@ -49,7 +55,7 @@ export function DataTable({
     return formFields[columnKey]?.type || "texto"
   }
 
-  const getFieldOptions = (columnKey: string) => {
+  const getFieldOptions = (columnKey: string): string[] => {
     return formFields[columnKey]?.options || []
   }
 
@@ -76,7 +82,7 @@ export function DataTable({
                   
                   {column.filterable && (
                     <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
-                      <Button variant="ghost" onClick={() => setActiveFilter(column.key as string)} className="hover:bg-transparent !p-1 !h-fit align-middle">
+                      <Button variant="ghost" onClick={() => setActiveFilter(column.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
                         <Filter className="h-4 w-4" />
                       </Button>
                     </span>
@@ -91,7 +97,7 @@ export function DataTable({
                 <TableRow key={`row-${item.id || index}`}>
                   {columns.map((column) => (
                     <TableCell key={`cell-${item.id || index}-${column.key}`}>
-                      {item[column.key as string]}
+                      {item[column.key as keyof Assists]}
                     </TableCell>
                   ))}
                 </TableRow>

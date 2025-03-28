@@ -540,7 +540,15 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type={currentTab}
                                             data={currentTab === "assists" ? filteredAssists : filteredInscriptions}
-                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists) : getColumnsForm(event.formInscriptions)}
+                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists).map(col => ({
+                                                key: String(col.id),
+                                                label: String(col.nombre),
+                                                filterable: true
+                                            })) : getColumnsForm(event.formInscriptions).map(col => ({
+                                                key: String(col.id),
+                                                label: String(col.nombre),
+                                                filterable: true
+                                            }))}
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
@@ -614,7 +622,15 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type={currentTab}
                                             data={currentTab === "assists" ? filteredAssists : filteredInscriptions}
-                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists) : getColumnsForm(event.formInscriptions)}
+                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists).map(col => ({
+                                                key: String(col.id),
+                                                label: String(col.nombre),
+                                                filterable: true
+                                            })) : getColumnsForm(event.formInscriptions).map(col => ({
+                                                key: String(col.id),
+                                                label: String(col.nombre),
+                                                filterable: true
+                                            }))}
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
