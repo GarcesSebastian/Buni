@@ -145,18 +145,6 @@ export default function EventDetailPage() {
         }
     }
 
-    const getFormFields = (form: Form) => {
-        const fields: Record<string, { type: "texto" | "numero" | "email" | "seleccion"; options?: string[] }> = {}
-        form.data?.campos.forEach(campo => {
-            const key = campo.id.split("_")[0]
-            fields[key] = {
-                type: campo.tipo as "texto" | "numero" | "email" | "seleccion",
-                options: campo.opciones
-            }
-        })
-        return fields
-    }
-
     const handlePageChange = (type: TabsEvent, page: number) => {
         if (type === "assists") {
             setAssistsPagination({

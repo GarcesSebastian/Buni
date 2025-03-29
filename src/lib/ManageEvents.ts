@@ -1,22 +1,6 @@
 import { TabsEvent } from "@/app/events/[id]/page"
 import { Event } from "@/types/Events"
 
-interface FilterProps{
-    type: TabsEvent
-    column: string
-    value: string
-    functions: {
-      setAssistsFilter: (value: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void
-      setAssistsPagination: (value: Record<string, number>) => void
-      setInscriptionsFilter: (value: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void
-      setInscriptionsPagination: (value: Record<string, number>) => void
-    }
-    data: {
-      assistsPagination: Record<string, number>,
-      inscriptionsPagination: Record<string, number>,
-    }
-}
-
 export const COLORS = [
   "#0088FE",
   "#00C49F",
