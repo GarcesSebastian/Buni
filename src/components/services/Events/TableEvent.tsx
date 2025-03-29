@@ -45,14 +45,6 @@ export function DataTable({
     pagination.currentPage * pagination.rowsPerPage,
   )
 
-  const getFieldType = (columnKey: string): "texto" | "numero" | "email" | "seleccion" => {
-    return formFields[columnKey]?.type || "texto"
-  }
-
-  const getFieldOptions = (columnKey: string) => {
-    return formFields[columnKey]?.options || []
-  }
-
   return (
     <div className="space-y-4">
       {hasActiveFilters && (

@@ -1,24 +1,39 @@
 import type { Event } from "@/types/Events";
 import { Form } from "@/types/Forms";
+import type { typeFieldForm } from "@/types/Forms";
 
 export const SAMPLE_DATA_COUNT = {
     INSCRIPTIONS: 100,
     ASSISTS: 60
 };
 
+interface Campo {
+    id: string;
+    nombre: string;
+    tipo: typeFieldForm;
+    requerido: boolean;
+    seccion?: string;
+    opciones?: string[];
+}
+
+interface Registro {
+    [key: string]: string;
+}
+
 export function generateSampleData(count: number, form: Form) {
-    const data = [];
+    const data: Registro[] = [];
     const campos = form.data?.campos || form.campos;
 
-    const getRandomValue = (campo: any) => {
+    const getRandomValue = (campo: Campo): string => {
         switch (campo.tipo) {
             case "seleccion":
-                return campo.opciones[Math.floor(Math.random() * campo.opciones.length)];
+                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
             case "email":
                 return `estudiante${Math.floor(Math.random() * 1000)}@universidad.edu.co`;
             case "numero":
                 return Math.floor(Math.random() * 1000000).toString();
             case "texto":
+            case "fecha":
                 return `Estudiante ${Math.floor(Math.random() * 1000)}`;
             default:
                 return "";
@@ -26,7 +41,7 @@ export function generateSampleData(count: number, form: Form) {
     };
 
     for (let i = 0; i < count; i++) {
-        const registro: Record<string, any> = {};
+        const registro: Registro = {};
         campos.forEach((campo) => {
             const key = campo.id.split("_")[0];
             registro[key] = getRandomValue(campo);

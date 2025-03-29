@@ -18,12 +18,11 @@ import { ChartSection } from "@/components/services/Events/CharSection"
 import { useUserData } from "@/hooks/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
 
-import { COLORS } from "@/lib/ManageEvents"
-import { getDataForCharts, handleFilter } from "@/lib/ManageEvents"
+import { getDataForCharts, COLORS } from "@/lib/ManageEvents"
 import { Alert, AlertTitle } from "@/components/ui/Alert"
 import { Form } from "@/types/Forms"
-import { eventosEjemplo, generateSampleData } from "./data"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { generateSampleData } from "./data"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 

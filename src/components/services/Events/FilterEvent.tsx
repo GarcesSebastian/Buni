@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog"
-import { ScrollArea } from "@/components/ui/ScrollArea"
-import { Form } from "@/types/Forms"
+  import { Form } from "@/types/Forms"
 
 interface FilterDialogProps {
   column: string | null

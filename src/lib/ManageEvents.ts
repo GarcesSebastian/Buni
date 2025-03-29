@@ -30,30 +30,6 @@ export const COLORS = [
   "#1E3A8A",
 ];
 
-export const handleFilter = ({type, column, value, functions, data}: FilterProps) => {
-    if (type === "assists") {
-      functions.setAssistsFilter((prev: Record<string, string>) => ({
-        ...prev,
-        [column]: value,
-      }))
-
-      functions.setAssistsPagination({
-          ...data.assistsPagination,
-          currentPage: 1,
-      })
-    } else {
-      functions.setInscriptionsFilter((prev: Record<string, string>) => ({
-          ...prev,
-          [column]: value,
-      }))
-
-      functions.setInscriptionsPagination({
-          ...data.inscriptionsPagination,
-          currentPage: 1,
-      })
-    }
-}
-
 export const getDataForCharts = (
     event: Event, 
     selectedFacultad: string, 
