@@ -42,12 +42,10 @@ export default function FormsPage() {
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
 
-  // Validaciones iniciales
-  if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
-    return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
-  }
+  // Definir keyForm antes de los hooks
+  const keyForm = typeForm ? `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}` : '';
 
-  const keyForm = `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}`
+  // Todos los hooks deben estar al inicio, antes de cualquier validación
   const [event, setEvent] = useState<Event | undefined>(undefined)
   const [formValues, setFormValues] = useState<Record<string, (string | boolean)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -57,6 +55,7 @@ export default function FormsPage() {
   const [showPreview, setShowPreview] = useState(false)
   const [isActive] = useState<boolean>(true)
 
+  // Efectos
   useEffect(() => {
     if (user && idEvent) {
       const eventFound = getEvent(user, Number(idEvent))
@@ -65,7 +64,7 @@ export default function FormsPage() {
   }, [user, idEvent])
 
   useEffect(() => {
-    if (event) {
+    if (event && keyForm) {
       const form = event[keyForm as keyof Event] as { value: string, data: Form}
       if (form) {
         const initialValues: Record<string, (string | boolean)> = {}
@@ -78,7 +77,7 @@ export default function FormsPage() {
   }, [event, keyForm])
 
   useEffect(() => {
-    if (event) {
+    if (event && keyForm) {
       const form = event[keyForm as keyof Event] as { value: string, data: Form}
       if (form) {
         const totalFields = form.data.campos.filter((campo) => campo.requerido).length
@@ -94,6 +93,11 @@ export default function FormsPage() {
       }
     }
   }, [formValues, event, keyForm])
+
+  // Validaciones después de los hooks
+  if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
+    return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
+  }
 
   if (!event) {
     return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
