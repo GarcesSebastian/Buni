@@ -56,13 +56,13 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
     const updatedFormData: UpdatedFormData = { ...formData, id };
     
     Object.keys(updatedFormData).forEach((key: string) => {
-      if (typeof updatedFormData[key] === "string"){
+      if (typeof updatedFormData[key] == "string"){
         const dataSplit = updatedFormData[key].split("_")
         if (dataSplit.length <= 1) return;
 
-        const keyFormatted = key === "formAssists" || key === "formInscriptions" ? "form" : key
+        const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
         const dataId = dataSplit[dataSplit.length - 1]
-        const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id === Number(dataId))
+        const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
         if(findDataUser){
           updatedFormData[key] = {
             value: updatedFormData[key] as string,
@@ -83,7 +83,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
     const key = data.table.key as keyof User;
     const newData = {
       ...user,
-      [key]: [...(user[key] as unknown[]), updatedFormData],
+      [key]: [...user[key], updatedFormData],
     }
 
     if (Array.isArray(user[key])) {

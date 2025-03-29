@@ -25,6 +25,7 @@ export interface States {
 const UserDataContext = createContext<{
     user: User;
     setUser: (data: User) => void;
+    updateEvent: (eventId: number, updatedEvent: Event) => void;
     states: States,
     setStates: (data: States) => void;
 } | null>(null);
@@ -374,6 +375,15 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         setUserState(data);
     };
 
+    const updateEvent = (eventId: number, updatedEvent: Event) => {
+        setUserState(prevUser => ({
+            ...prevUser,
+            events: prevUser.events.map(event => 
+                event.id === eventId ? updatedEvent : event
+            )
+        }));
+    };
+
     useEffect(() => {
         Cookies.set("events", JSON.stringify(user.events), { expires: 7 });
         Cookies.set("faculty", JSON.stringify(user.faculty), { expires: 7 });
@@ -383,13 +393,19 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     }, [user]);
     
     return (
-        <UserDataContext.Provider value={{ user, setUser, states, setStates }}>
+        <UserDataContext.Provider value={{ user, setUser, updateEvent, states, setStates }}>
             {children}
         </UserDataContext.Provider>
     );
 };
 
-export const useUserData = (): { user: User; setUser: (data: User) => void, states: States, setStates: (data: States) => void } => {
+export const useUserData = (): { 
+    user: User; 
+    setUser: (data: User) => void;
+    updateEvent: (eventId: number, updatedEvent: Event) => void;
+    states: States;
+    setStates: (data: States) => void;
+} => {
     const context = useContext(UserDataContext);
     if (!context) {
         throw new Error("useUserData debe estar dentro de un UserDataProvider");

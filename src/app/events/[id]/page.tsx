@@ -19,10 +19,10 @@ import { useUserData } from "@/hooks/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
 
 import { COLORS } from "@/lib/ManageEvents"
-import { getDataForCharts } from "@/lib/ManageEvents"
+import { getDataForCharts, handleFilter } from "@/lib/ManageEvents"
 import { Alert, AlertTitle } from "@/components/ui/Alert"
 import { Form } from "@/types/Forms"
-import { generateSampleData } from "./data"
+import { eventosEjemplo, generateSampleData } from "./data"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
@@ -31,7 +31,7 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    const {user, setUser} = useUserData()
+    const {user, setUser, updateEvent} = useUserData()
     const { sendMessage, lastMessage } = useWebSocket()
     const [event, setEvent] = useState<Event | null>(null)
     const [loading, setLoading] = useState(true)
@@ -117,12 +117,12 @@ export default function EventDetailPage() {
             const updatedUser = (lastMessage.payload as { users: User }).users;
             const updatedEvent = updatedUser.events.find((e: Event) => e.id === Number(eventId));
             
-            if (updatedEvent) {
+            if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
                 setEvent(updatedEvent);
-                setUser(updatedUser);
+                updateEvent(Number(eventId), updatedEvent);
             }
         }
-    }, [lastMessage, eventId, setUser]);
+    }, [lastMessage, eventId, updateEvent, event]);
 
     const handleFilter = (column: string, value: string | string[], type: TabsEvent) => {
         if (type === "assists") {
@@ -144,6 +144,18 @@ export default function EventDetailPage() {
         } else {
             setInscriptionsFilters({})
         }
+    }
+
+    const getFormFields = (form: Form) => {
+        const fields: Record<string, { type: "texto" | "numero" | "email" | "seleccion"; options?: string[] }> = {}
+        form.data?.campos.forEach(campo => {
+            const key = campo.id.split("_")[0]
+            fields[key] = {
+                type: campo.tipo as "texto" | "numero" | "email" | "seleccion",
+                options: campo.opciones
+            }
+        })
+        return fields
     }
 
     const handlePageChange = (type: TabsEvent, page: number) => {
@@ -294,11 +306,11 @@ export default function EventDetailPage() {
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Link href="/events" className="sm:mr-4">
-                                    <Button variant="outline" size="icon" className="flex justify-center items-center">
-                                        <ArrowLeft className="h-4 w-4" />
-                                    </Button>
-                                </Link>
-                                <div>
+                                <Button variant="outline" size="icon" className="flex justify-center items-center">
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                            <div>
                                     <h1 className="text-xl sm:text-2xl font-bold">{event.nombre}</h1>
                                     <p className="text-sm sm:text-base text-muted-foreground">{event.organizador}</p>
                                 </div>
@@ -434,8 +446,8 @@ export default function EventDetailPage() {
                                                                 <div>
                                                                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">Asistencias</p>
                                                                     <h3 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                                                                        {event.assists?.length || 0}
-                                                                    </h3>
+                                                        {event.assists?.length || 0}
+                                                    </h3>
                                                                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                                                                         {event.inscriptions?.length 
                                                                             ? `${Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)}% de los inscritos asistieron`
@@ -469,7 +481,7 @@ export default function EventDetailPage() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                </div>
 
                                             <div className="mt-4 sm:mt-6 md:mt-8 bg-background p-3 sm:p-4 md:p-6 rounded-xl border">
                                                 <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
@@ -516,33 +528,29 @@ export default function EventDetailPage() {
                                         </div>
 
                                         <div className="mt-4 sm:mt-0">
-                                            <DataImportExport
-                                                type="assists"
-                                                data={filteredAssists}
-                                                fileName={`asistencias_evento_${event.id}`}
-                                                onImport={(data) => handleImportData("assists", data)}
-                                            />
+                                        <DataImportExport
+                                            type="assists"
+                                            data={filteredAssists}
+                                            fileName={`asistencias_evento_${event.id}`}
+                                            onImport={(data) => handleImportData("assists", data)}
+                                        />
                                         </div>
                                     </CardHeader>
                                     <CardContent className="p-4 sm:p-6">
                                         <DataTable
                                             type={currentTab}
                                             data={currentTab === "assists" ? filteredAssists : filteredInscriptions}
-                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists).map(col => ({
-                                                key: String(col.id),
-                                                label: String(col.nombre),
-                                                filterable: true
-                                            })) : getColumnsForm(event.formInscriptions).map(col => ({
-                                                key: String(col.id),
-                                                label: String(col.nombre),
-                                                filterable: true
-                                            }))}
+                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists) : getColumnsForm(event.formInscriptions)}
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
                                             onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
                                             hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
+                                            formFields={currentTab === "assists" 
+                                                ? getFormFields(event.formAssists.data)
+                                                : getFormFields(event.formInscriptions.data)
+                                            }
                                             form={currentTab === "assists" ? event.formAssists.data : event.formInscriptions.data}
                                         />
                                     </CardContent>
@@ -594,33 +602,29 @@ export default function EventDetailPage() {
                                             <CardDescription className="text-sm">Lista de personas inscritas al evento</CardDescription>
                                         </div>
                                         <div className="mt-4 sm:mt-0">
-                                            <DataImportExport
-                                                type="inscriptions"
-                                                data={filteredInscriptions}
-                                                fileName={`inscripciones_evento_${event.id}`}
-                                                onImport={(data) => handleImportData("inscriptions", data)}
-                                            />
+                                        <DataImportExport
+                                            type="inscriptions"
+                                            data={filteredInscriptions}
+                                            fileName={`inscripciones_evento_${event.id}`}
+                                            onImport={(data) => handleImportData("inscriptions", data)}
+                                        />
                                         </div>
                                     </CardHeader>
                                     <CardContent className="p-4 sm:p-6">
                                         <DataTable
                                             type={currentTab}
                                             data={currentTab === "assists" ? filteredAssists : filteredInscriptions}
-                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists).map(col => ({
-                                                key: String(col.id),
-                                                label: String(col.nombre),
-                                                filterable: true
-                                            })) : getColumnsForm(event.formInscriptions).map(col => ({
-                                                key: String(col.id),
-                                                label: String(col.nombre),
-                                                filterable: true
-                                            }))}
+                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists) : getColumnsForm(event.formInscriptions)}
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
                                             onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
                                             hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
+                                            formFields={currentTab === "assists" 
+                                                ? getFormFields(event.formAssists.data)
+                                                : getFormFields(event.formInscriptions.data)
+                                            }
                                             form={currentTab === "assists" ? event.formAssists.data : event.formInscriptions.data}
                                         />
                                     </CardContent>

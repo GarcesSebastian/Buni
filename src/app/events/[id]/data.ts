@@ -10,10 +10,10 @@ export function generateSampleData(count: number, form: Form) {
     const data = [];
     const campos = form.data?.campos || form.campos;
 
-    const getRandomValue = (campo: { tipo: string; opciones?: string[] }) => {
+    const getRandomValue = (campo: any) => {
         switch (campo.tipo) {
             case "seleccion":
-                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
+                return campo.opciones[Math.floor(Math.random() * campo.opciones.length)];
             case "email":
                 return `estudiante${Math.floor(Math.random() * 1000)}@universidad.edu.co`;
             case "numero":
@@ -26,7 +26,7 @@ export function generateSampleData(count: number, form: Form) {
     };
 
     for (let i = 0; i < count; i++) {
-        const registro: Record<string, string> = {};
+        const registro: Record<string, any> = {};
         campos.forEach((campo) => {
             const key = campo.id.split("_")[0];
             registro[key] = getRandomValue(campo);

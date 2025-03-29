@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Event } from '@/types/Events';
 
 export async function middleware(req: NextRequest) {
     const path = req.nextUrl.pathname;
@@ -19,15 +18,15 @@ export async function middleware(req: NextRequest) {
                 return NextResponse.redirect(new URL('/events', req.url));
             }
 
-            const events = JSON.parse(eventsCookie) as Event[];
-            const event = events.find((e: Event) => e.id === Number(eventId));
+            const events = JSON.parse(eventsCookie);
+            const event = events.find((e: any) => e.id === Number(eventId));
 
             if (!event) {
                 return NextResponse.redirect(new URL('/events', req.url));
             }
 
             const formKey = `form${formType.charAt(0).toUpperCase() + formType.slice(1)}`;
-            if (!event[formKey as keyof Event]) {
+            if (!event[formKey]) {
                 return NextResponse.redirect(new URL(`/events/${eventId}`, req.url));
             }
 
