@@ -546,10 +546,6 @@ export default function EventDetailPage() {
                                             onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
                                             hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
-                                            formFields={currentTab === "assists" 
-                                                ? getFormFields(event.formAssists.data)
-                                                : getFormFields(event.formInscriptions.data)
-                                            }
                                             form={currentTab === "assists" ? event.formAssists.data : event.formInscriptions.data}
                                         />
                                     </CardContent>
@@ -620,10 +616,6 @@ export default function EventDetailPage() {
                                             onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
                                             hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
-                                            formFields={currentTab === "assists" 
-                                                ? getFormFields(event.formAssists.data)
-                                                : getFormFields(event.formInscriptions.data)
-                                            }
                                             form={currentTab === "assists" ? event.formAssists.data : event.formInscriptions.data}
                                         />
                                     </CardContent>
