@@ -1,4 +1,3 @@
-import { TabsEvent } from "@/app/events/[id]/page"
 import { Event } from "@/types/Events"
 
 export const COLORS = [
