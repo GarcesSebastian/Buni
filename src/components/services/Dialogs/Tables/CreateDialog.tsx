@@ -11,11 +11,14 @@ import {
   DialogTitle,
 } from "@/components/ui/Dialog"
 import { Form } from "@/types/Forms"
-import { type User, useUserData } from "@/hooks/useUserData"
+import { type User, useUserData } from "@/hooks/auth/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { GeneralStructureForm } from "@/types/Table"
 import { InputBasic } from "../../InputGeneric"
 import { dataExtra } from "@/config/Data"
+import { useRouter } from "next/navigation"
+import Cookies from "js-cookie"
+import { useNotification } from "@/components/ui/Notification"
 
 type DataExtraValue = string | number | boolean | null | DataExtraValue[] | { [key: string]: DataExtraValue }
 
@@ -38,8 +41,11 @@ interface UpdatedFormData {
 
 export function CreateEventDialog({ data, open, onOpenChange }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
-  const { sendMessage } = useWebSocket()
+  const { sendMessage } = useWebSocket();
+  const router = useRouter();
+  const { showNotification } = useNotification();
 
   const RestartFormData = () => {
     const rest: Record<string, string> = {};
@@ -49,50 +55,129 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
     setFormData(rest);
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const keyData = user[data.table.key as keyof typeof user];
-    const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
-    const updatedFormData: UpdatedFormData = { ...formData, id };
-    
-    Object.keys(updatedFormData).forEach((key: string) => {
-      if (typeof updatedFormData[key] == "string"){
-        const dataSplit = updatedFormData[key].split("_")
-        if (dataSplit.length <= 1) return;
+    setIsSubmitting(true);
 
-        const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
-        const dataId = dataSplit[dataSplit.length - 1]
-        const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
-        if(findDataUser){
-          updatedFormData[key] = {
-            value: updatedFormData[key] as string,
-            data: findDataUser
+    try {
+      const token = Cookies.get('token');
+      
+      if (!token) {
+        throw new Error('No hay token de autenticación');
+      }
+
+      if (data.table.key === 'users') {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/create`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.nombre,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role
+          }),
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            Cookies.remove('token');
+            router.push('/');
+            return;
+          }
+          const errorData = await response.json();
+          showNotification({
+            title: "Error",
+            message: errorData.error || 'Error al crear el usuario',
+            type: "error"
+          });
+          return;
+        }
+
+        const usersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/get`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        });
+
+        if (!usersResponse.ok) {
+          throw new Error('Error al obtener la lista de usuarios');
+        }
+
+        const users = await usersResponse.json();
+        setUser({
+          ...user,
+          users
+        });
+
+        showNotification({
+          title: "Éxito",
+          message: "Usuario creado exitosamente",
+          type: "success"
+        });
+
+        RestartFormData();
+        onOpenChange(false);
+        return;
+      }
+
+      const keyData = user[data.table.key as keyof typeof user];
+      const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
+      const updatedFormData: UpdatedFormData = { ...formData, id };
+      
+      Object.keys(updatedFormData).forEach((key: string) => {
+        if (typeof updatedFormData[key] == "string"){
+          const dataSplit = updatedFormData[key].split("_")
+          if (dataSplit.length <= 1) return;
+
+          const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
+          const dataId = dataSplit[dataSplit.length - 1]
+          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+          if(findDataUser){
+            updatedFormData[key] = {
+              value: updatedFormData[key] as string,
+              data: findDataUser
+            }
           }
         }
+      })
+      
+      const tableKey = data.table.key as keyof typeof dataExtra;
+      const extraData = dataExtra[tableKey];
+      if (extraData) {
+        Object.entries(extraData).forEach(([key, value]) => {
+          updatedFormData[key] = value as DataExtraValue;
+        });
       }
-    })
-    
-    const tableKey = data.table.key as keyof typeof dataExtra;
-    const extraData = dataExtra[tableKey];
-    if (extraData) {
-      Object.entries(extraData).forEach(([key, value]) => {
-        updatedFormData[key] = value as DataExtraValue;
+
+      const key = data.table.key as keyof User;
+      const newData = {
+        ...user,
+        [key]: [...user[key], updatedFormData],
+      }
+
+      if (Array.isArray(user[key])) {
+        setUser(newData);
+      }      
+
+      RestartFormData();
+      onOpenChange(false);
+      sendMessage("UPDATE_DATA", {users: newData})
+    } catch (error) {
+      console.error('Error:', error);
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : 'Error inesperado',
+        type: "error"
       });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const key = data.table.key as keyof User;
-    const newData = {
-      ...user,
-      [key]: [...user[key], updatedFormData],
-    }
-
-    if (Array.isArray(user[key])) {
-      setUser(newData);
-    }      
-
-    RestartFormData();
-    onOpenChange(false);
-    sendMessage("UPDATE_DATA", {users: newData})
   };
 
   useEffect(RestartFormData, [data.structureForm]);
@@ -102,8 +187,8 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Crear dato para {data.table.name}</DialogTitle>
-            <DialogDescription>Complete los datos para {data.table.name}</DialogDescription>
+            <DialogTitle>Crear {data.table.name}</DialogTitle>
+            <DialogDescription>Complete los datos para crear un nuevo {data.table.name}</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4">
             {Object.keys(data.structureForm).map((value, index) => (
@@ -129,7 +214,12 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
+            <Button 
+              type="submit" 
+              className="bg-primary hover:bg-primary/90"
+              loading={isSubmitting}
+              loadingText="Creando..."
+            >
               Crear
             </Button>
           </DialogFooter>

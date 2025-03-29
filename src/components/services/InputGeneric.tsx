@@ -2,16 +2,25 @@ import { InputPassword } from "@/components/ui/InputPassword"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
-import { User } from "@/hooks/useUserData";
+import { User } from "@/hooks/auth/useUserData";
 import { Form } from "@/types/Forms";
 
 interface PropsInputBasic {
     data: {
         form: {
-        name: string;
-        options: { value: string; label: string; id?: number }[];
-        type: "text" | "number" | "date" | "time" | "selection" | "password" | "email";
-        };
+            name: string;
+            type: "text" | "number" | "date" | "time" | "selection" | "password" | "email";
+            required?: boolean;
+            options?: { value: string; label: string; id?: number }[];
+        } & (
+            | {
+                type: "selection";
+                options: { value: string; label: string; id?: number }[];
+            }
+            | {
+                type: "text" | "number" | "date" | "time" | "password" | "email";
+            }
+        );
         key: string;
         index: number;
         onChange: (e: React.ChangeEvent<HTMLInputElement> | string) => void;
@@ -20,7 +29,7 @@ interface PropsInputBasic {
     user?: User
 }
 
-const options = ["text", "number", "date", "time"]
+const options = ["text", "number", "date", "time", "email"]
 
 export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     let valueFormatted: string | { id: number; nombre: string; } = "";
@@ -43,7 +52,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
             type={data.form.type}
             value={valueFormatted as string}
             onChange={data.onChange}
-            required
+            required={data.form.required}
             />
         </>
         )
@@ -66,7 +75,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
             key={data.index}
             value={typeof valueFormatted == "object" ? valueFormatted.nombre + "_" + valueFormatted.id : valueFormatted}
             onValueChange={data.onChange}
-            required
+            required={data.form.required}
         >
             <SelectTrigger>
             <SelectValue placeholder={`Seleccione una ${data.form.name}`} />

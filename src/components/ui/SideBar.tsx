@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { ChevronDown, ChevronRight, Menu } from "lucide-react"
 import { ConfigSideBar } from "@/config/components/SideBar"
-import { useUserData } from "@/hooks/useUserData"
+import { useUserData } from "@/hooks/auth/useUserData"
 
 export function SideBar() {
   const { states, setStates } = useUserData()

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { handleUpdateUserData } from "@/controllers/WebSocketController";
-import { type User, useUserData } from "../useUserData";
+import { type User, useUserData } from "../auth/useUserData";
 
 const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
 

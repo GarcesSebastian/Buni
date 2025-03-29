@@ -4,7 +4,7 @@ import { Inter } from "next/font/google"
 import "../styles/globals.css"
 
 import { TopNav } from "@/components/ui/TopNav"
-import { UserDataProvider } from "@/hooks/useUserData"
+import { UserDataProvider } from "@/hooks/auth/useUserData"
 import { NotificationProvider } from "@/components/ui/Notification"
 import { Suspense } from "react"
 

@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
-import { User, useUserData } from "@/hooks/useUserData"
+import { User, useUserData } from "@/hooks/auth/useUserData"
 import { GeneralStructureForm } from "@/types/Table"
 import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { Form } from "@/types/Forms"

@@ -3,15 +3,6 @@ export interface TableUser {
   key: string;
 }
 
-export interface User {
-  id: number;
-  nombre: string;
-  email: string;
-  role: string;
-  password?: string;
-  state: string;
-}
-
 export interface ConfigUser {
   key: string;
   value: string;
@@ -20,24 +11,31 @@ export interface ConfigUser {
 export interface ConfigFormUser {
   nombre: {
     name: string;
-    type: string;
+    type: "text";
+    required?: boolean;
   };
   email: {
     name: string;
-    type: string;
+    type: "email";
+    required?: boolean;
   };
   password: {
     name: string;
-    type: string;
+    type: "password";
+    required?: boolean;
   };
-  role: {
+  roles: {
     name: string;
-    type: string;
-    options: { value: string; label: string }[];
+    type: "selection";
+    required?: boolean;
+    options: { value: string; label: string; id?: number }[];
   };
-  state: {
-    name: string;
-    type: string;
-    options: { value: string; label: string }[];
-  };
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  roles: string;
+  created_at: string;
 }

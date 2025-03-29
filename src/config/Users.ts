@@ -9,38 +9,30 @@ export const configUser: ConfigUser[] = [
     { key: "id", value: "ID" },
     { key: "nombre", value: "Nombre" },
     { key: "email", value: "Correo" },
-    { key: "password", value: "Contraseña" },
     { key: "role", value: "Rol" },
-    { key: "state", value: "Estados" },
+    { key: "created_at", value: "Fecha de Creación" },
 ]
 
 export const configFormUser: ConfigFormUser = {
     nombre: {
         name: "Nombre",
-        type: "text"
+        type: "text",
+        required: true
     },
     email: {
         name: "Correo",
-        type: "text"
+        type: "email",
+        required: true
     },
     password: {
         name: "Contraseña",
-        type: "password"
+        type: "password",
+        required: true
     },
-    role: {
+    roles: {
         name: "Rol",
         type: "selection",
-        options: [
-            { value: "admin", label: "Administrador" },
-            { value: "user", label: "Usuario" }
-        ]
-    },
-    state: {
-        name: "Estado",
-        type: "selection",
-        options: [
-            { value: "true", label: "Activo" },
-            { value: "false", label: "Inactivo" }
-        ]
+        required: true,
+        options: []
     }
 }

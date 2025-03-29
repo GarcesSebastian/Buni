@@ -10,7 +10,7 @@ import { QRDialog } from "./Dialogs/QRDialog"
 import { FilterDialog } from "./Dialogs/Tables/FilterDialog"
 import { EditDialog } from "./Dialogs/Tables/EditDialog"
 import { DeleteDialog } from "./Dialogs/Tables/DeleteDialog"
-import { useUserData } from "@/hooks/useUserData"
+import { useUserData } from "@/hooks/auth/useUserData"
 import { useRouter } from "next/navigation"
 
 export function TableGeneric({structure, structureForm, table}) {
@@ -116,6 +116,8 @@ export function TableGeneric({structure, structureForm, table}) {
   useEffect(() => {
     Object.keys(structureForm).forEach(value => {
       const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
+
+      console.log(user, valueFormatted, structureForm[value].type, user[valueFormatted])
       if(structureForm[value].type == "selection" && user[valueFormatted]){
 
         const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {

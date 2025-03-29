@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
@@ -22,24 +22,32 @@ import {
 } from "lucide-react"
 import { Event } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
-import { User, useUserData } from "@/hooks/useUserData"
+import { User, useUserData } from "@/hooks/auth/useUserData"
 import Link from "next/link"
 import { Form } from "@/types/Forms"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
+import { ErrorMessage } from "@/components/ui/ErrorMessage"
+import { ERROR_MESSAGES } from "@/constants/errorMessages"
 
-const getEvent = (user: User, eventId: number): Event => {
-  const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId) as Event
+const getEvent = (user: User, eventId: number): Event | undefined => {
+  const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId)
   return eventFind
 }
 
 export default function FormsPage() {
   const params = useParams();
+  const router = useRouter();
   const {user} = useUserData()
   const { sendMessage } = useWebSocket()
   const { params: dynamicParams } = params || {}; 
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
-  const [event] = useState<Event>( getEvent(user, Number(idEvent as string)))
+
+  if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
+    return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
+  }
+
+  const [event] = useState<Event | undefined>(getEvent(user, Number(idEvent)))
   const [formValues, setFormValues] = useState<Record<string, (string | boolean)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -48,8 +56,16 @@ export default function FormsPage() {
   const [showPreview, setShowPreview] = useState(false)
   const [isActive] = useState<boolean>(true)
 
-  const keyForm = `form${typeForm?.charAt(0).toUpperCase().concat(typeForm?.slice(1))}`
+  if (!event) {
+    return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
+  }
+
+  const keyForm = `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}`
   const form = event[keyForm as keyof Event] as { value: string, data: Form}
+
+  if (!form) {
+    return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
+  }
 
   const secciones = {
       personal: form.data.campos.filter((campo) => campo.seccion === "personal") || [],

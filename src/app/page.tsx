@@ -4,24 +4,33 @@ import type React from "react"
 
 import Image from "next/image"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert"
+import { useAuth } from "@/hooks/auth/useAuth"
 
 export default function SignInPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    router.push("/dashboard")
+    setIsLoading(true)
+
+    try {
+      await login(username, password)
+    } catch (error: any) {
+      setError(error.message || "Error al iniciar sesión")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -33,20 +42,21 @@ export default function SignInPage() {
           </div>
           <CardTitle className="text-2xl font-bold text-center">Iniciar sesión</CardTitle>
           <CardDescription className="text-center">
-            Ingrese sus credenciales para acceder al sistema de la Universidad del Sinú
+            Ingrese sus credenciales para acceder al sistema
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Usuario</Label>
+              <Label htmlFor="username">Correo electrónico</Label>
               <Input
                 id="username"
-                type="text"
-                placeholder="Ingrese su nombre de usuario"
+                type="email"
+                placeholder="Ingrese su correo electrónico"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -58,23 +68,33 @@ export default function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             {error && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full justify-center bg-primary hover:bg-primary/90">
-              Iniciar sesión
+            <Button 
+              type="submit" 
+              className="w-full justify-center bg-primary hover:bg-primary/90"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                "Iniciar sesión"
+              )}
             </Button>
           </form>
         </CardContent>
         <CardFooter>
           <p className="text-sm text-center text-gray-600 mt-4 p-6 pt-0 w-full">
-            Este es un sistema de acceso restringido. Si necesita ayuda, contacte al administrador.
+            Si necesita ayuda, contacte al administrador del sistema.
           </p>
         </CardFooter>
       </Card>

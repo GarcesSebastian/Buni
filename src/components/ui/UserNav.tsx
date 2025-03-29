@@ -10,14 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/Dropdown"
 import { UserCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/auth/useAuth"
 
 export function UserNav() {
-  const router = useRouter()
-
-  const handleSignOut = () => {
-    router.push("/")
-  }
+  const { user, logout } = useAuth();
 
   return (
     <DropdownMenu>
@@ -30,12 +26,12 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Administrador</p>
-            <p className="text-xs leading-none text-muted-foreground">admin@universidad.edu.co</p>
+            <p className="text-sm font-medium leading-none">{user?.name}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>Cerrar sesión</DropdownMenuItem>
+        <DropdownMenuItem onClick={logout}>Cerrar sesión</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -9,13 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { AlertTriangle, ArrowLeft, Calendar, Clock, Loader, MapPin, Users } from "lucide-react"
 import Link from "next/link"
 import type { Assists, Event } from "@/types/Events"
-import type { User } from "@/hooks/useUserData"
+import type { User } from "@/hooks/auth/useUserData"
 
 import { DataTable } from "@/components/services/Events/TableEvent"
 import { DataImportExport } from "@/components/services/Events/ManageExcel"
 import { ChartSection } from "@/components/services/Events/CharSection"
 
-import { useUserData } from "@/hooks/useUserData"
+import { useUserData } from "@/hooks/auth/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
 
 import { getDataForCharts, COLORS } from "@/lib/ManageEvents"
@@ -452,7 +452,7 @@ export default function EventDetailPage() {
                                                             <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
                                                                 {event.inscriptions?.length 
                                                                     ? Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)
-                                                                    : 0}
+                                                                    : 0}%
                                                             </div>
                                                             <p className="text-xs sm:text-sm text-muted-foreground">Tasa de Asistencia</p>
                                                             <div className="mt-3 sm:mt-4 w-full max-w-[150px] sm:max-w-[200px] h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">

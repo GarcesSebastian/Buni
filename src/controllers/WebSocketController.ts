@@ -1,4 +1,4 @@
-import { User } from "@/hooks/useUserData";
+import { User } from "@/hooks/auth/useUserData";
 
 interface UpdateUserDataPayLoad {
   users: User;

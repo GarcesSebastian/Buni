@@ -39,7 +39,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { useUserData } from "@/hooks/useUserData"
+import { useUserData } from "@/hooks/auth/useUserData"
 import { configField } from "@/config/Forms"
 import type { Form, FormField } from "@/types/Forms"
 import { useWebSocket } from "@/hooks/server/useWebSocket"

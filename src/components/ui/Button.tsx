@@ -1,8 +1,11 @@
 import * as React from "react"
+import { Loader2 } from "lucide-react"
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
   size?: "default" | "sm" | "lg" | "icon"
+  loading?: boolean
+  loadingText?: string
 }
 
 const buttonVariants = ({ variant = "default", size = "default", className = "" }: ButtonProps) => {
@@ -28,9 +31,27 @@ const buttonVariants = ({ variant = "default", size = "default", className = "" 
   return `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, ...props }, ref) => {
-  return <button className={buttonVariants({ variant, size, className })} ref={ref} {...props} />
-})
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, loading, loadingText, children, ...props }, ref) => {
+    return (
+      <button 
+        className={buttonVariants({ variant, size, className })} 
+        ref={ref} 
+        disabled={loading || props.disabled}
+        {...props}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {loadingText || children}
+          </>
+        ) : (
+          children
+        )}
+      </button>
+    )
+  }
+)
 Button.displayName = "Button"
 
 export { Button, buttonVariants }
