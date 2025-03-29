@@ -3,11 +3,9 @@
 import Image from "next/image"
 import { UserNav } from "./UserNav"
 import { usePathname } from "next/navigation"
-import { useAuth } from "@/hooks/auth/useAuth"
 
 export function TopNav() {
   const pathname = usePathname()
-  const { user } = useAuth();
   const isAuthenticated = pathname !== "/"
 
   return (

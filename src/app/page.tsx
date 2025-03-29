@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
-import { AlertCircle, Loader2 } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert"
+import { Loader2 } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/Alert"
 import { useAuth } from "@/hooks/auth/useAuth"
 
 export default function SignInPage() {

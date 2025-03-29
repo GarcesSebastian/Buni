@@ -1,12 +1,12 @@
 "use client"
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import Section from "@/components/ui/Section"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Alert, AlertDescription } from "@/components/ui/Alert"
-import { Loader2, Plus, MoreVertical, Edit, Trash } from "lucide-react"
+import { Loader2, Plus, MoreVertical, Edit, Trash, Loader } from "lucide-react"
 import Cookies from "js-cookie"
 import { useRouter } from "next/navigation"
 import { useNotification } from "@/components/ui/Notification"
@@ -84,11 +84,7 @@ export default function RolesPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
-        fetchRoles();
-    }, []);
-
-    const fetchRoles = async () => {
+    const fetchRoles = useCallback(async () => {
         try {
             const token = Cookies.get('token');
             
@@ -122,7 +118,11 @@ export default function RolesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
+
+    useEffect(() => {
+        fetchRoles();
+    }, [fetchRoles]);
 
     const handleCreateRole = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -306,7 +306,7 @@ export default function RolesPage() {
         });
         setSelectedPermissions(
             Object.entries(role.permissions)
-                .filter(([_, value]) => value)
+                .filter(([, value]) => value)
                 .map(([key]) => key)
         );
         setIsEditing(true);
@@ -326,11 +326,16 @@ export default function RolesPage() {
 
     if (loading) {
         return (
-            <Section>
-                <div className="flex items-center justify-center h-full">
-                    <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="h-full">
+                <div className="h-full bg-gray-100">
+                    <main className="h-full overflow-y-auto p-4 md:p-8">
+                        <div className="flex flex-col items-center justify-center py-10">
+                            <Loader className="h-10 w-10 animate-spin text-primary" />
+                            <p className="mt-3 text-lg font-semibold text-primary">Buscando roles...</p>
+                        </div>
+                    </main>
                 </div>
-            </Section>
+            </div>
         );
     }
 
@@ -381,7 +386,7 @@ export default function RolesPage() {
                                             <TableCell>
                                                 <div className="flex flex-wrap gap-2">
                                                     {Object.entries(role.permissions)
-                                                        .filter(([_, value]) => value)
+                                                        .filter(([, value]) => value)
                                                         .map(([permission]) => (
                                                             <button
                                                                 key={permission}
@@ -523,7 +528,7 @@ export default function RolesPage() {
                     <DialogHeader>
                         <DialogTitle>Eliminar Rol</DialogTitle>
                         <DialogDescription>
-                            ¿Estás seguro de que deseas eliminar el rol "{roleToDelete?.name}"? Esta acción no se puede deshacer.
+                            ¿Estás seguro de que deseas eliminar el rol &quot;{roleToDelete?.name}&quot;? Esta acción no se puede deshacer.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

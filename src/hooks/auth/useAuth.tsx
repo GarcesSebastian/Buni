@@ -2,11 +2,20 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
+type PermissionKey = 
+    | 'create_event' | 'edit_event' | 'delete_event' | 'view_event'
+    | 'create_user' | 'edit_user' | 'delete_user' | 'view_user'
+    | 'create_role' | 'edit_role' | 'delete_role' | 'view_role'
+    | 'create_faculty' | 'edit_faculty' | 'delete_faculty' | 'view_faculty'
+    | 'create_scenery' | 'edit_scenery' | 'delete_scenery' | 'view_scenery';
+
 interface User {
+    id: number;
     name: string;
     email: string;
     role: string;
-    permissions?: any;
+    permissions: Record<PermissionKey, boolean>;
+    created_at: string;
 }
 
 interface AuthState {
@@ -27,7 +36,7 @@ export function useAuth() {
         const userCookie = Cookies.get('user');
         if (userCookie) {
             try {
-                const user = JSON.parse(userCookie);
+                const user = JSON.parse(userCookie) as User;
                 setAuthState({ user, isAuthenticated: true, isLoading: false });
             } catch (error) {
                 console.error('Error parsing user cookie:', error);
@@ -59,7 +68,7 @@ export function useAuth() {
             Cookies.set('user', JSON.stringify(data.user), { expires: 1 });
 
             setAuthState({
-                user: data.user,
+                user: data.user as User,
                 isAuthenticated: true,
                 isLoading: false
             });
