@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
@@ -36,18 +36,19 @@ const getEvent = (user: User, eventId: number): Event | undefined => {
 
 export default function FormsPage() {
   const params = useParams();
-  const router = useRouter();
   const {user} = useUserData()
   const { sendMessage } = useWebSocket()
   const { params: dynamicParams } = params || {}; 
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
 
+  // Validaciones iniciales
   if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
     return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
   }
 
-  const [event] = useState<Event | undefined>(getEvent(user, Number(idEvent)))
+  const keyForm = `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}`
+  const [event, setEvent] = useState<Event | undefined>(undefined)
   const [formValues, setFormValues] = useState<Record<string, (string | boolean)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -56,11 +57,48 @@ export default function FormsPage() {
   const [showPreview, setShowPreview] = useState(false)
   const [isActive] = useState<boolean>(true)
 
+  useEffect(() => {
+    if (user && idEvent) {
+      const eventFound = getEvent(user, Number(idEvent))
+      setEvent(eventFound)
+    }
+  }, [user, idEvent])
+
+  useEffect(() => {
+    if (event) {
+      const form = event[keyForm as keyof Event] as { value: string, data: Form}
+      if (form) {
+        const initialValues: Record<string, (string | boolean)> = {}
+        form.data.campos.forEach((campo) => {
+          initialValues[campo.id] = campo.tipo === "checkbox" ? false : ""
+        })
+        setFormValues(initialValues)
+      }
+    }
+  }, [event, keyForm])
+
+  useEffect(() => {
+    if (event) {
+      const form = event[keyForm as keyof Event] as { value: string, data: Form}
+      if (form) {
+        const totalFields = form.data.campos.filter((campo) => campo.requerido).length
+        const completedFields = form.data.campos
+          .filter((campo) => campo.requerido)
+          .filter((campo) => {
+            if (campo.tipo === "checkbox") return formValues[campo.id] === true
+            return formValues[campo.id] && formValues[campo.id].toString().trim() !== ""
+          }).length
+
+        const calculatedProgress = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0
+        setProgress(calculatedProgress)
+      }
+    }
+  }, [formValues, event, keyForm])
+
   if (!event) {
     return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
   }
 
-  const keyForm = `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}`
   const form = event[keyForm as keyof Event] as { value: string, data: Form}
 
   if (!form) {
@@ -72,27 +110,6 @@ export default function FormsPage() {
       academica: form.data.campos.filter((campo) => campo.seccion === "academica") || [],
       adicional: form.data.campos.filter((campo) => campo.seccion === "adicional") || [],
   }
-
-  useEffect(() => {
-    const initialValues: Record<string, (string | boolean)> = {}
-    form.data.campos.forEach((campo) => {
-      initialValues[campo.id] = campo.tipo === "checkbox" ? false : ""
-    })
-    setFormValues(initialValues)
-  }, [event])
-
-  useEffect(() => {
-    const totalFields = form.data.campos.filter((campo) => campo.requerido).length
-    const completedFields = form.data.campos
-      .filter((campo) => campo.requerido)
-      .filter((campo) => {
-        if (campo.tipo === "checkbox") return formValues[campo.id] === true
-        return formValues[campo.id] && formValues[campo.id].toString().trim() !== ""
-      }).length
-
-    const calculatedProgress = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0
-    setProgress(calculatedProgress)
-  }, [formValues, form.data.campos])
 
   const validateForm = (sectionToValidate?: string) => {
     const newErrors: Record<string, string> = {}

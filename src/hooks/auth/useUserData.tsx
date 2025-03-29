@@ -64,37 +64,37 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                 }
             },
             "formAssists": {
-                "value": "form_1",
+                "value": "Formulario de Asistencia_1743070732515",
                 "data": {
-                    "id": 1,
+                    "id": 1743070732515,
                     "nombre": "Formulario de Asistencia",
-                    "descripcion": "Formulario para registrar asistencia",
+                    "descripcion": "Diligenciar este formulario para la asistencia al evento",
                     "campos": [
                         {
-                            "id": "nombre_1743070812197",
+                            "id": "nombre_1743070756636",
                             "nombre": "Nombre",
                             "tipo": "texto",
-                            "requerido": true,
+                            "requerido": false,
                             "seccion": "personal"
                         },
                         {
-                            "id": "apellido_1743070812197",
+                            "id": "apellido_1743070766625",
                             "nombre": "Apellido",
                             "tipo": "texto",
-                            "requerido": true,
+                            "requerido": false,
                             "seccion": "personal"
                         },
                         {
-                            "id": "email_1743070812197",
-                            "nombre": "Email",
+                            "id": "correo_electronico_1743070781306",
+                            "nombre": "Correo Electronico",
                             "tipo": "email",
-                            "requerido": true,
+                            "requerido": false,
                             "seccion": "personal"
                         },
                         {
-                            "id": "carrera_1743070812197",
-                            "nombre": "Carrera",
-                            "tipo": "texto",
+                            "id": "codigo_estudiantil_1743070800404",
+                            "nombre": "Codigo Estudiantil",
+                            "tipo": "numero",
                             "requerido": false,
                             "seccion": "academica"
                         },
@@ -134,46 +134,39 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                 }
             },
             "formInscriptions": {
-                "value": "form_2",
+                "value": "Formulario de Inscripcion_1742291990002",
                 "data": {
-                    "id": 2,
+                    "id": 1742291990002,
                     "nombre": "Formulario de Inscripcion",
-                    "descripcion": "Formulario para registrar inscripcion",
+                    "descripcion": "Por favor ingrese los datos correctamente",
                     "campos": [
                         {
-                            "id": "nombre_1743070812197",
+                            "id": "nombre_1742294172313",
                             "nombre": "Nombre",
                             "tipo": "texto",
-                            "requerido": true,
-                            "seccion": "personal"
-                        },
-                        {
-                            "id": "apellido_1743070812197",
-                            "nombre": "Apellido",
-                            "tipo": "texto",
-                            "requerido": true,
-                            "seccion": "personal"
-                        },
-                        {
-                            "id": "email_1743070812197",
-                            "nombre": "Email",
-                            "tipo": "email",
-                            "requerido": true,
-                            "seccion": "personal"
-                        },
-                        {
-                            "id": "carrera_1743070812197",
-                            "nombre": "Carrera",
-                            "tipo": "texto",
                             "requerido": false,
-                            "seccion": "academica"
+                            "seccion": "personal"
                         },
                         {
-                            "id": "semestre_1743070812197",
+                            "id": "correo_electronico_1742294180033",
+                            "nombre": "Correo Electronico",
+                            "tipo": "email",
+                            "requerido": false,
+                            "seccion": "personal"
+                        },
+                        {
+                            "id": "numero_telefonico_1742294190390",
+                            "nombre": "Numero Telefonico",
+                            "tipo": "numero",
+                            "requerido": false,
+                            "seccion": "personal"
+                        },
+                        {
+                            "id": "semestre_1742294209768",
                             "nombre": "Semestre",
                             "tipo": "seleccion",
                             "requerido": false,
-                            "seccion": "academica",
+                            "seccion": "personal",
                             "opciones": [
                                 "I",
                                 "II",
@@ -188,16 +181,35 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             ]
                         },
                         {
-                            "id": "valoracion_del_evento_1743070837876",
-                            "nombre": "Valoracion del Evento",
+                            "id": "facultad_1742294260490",
+                            "nombre": "Facultad",
+                            "tipo": "seleccion",
+                            "requerido": false,
+                            "seccion": "personal",
+                            "opciones": [
+                                "Ingenieria",
+                                " Gastronomia",
+                                " Psicologia"
+                            ]
+                        },
+                        {
+                            "id": "estrato_1742294281482",
+                            "nombre": "Estrato",
                             "tipo": "seleccion",
                             "requerido": false,
                             "seccion": "adicional",
                             "opciones": [
-                                "Bueno",
-                                " Buenisimo",
-                                " Super"
+                                "Bajo",
+                                " Medio",
+                                " Alto"
                             ]
+                        },
+                        {
+                            "id": "direccion_1742294297671",
+                            "nombre": "Direccion",
+                            "tipo": "texto",
+                            "requerido": false,
+                            "seccion": "adicional"
                         }
                     ],
                     "state": true
@@ -208,9 +220,162 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
             "state": "true",
             "id": 1
         }],
-        faculty: [],
-        scenery: [],
-        form: [],
+        faculty: [{
+            "nombre": "Ingenieria",
+            "state": "true",
+            "id": 1
+        }],
+        scenery: [{
+            "id": 1,
+            "nombre": "Auditorio Santillana",
+            "state": "true"
+        }],
+        form: [{
+            "id": 1742291990002,
+            "nombre": "Formulario de Inscripcion",
+            "descripcion": "Por favor ingrese los datos correctamente",
+            "campos": [
+                {
+                    "id": "nombre_1742294172313",
+                    "nombre": "Nombre",
+                    "tipo": "texto",
+                    "requerido": false,
+                    "seccion": "personal"
+                },
+                {
+                    "id": "correo_electronico_1742294180033",
+                    "nombre": "Correo Electronico",
+                    "tipo": "email",
+                    "requerido": false,
+                    "seccion": "personal"
+                },
+                {
+                    "id": "numero_telefonico_1742294190390",
+                    "nombre": "Numero Telefonico",
+                    "tipo": "numero",
+                    "requerido": false,
+                    "seccion": "personal"
+                },
+                {
+                    "id": "semestre_1742294209768",
+                    "nombre": "Semestre",
+                    "tipo": "seleccion",
+                    "requerido": false,
+                    "seccion": "personal",
+                    "opciones": [
+                        "I",
+                        "II",
+                        "III",
+                        "IV",
+                        "V",
+                        "VI",
+                        "VII",
+                        "VIII",
+                        "IX",
+                        "X"
+                    ]
+                },
+                {
+                    "id": "facultad_1742294260490",
+                    "nombre": "Facultad",
+                    "tipo": "seleccion",
+                    "requerido": false,
+                    "seccion": "personal",
+                    "opciones": [
+                        "Ingenieria",
+                        " Gastronomia",
+                        " Psicologia"
+                    ]
+                },
+                {
+                    "id": "estrato_1742294281482",
+                    "nombre": "Estrato",
+                    "tipo": "seleccion",
+                    "requerido": false,
+                    "seccion": "adicional",
+                    "opciones": [
+                        "Bajo",
+                        " Medio",
+                        " Alto"
+                    ]
+                },
+                {
+                    "id": "direccion_1742294297671",
+                    "nombre": "Direccion",
+                    "tipo": "texto",
+                    "requerido": false,
+                    "seccion": "adicional"
+                }
+            ],
+            "state": true
+        },
+        {
+                "id": 1743070732515,
+                "nombre": "Formulario de Asistencia",
+                "descripcion": "Diligenciar este formulario para la asistencia al evento",
+                "campos": [
+                    {
+                        "id": "nombre_1743070756636",
+                        "nombre": "Nombre",
+                        "tipo": "texto",
+                        "requerido": false,
+                        "seccion": "personal"
+                    },
+                    {
+                        "id": "apellido_1743070766625",
+                        "nombre": "Apellido",
+                        "tipo": "texto",
+                        "requerido": false,
+                        "seccion": "personal"
+                    },
+                    {
+                        "id": "correo_electronico_1743070781306",
+                        "nombre": "Correo Electronico",
+                        "tipo": "email",
+                        "requerido": false,
+                        "seccion": "personal"
+                    },
+                    {
+                        "id": "codigo_estudiantil_1743070800404",
+                        "nombre": "Codigo Estudiantil",
+                        "tipo": "numero",
+                        "requerido": false,
+                        "seccion": "academica"
+                    },
+                    {
+                        "id": "semestre_1743070812197",
+                        "nombre": "Semestre",
+                        "tipo": "seleccion",
+                        "requerido": false,
+                        "seccion": "academica",
+                        "opciones": [
+                            "I",
+                            "II",
+                            "III",
+                            "IV",
+                            "V",
+                            "VI",
+                            "VII",
+                            "VIII",
+                            "IX",
+                            "X"
+                        ]
+                    },
+                    {
+                        "id": "valoracion_del_evento_1743070837876",
+                        "nombre": "Valoracion del Evento",
+                        "tipo": "seleccion",
+                        "requerido": false,
+                        "seccion": "adicional",
+                        "opciones": [
+                            "Bueno",
+                            " Buenisimo",
+                            " Super"
+                        ]
+                    }
+                ],
+                "state": true
+        }],
         users: [],
         roles: []
     });

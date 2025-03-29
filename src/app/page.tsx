@@ -12,6 +12,10 @@ import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/Alert"
 import { useAuth } from "@/hooks/auth/useAuth"
 
+interface LoginError {
+  message: string;
+}
+
 export default function SignInPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -26,8 +30,9 @@ export default function SignInPage() {
 
     try {
       await login(username, password)
-    } catch (error: any) {
-      setError(error.message || "Error al iniciar sesión")
+    } catch (error) {
+      const loginError = error as LoginError
+      setError(loginError.message || "Error al iniciar sesión")
     } finally {
       setIsLoading(false)
     }
