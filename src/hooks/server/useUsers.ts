@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 interface User {
   id: number;
   name: string;
@@ -14,30 +12,28 @@ export function useFetchUsers() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!API_URL) {
-      console.error("API URL no definida en las variables de entorno.");
-      setError("No se pudo cargar la API");
-      setLoading(false);
-      return;
-    }
-
     const fetchUsers = async () => {
       try {
-        const response = await fetch(`${API_URL}/users/get`);
+        setLoading(true)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
         if (!response.ok) {
-          throw new Error("Error al obtener los datos");
+          throw new Error('Error al obtener usuarios')
         }
-        const data = await response.json();
-        setUsers(data);
-      } catch (err) {
-        setError((err as Error).message);
+        const data = await response.json()
+        setUsers(data)
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Error al obtener usuarios')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchUsers();
-  }, [API_URL]);
+    fetchUsers()
+  }, [])
 
   return { users, loading, error };
 }

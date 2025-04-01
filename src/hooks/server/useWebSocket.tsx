@@ -55,7 +55,7 @@ export function useWebSocket() {
     return () => {
       console.log("useWebSocket desmontado, pero la conexión sigue activa");
     };
-  }, []);
+  }, [setUser]);
 
   const sendMessage = <T,>(type: string, payload: T) => {
     if (globalSocket && globalSocket.readyState === WebSocket.OPEN) {
