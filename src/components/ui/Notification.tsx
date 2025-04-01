@@ -205,6 +205,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     {} as Record<NotificationPosition, NotificationProps[]>,
   )
 
+  const hideNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id))
+  }, [])
+
   const showNotification = useCallback((notification: Omit<NotificationProps, "id" | "index">) => {
     const id = Math.random().toString(36).substring(2, 9)
     const newNotification = {
@@ -222,11 +226,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
 
     return id
-  }, [])
-
-  const hideNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id))
-  }, [])
+  }, [hideNotification])
 
   return (
     <NotificationContext.Provider value={{ notifications, showNotification, hideNotification }}>

@@ -109,7 +109,7 @@ export default function EventDetailPage() {
         }
 
         setLoading(false)
-    }, [eventId, router])
+    }, [eventId, router, user.events])
 
     useEffect(() => {
         if (lastMessage?.type === "UPDATE_DATA" && (lastMessage.payload as { users: User })?.users) {

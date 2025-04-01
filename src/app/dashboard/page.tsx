@@ -82,41 +82,6 @@ const prestamosActivos = [
   },
 ]
 
-const escenariosOcupados = [
-  {
-    id: 1,
-    nombre: "Auditorio Principal",
-    evento: "Conferencia de Ingeniería",
-    fecha: "2024-06-05",
-    horaInicio: "10:00",
-    horaFin: "12:00",
-  },
-  {
-    id: 2,
-    nombre: "Sala de Conferencias A",
-    evento: "Taller de Liderazgo",
-    fecha: "2024-06-06",
-    horaInicio: "14:00",
-    horaFin: "16:00",
-  },
-  {
-    id: 3,
-    nombre: "Laboratorio de Informática",
-    evento: "Hackathon Universitario",
-    fecha: "2024-06-07",
-    horaInicio: "09:00",
-    horaFin: "18:00",
-  },
-  {
-    id: 4,
-    nombre: "Sala de Videoconferencias",
-    evento: "Seminario Internacional",
-    fecha: "2024-06-08",
-    horaInicio: "11:00",
-    horaFin: "13:30",
-  },
-]
-
 export default function DashboardPage() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [showDetailChart, setShowDetailChart] = useState(false)
