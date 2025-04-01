@@ -39,7 +39,6 @@ const UserDataContext = createContext<{
 } | null>(null);
 
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
-    const test = 1;
     const [states, setStates] = useState<States>({});
     const [user, setUserState] = useState<User>({
         events: [{
