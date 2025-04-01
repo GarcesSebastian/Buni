@@ -32,6 +32,21 @@ export function useAuth() {
     });
     const router = useRouter();
 
+    useEffect(() => {
+        const userCookie = Cookies.get('user');
+        if (userCookie) {
+            try {
+                const user = JSON.parse(userCookie) as User;
+                setAuthState({ user, isAuthenticated: true, isLoading: false });
+            } catch (error) {
+                console.error('Error parsing user cookie:', error);
+                logout();
+            }
+        } else {
+            setAuthState(prev => ({ ...prev, isLoading: false }));
+        }
+    }, []);
+
     const login = async (email: string, password: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
@@ -75,21 +90,6 @@ export function useAuth() {
         });
         router.push('/');
     };
-
-    useEffect(() => {
-        const userCookie = Cookies.get('user');
-        if (userCookie) {
-            try {
-                const user = JSON.parse(userCookie) as User;
-                setAuthState({ user, isAuthenticated: true, isLoading: false });
-            } catch (error) {
-                console.error('Error parsing user cookie:', error);
-                logout();
-            }
-        } else {
-            setAuthState(prev => ({ ...prev, isLoading: false }));
-        }
-    }, [logout]);
 
     return {
         ...authState,

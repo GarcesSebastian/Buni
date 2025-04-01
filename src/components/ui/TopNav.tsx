@@ -13,7 +13,7 @@ export function TopNav() {
     <header className="border-b">
       <div className="flex h-16 items-center px-4">
         <Link href="/" className="flex items-center size-fit">
-          <Image src="/Logo.png" alt="Description" width={160} height={40}/>
+          <img src="https://i.ibb.co/K8mMDbP/Logo.png" alt="Logo Bienestar Universitario Cartagena" width={160} height={40}/>
         </Link>
         {isAuthenticated && (
           <div className="ml-auto flex items-center space-x-4">
