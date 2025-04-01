@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { UserNav } from "./UserNav"
 import { usePathname } from "next/navigation"
 import Link from "next/link"

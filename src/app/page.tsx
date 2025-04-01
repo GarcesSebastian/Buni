@@ -2,7 +2,6 @@
 
 import type React from "react"
 
-import Image from "next/image"
 import { useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
