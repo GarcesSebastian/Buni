@@ -35,7 +35,7 @@ export function SideBar() {
     
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [])
+  }, [states, setStates])
 
   const toggleExpand = () => {
     setStates({
