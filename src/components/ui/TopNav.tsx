@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { UserNav } from "./UserNav"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 export function TopNav() {
   const pathname = usePathname()
@@ -11,10 +12,9 @@ export function TopNav() {
   return (
     <header className="border-b">
       <div className="flex h-16 items-center px-4">
-        <div className="flex items-center space-x-4">
-          <Image src="/logo-buni.png" alt="Description" width={40} height={40}/>
-          <span className="font-semibold">BUNI</span>
-        </div>
+        <Link href="/" className="flex items-center size-fit">
+          <Image src="/Logo.png" alt="Description" width={160} height={40}/>
+        </Link>
         {isAuthenticated && (
           <div className="ml-auto flex items-center space-x-4">
             <UserNav />

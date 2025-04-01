@@ -518,6 +518,7 @@ export default function EventDetailPage() {
                                         <DataImportExport
                                             type="assists"
                                             data={filteredAssists}
+                                            columns={getColumnsForm(event.formAssists) as Assists[]}
                                             fileName={`asistencias_evento_${event.id}`}
                                             onImport={(data) => handleImportData("assists", data)}
                                         />
@@ -588,6 +589,7 @@ export default function EventDetailPage() {
                                         <DataImportExport
                                             type="inscriptions"
                                             data={filteredInscriptions}
+                                            columns={getColumnsForm(event.formInscriptions) as Assists[]}
                                             fileName={`inscripciones_evento_${event.id}`}
                                             onImport={(data) => handleImportData("inscriptions", data)}
                                         />

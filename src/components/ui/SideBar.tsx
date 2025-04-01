@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { ChevronDown, ChevronRight, Menu } from "lucide-react"
-import { ConfigSideBar } from "@/config/components/SideBar"
+import { ConfigSideBar } from "@/components/config/SideBar"
 import { useUserData } from "@/hooks/auth/useUserData"
 
 export function SideBar() {

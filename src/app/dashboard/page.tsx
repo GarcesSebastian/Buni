@@ -300,40 +300,6 @@ export default function DashboardPage() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Escenarios Ocupados</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Escenario</TableHead>
-                          <TableHead>Evento</TableHead>
-                          <TableHead>Fecha</TableHead>
-                          <TableHead>Horario</TableHead>
-                          <TableHead>Acción</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {escenariosOcupados.map((escenario) => (
-                          <TableRow key={escenario.id}>
-                            <TableCell>{escenario.nombre}</TableCell>
-                            <TableCell>{escenario.evento}</TableCell>
-                            <TableCell>{escenario.fecha}</TableCell>
-                            <TableCell>{`${escenario.horaInicio} - ${escenario.horaFin}`}</TableCell>
-                            <TableCell>
-                              <Button variant="outline" size="sm">
-                                <Link href={`/eventos/escenarios?id=${escenario.id}`}>Ver detalles</Link>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
                     <CardTitle>Actividad Reciente</CardTitle>
                   </CardHeader>
                   <CardContent>

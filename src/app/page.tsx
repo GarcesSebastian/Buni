@@ -39,11 +39,11 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="h-full flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col">
-          <div className="flex justify-center mb-4">
-            <Image src="/logo-buni.png" alt="Description" width={80} height={80}/>
+    <div className="h-full flex items-center justify-center bg-gray-100 overflow-y-auto">
+      <Card className="w-full h-fit max-w-md flex flex-col">
+        <CardHeader className="flex flex-col">
+          <div className="flex justify-center">
+            <Image src="/Logo.png" alt="Description" width={160} height={40}/>
           </div>
           <CardTitle className="text-2xl font-bold text-center">Iniciar sesión</CardTitle>
           <CardDescription className="text-center">

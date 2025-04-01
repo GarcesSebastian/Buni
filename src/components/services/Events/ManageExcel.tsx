@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/Button"
 import { FileSpreadsheet, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
 import { useNotification } from "@/components/ui/Notification"
-import { AssistsColumns } from "@/config/Assists"
-import { InscriptionsColumns } from "@/config/Inscriptions"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
@@ -16,11 +14,12 @@ import { Assists } from "@/types/Events"
 interface DataImportExportProps {
   type: TabsEvent
   data: Assists[]
+  columns: Assists[]
   fileName: string
   onImport: (data: Assists[]) => void
 }
 
-export function DataImportExport({ type, data, fileName, onImport }: DataImportExportProps) {
+export function DataImportExport({ type, data, columns, fileName, onImport }: DataImportExportProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { showNotification } = useNotification()
 
@@ -74,7 +73,10 @@ export function DataImportExport({ type, data, fileName, onImport }: DataImportE
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json<{ [key: string]: string }>(worksheet);
 
-        const requiredKeys = type === "assists"  ? AssistsColumns.map((col) => col.key.toLowerCase()) : InscriptionsColumns.map((col) => col.key.toLowerCase());
+        const requiredKeys = columns?.map((col) => {
+          const key = col.key;
+          return typeof key === 'string' ? key.toLowerCase() : String(key).toLowerCase();
+        });
 
         if (jsonData.length === 0) {
           throw new Error("El archivo no contiene datos.");
