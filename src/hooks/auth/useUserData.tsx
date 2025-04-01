@@ -74,35 +74,35 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             "id": "nombre_1743070756636",
                             "nombre": "Nombre",
                             "tipo": "texto",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal"
                         },
                         {
                             "id": "apellido_1743070766625",
                             "nombre": "Apellido",
                             "tipo": "texto",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal"
                         },
                         {
                             "id": "correo_electronico_1743070781306",
                             "nombre": "Correo Electronico",
                             "tipo": "email",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal"
                         },
                         {
                             "id": "codigo_estudiantil_1743070800404",
                             "nombre": "Codigo Estudiantil",
                             "tipo": "numero",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "academica"
                         },
                         {
                             "id": "semestre_1743070812197",
                             "nombre": "Semestre",
                             "tipo": "seleccion",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "academica",
                             "opciones": [
                                 "I",
@@ -121,7 +121,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             "id": "valoracion_del_evento_1743070837876",
                             "nombre": "Valoracion del Evento",
                             "tipo": "seleccion",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "adicional",
                             "opciones": [
                                 "Bueno",
@@ -144,28 +144,28 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             "id": "nombre_1742294172313",
                             "nombre": "Nombre",
                             "tipo": "texto",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal"
                         },
                         {
                             "id": "correo_electronico_1742294180033",
                             "nombre": "Correo Electronico",
                             "tipo": "email",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal"
                         },
                         {
                             "id": "numero_telefonico_1742294190390",
                             "nombre": "Numero Telefonico",
                             "tipo": "numero",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal"
                         },
                         {
                             "id": "semestre_1742294209768",
                             "nombre": "Semestre",
                             "tipo": "seleccion",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal",
                             "opciones": [
                                 "I",
@@ -184,7 +184,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             "id": "facultad_1742294260490",
                             "nombre": "Facultad",
                             "tipo": "seleccion",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "personal",
                             "opciones": [
                                 "Ingenieria",
@@ -196,7 +196,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             "id": "estrato_1742294281482",
                             "nombre": "Estrato",
                             "tipo": "seleccion",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "adicional",
                             "opciones": [
                                 "Bajo",
@@ -208,7 +208,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                             "id": "direccion_1742294297671",
                             "nombre": "Direccion",
                             "tipo": "texto",
-                            "requerido": false,
+                            "requerido": true,
                             "seccion": "adicional"
                         }
                     ],
@@ -239,28 +239,28 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                     "id": "nombre_1742294172313",
                     "nombre": "Nombre",
                     "tipo": "texto",
-                    "requerido": false,
+                    "requerido": true,
                     "seccion": "personal"
                 },
                 {
                     "id": "correo_electronico_1742294180033",
                     "nombre": "Correo Electronico",
                     "tipo": "email",
-                    "requerido": false,
+                    "requerido": true,
                     "seccion": "personal"
                 },
                 {
                     "id": "numero_telefonico_1742294190390",
                     "nombre": "Numero Telefonico",
                     "tipo": "numero",
-                    "requerido": false,
+                    "requerido": true,
                     "seccion": "personal"
                 },
                 {
                     "id": "semestre_1742294209768",
                     "nombre": "Semestre",
                     "tipo": "seleccion",
-                    "requerido": false,
+                    "requerido": true,
                     "seccion": "personal",
                     "opciones": [
                         "I",
@@ -279,7 +279,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                     "id": "facultad_1742294260490",
                     "nombre": "Facultad",
                     "tipo": "seleccion",
-                    "requerido": false,
+                    "requerido": true,
                     "seccion": "personal",
                     "opciones": [
                         "Ingenieria",
@@ -291,7 +291,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                     "id": "estrato_1742294281482",
                     "nombre": "Estrato",
                     "tipo": "seleccion",
-                    "requerido": false,
+                    "requerido": true,
                     "seccion": "adicional",
                     "opciones": [
                         "Bajo",
@@ -303,7 +303,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                     "id": "direccion_1742294297671",
                     "nombre": "Direccion",
                     "tipo": "texto",
-                    "requerido": false,
+                    "requerido": true,
                     "seccion": "adicional"
                 }
             ],
@@ -318,35 +318,35 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                         "id": "nombre_1743070756636",
                         "nombre": "Nombre",
                         "tipo": "texto",
-                        "requerido": false,
+                        "requerido": true,
                         "seccion": "personal"
                     },
                     {
                         "id": "apellido_1743070766625",
                         "nombre": "Apellido",
                         "tipo": "texto",
-                        "requerido": false,
+                        "requerido": true,
                         "seccion": "personal"
                     },
                     {
                         "id": "correo_electronico_1743070781306",
                         "nombre": "Correo Electronico",
                         "tipo": "email",
-                        "requerido": false,
+                        "requerido": true,
                         "seccion": "personal"
                     },
                     {
                         "id": "codigo_estudiantil_1743070800404",
                         "nombre": "Codigo Estudiantil",
                         "tipo": "numero",
-                        "requerido": false,
+                        "requerido": true,
                         "seccion": "academica"
                     },
                     {
                         "id": "semestre_1743070812197",
                         "nombre": "Semestre",
                         "tipo": "seleccion",
-                        "requerido": false,
+                        "requerido": true,
                         "seccion": "academica",
                         "opciones": [
                             "I",
@@ -365,7 +365,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                         "id": "valoracion_del_evento_1743070837876",
                         "nombre": "Valoracion del Evento",
                         "tipo": "seleccion",
-                        "requerido": false,
+                        "requerido": true,
                         "seccion": "adicional",
                         "opciones": [
                             "Bueno",
