@@ -3,17 +3,20 @@ import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { Checkbox } from "@/components/ui/Checkbox"
 import { FormField } from "@/types/Forms"
+import { formOptionsType } from "@/app/forms/[[...params]]/page"
+
+type formValuesType = Record<string, formOptionsType>
 
 interface Props{
     field: FormField,
-    formValues: Record<string, (string | boolean | string[])>
+    formValues: formValuesType
     errors: Record<string, string>
-    setFormValues: (value: Record<string, (string | boolean | string[])> | ((prev: Record<string, (string | boolean | string[])>) => Record<string, (string | boolean | string[])>)) => void,
+    setFormValues: (value: formValuesType | ((prev: formValuesType) => formValuesType)) => void,
     setErrors: (value: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void,
 }
 
 const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => {
-    const handleChange = (id: string, value: string | boolean | string[]) => {
+    const handleChange = (id: string, value: formOptionsType) => {
     setFormValues((prev) => ({
         ...prev,
         [id]: value,
@@ -126,7 +129,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                 <Label className="font-medium">
                     {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
                 </Label>
-                <div className="flex flex-col space-y-2 border rounded-md p-3">
+                <div className="flex flex-col space-y-2 py-3">
                     {field.opciones?.map((opcion) => (
                         <div key={opcion} className="flex items-center">
                             <Checkbox
@@ -152,7 +155,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                 <Label className="font-medium">
                     {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
                 </Label>
-                <div className="flex flex-col space-y-2 border rounded-md p-3">
+                <div className="flex flex-col space-y-2 py-3">
                     {field.opciones?.map((opcion) => {
                         const currentValues = formValues[field.id] as string[] || [];
                         return (
@@ -167,6 +170,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                                             handleChange(field.id, currentValues.filter(v => v !== opcion));
                                         }
                                     }}
+                                    variant="square"
                                 />
                                 <Label htmlFor={`${field.id}-${opcion}`} className="ml-2">{opcion}</Label>
                             </div>

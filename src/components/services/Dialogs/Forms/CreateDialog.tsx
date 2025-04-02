@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/Label"
 import { useState } from "react"
 import { Form, FormField, sectionFieldForm, typeFieldForm } from "@/types/Forms"
 import { configField, configFieldSection } from "@/config/Forms"
+import CheckList from "@/components/ui/CheckList"
 
 interface Props{
     currentForm: Form | null
@@ -22,6 +23,8 @@ interface Props{
     dialogAddField: boolean 
     setDialogAddField: (dialogAddField: boolean) => void
 }
+
+export type ItemList = {id: number, value: string}
 
 const DialogDefault: FormField = {
     id: "",
@@ -32,6 +35,7 @@ const DialogDefault: FormField = {
 }
 
 const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAddField}: Props) => {
+    const [itemsList, setItemsList] = useState<ItemList[]>([])
     const [newField, setNewField] = useState<FormField>(DialogDefault)
     const [optionsField, setOptionsField] = useState<string>("")
     const [showOptionsField, setShowOptionsField] = useState<boolean>(false)
@@ -48,6 +52,10 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
 
         if (campo.tipo === "seleccion" && optionsField) {
             campo.opciones = optionsField.split(",")
+        }
+
+        if (campo.tipo === "checklist_unico" || campo.tipo === "checklist_multiple") {
+            campo.opciones = itemsList.map((item) => item.value)
         }
 
         setCurrentForm({
@@ -69,7 +77,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                 <DialogDescription>Defina las propiedades del nuevo campo para el formulario</DialogDescription>
             </DialogHeader>
 
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-4 py-4 max-h-full">
                 <div className="grid gap-2">
                     <Label htmlFor="nombre-campo">Nombre del Campo</Label>
                     <Input
@@ -123,22 +131,10 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                 </div>
 
                 {showOptionsField && (
-                <div className="grid gap-2">
-                    <Label htmlFor="opciones-campo">Opciones (separadas por comas)</Label>
-                    <Input
-                        id="opciones-campo"
-                        value={optionsField}
-                        onChange={(e) => setOptionsField(e.target.value)}
-                        placeholder="Opción 1,Opción 2,Opción 3"
-                    />
-                    <p className="text-xs text-gray-500">
-                        {newField.tipo === "checklist_unico" 
-                            ? "El usuario podrá seleccionar solo una opción." 
-                            : newField.tipo === "checklist_multiple" 
-                                ? "El usuario podrá seleccionar múltiples opciones." 
-                                : "El usuario seleccionará una opción de la lista."}
-                    </p>
-                </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="opciones-campo">Opciones</Label>
+                        <CheckList itemsList={itemsList} setItemsList={setItemsList}/>
+                    </div>
                 )}
 
                 <div className="flex items-center space-x-2">

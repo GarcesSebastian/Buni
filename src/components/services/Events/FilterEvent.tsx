@@ -56,7 +56,7 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
           <DialogTitle>Filtrar por {fieldInfo?.nombre || column}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {fieldInfo?.tipo === "seleccion" ? (
+          {fieldInfo?.tipo === "seleccion" || fieldInfo?.tipo === "checklist_unico" || fieldInfo?.tipo === "checklist_multiple" ? (
             <div className="grid gap-2">
               <Label>Seleccionar opciones</Label>
               <div className="border rounded-md p-3">

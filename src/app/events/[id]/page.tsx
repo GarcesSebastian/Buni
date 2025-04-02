@@ -550,7 +550,7 @@ export default function EventDetailPage() {
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {event.formAssists?.data.campos
-                                                            .filter(campo => campo.tipo === "seleccion")
+                                                            .filter(campo => campo.tipo === "seleccion" || campo.tipo === "checklist_unico" || campo.tipo === "checklist_multiple")
                                                             .map((campo) => (
                                                                 <SelectItem key={campo.id} value={campo.id.split("_")[0]}>
                                                                     {campo.nombre}

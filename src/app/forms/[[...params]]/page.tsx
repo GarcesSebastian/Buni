@@ -29,6 +29,8 @@ import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { ErrorMessage } from "@/components/ui/ErrorMessage"
 import { ERROR_MESSAGES } from "@/constants/errorMessages"
 
+export type formOptionsType = string | boolean | string[]
+
 const getEvent = (user: User, eventId: number): Event | undefined => {
   const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId)
   return eventFind
@@ -42,12 +44,10 @@ export default function FormsPage() {
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
 
-  // Definir keyForm antes de los hooks
   const keyForm = typeForm ? `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}` : '';
 
-  // Todos los hooks deben estar al inicio, antes de cualquier validación
   const [event, setEvent] = useState<Event | undefined>(undefined)
-  const [formValues, setFormValues] = useState<Record<string, (string | boolean)>>({})
+  const [formValues, setFormValues] = useState<Record<string, (formOptionsType)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [currentSection, setCurrentSection] = useState("personal")
@@ -94,7 +94,6 @@ export default function FormsPage() {
     }
   }, [formValues, event, keyForm])
 
-  // Validaciones después de los hooks
   if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
     return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
   }
@@ -147,7 +146,7 @@ export default function FormsPage() {
     e.preventDefault()
 
     if (validateForm()) {
-      const newFormValues: Record<string, string | boolean> = {}
+      const newFormValues: Record<string, formOptionsType> = {}
       Object.keys(formValues).forEach((key) => {
         newFormValues[key.split("_")[0]] = formValues[key]
       })
@@ -155,9 +154,11 @@ export default function FormsPage() {
       const event = user.events.find((evt) => evt.id == Number(idEvent))
       const sanitizedFormValues: Record<string, string | number> = {};
       Object.keys(newFormValues).forEach((key) => {
-        const value = newFormValues[key];
+        const value = newFormValues[key] as formOptionsType;
         if (typeof value === "boolean") {
           sanitizedFormValues[key] = value ? 1 : 0;
+        } else if (Array.isArray(value)) {
+          sanitizedFormValues[key] = value.join(", ");
         } else {
           sanitizedFormValues[key] = value;
         }

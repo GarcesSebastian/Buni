@@ -28,6 +28,10 @@ export function generateSampleData(count: number, form: Form) {
         switch (campo.tipo) {
             case "seleccion":
                 return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
+            case "checklist_unico":
+                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
+            case "checklist_multiple":
+                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
             case "email":
                 return `estudiante${Math.floor(Math.random() * 1000)}@universidad.edu.co`;
             case "numero":
