@@ -6,14 +6,14 @@ import { FormField } from "@/types/Forms"
 
 interface Props{
     field: FormField,
-    formValues: Record<string, (string | boolean)>
+    formValues: Record<string, (string | boolean | string[])>
     errors: Record<string, string>
-    setFormValues: (value: Record<string, (string | boolean)> | ((prev: Record<string, (string | boolean)>) => Record<string, (string | boolean)>)) => void,
+    setFormValues: (value: Record<string, (string | boolean | string[])> | ((prev: Record<string, (string | boolean | string[])>) => Record<string, (string | boolean | string[])>)) => void,
     setErrors: (value: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void,
 }
 
 const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => {
-    const handleChange = (id: string, value: string | boolean) => {
+    const handleChange = (id: string, value: string | boolean | string[]) => {
     setFormValues((prev) => ({
         ...prev,
         [id]: value,
@@ -122,12 +122,59 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
 
         case "checklist_unico":
         return (
-            <div></div>
+            <div className="grid gap-2" key={field.id}>
+                <Label className="font-medium">
+                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                </Label>
+                <div className="flex flex-col space-y-2 border rounded-md p-3">
+                    {field.opciones?.map((opcion) => (
+                        <div key={opcion} className="flex items-center">
+                            <Checkbox
+                                id={`${field.id}-${opcion}`}
+                                checked={formValues[field.id] === opcion}
+                                onCheckedChange={(checked) => {
+                                    if (checked) {
+                                        handleChange(field.id, opcion);
+                                    }
+                                }}
+                            />
+                            <Label htmlFor={`${field.id}-${opcion}`} className="ml-2">{opcion}</Label>
+                        </div>
+                    ))}
+                </div>
+                {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
+            </div>
         )
 
         case "checklist_multiple":
         return (
-            <div></div>
+            <div className="grid gap-2" key={field.id}>
+                <Label className="font-medium">
+                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                </Label>
+                <div className="flex flex-col space-y-2 border rounded-md p-3">
+                    {field.opciones?.map((opcion) => {
+                        const currentValues = formValues[field.id] as string[] || [];
+                        return (
+                            <div key={opcion} className="flex items-center">
+                                <Checkbox
+                                    id={`${field.id}-${opcion}`}
+                                    checked={currentValues.includes(opcion)}
+                                    onCheckedChange={(checked) => {
+                                        if (checked) {
+                                            handleChange(field.id, [...currentValues, opcion]);
+                                        } else {
+                                            handleChange(field.id, currentValues.filter(v => v !== opcion));
+                                        }
+                                    }}
+                                />
+                                <Label htmlFor={`${field.id}-${opcion}`} className="ml-2">{opcion}</Label>
+                            </div>
+                        )
+                    })}
+                </div>
+                {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
+            </div>
         )
 
         default:

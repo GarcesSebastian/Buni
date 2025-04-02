@@ -85,7 +85,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                         value={newField.tipo}
                         onValueChange={(valor: typeFieldForm) => {
                             setNewField({ ...newField, tipo: valor })
-                            setShowOptionsField(valor === "seleccion")
+                            setShowOptionsField(valor === "seleccion" || valor === "checklist_unico" || valor === "checklist_multiple")
                         }}
                     >
                         <SelectTrigger id="tipo-campo">
@@ -131,6 +131,13 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                         onChange={(e) => setOptionsField(e.target.value)}
                         placeholder="Opción 1,Opción 2,Opción 3"
                     />
+                    <p className="text-xs text-gray-500">
+                        {newField.tipo === "checklist_unico" 
+                            ? "El usuario podrá seleccionar solo una opción." 
+                            : newField.tipo === "checklist_multiple" 
+                                ? "El usuario podrá seleccionar múltiples opciones." 
+                                : "El usuario seleccionará una opción de la lista."}
+                    </p>
                 </div>
                 )}
 
