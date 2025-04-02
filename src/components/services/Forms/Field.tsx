@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
@@ -111,7 +110,6 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                 id={field.id}
                 checked={formValues[field.id] as boolean || false}
                 onCheckedChange={(checked) => handleChange(field.id, checked)}
-                className={errors[field.id] ? "border-red-500" : ""}
             />
             <div className="grid gap-1.5 leading-none">
                 <Label htmlFor={field.id} className="font-medium">
@@ -120,6 +118,16 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                 {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
             </div>
             </div>
+        )
+
+        case "checklist_unico":
+        return (
+            <div></div>
+        )
+
+        case "checklist_multiple":
+        return (
+            <div></div>
         )
 
         default:

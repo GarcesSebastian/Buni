@@ -2,6 +2,7 @@
 
 import type React from "react"
 
+import Image from "next/image"
 import { useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -10,7 +11,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/Alert"
 import { useAuth } from "@/hooks/auth/useAuth"
-import Image from "next/image"
 
 interface LoginError {
   message: string;
@@ -43,7 +43,7 @@ export default function SignInPage() {
       <Card className="w-full h-fit max-w-md flex flex-col">
         <CardHeader className="flex flex-col">
           <div className="flex justify-center">
-            <Image src={"https://i.ibb.co/K8mMDbP/Logo.png"} width={160} height={40} alt="Logo Bienestar Universitario Cartagena"></Image>
+            <Image src="/Logo.png" alt="Description" width={160} height={40}/>
           </div>
           <CardTitle className="text-2xl font-bold text-center">Iniciar sesión</CardTitle>
           <CardDescription className="text-center">

@@ -5,6 +5,8 @@ export const configField = [
     { id: "fecha", nombre: "Fecha" },
     { id: "seleccion", nombre: "Selección" },
     { id: "checkbox", nombre: "Casilla de verificación" },
+    { id: "checklist_unico", nombre: "Lista de selección única" },
+    { id: "checklist_multiple", nombre: "Lista de selección múltiple" },
 ]
 
 export const configFieldSection = [

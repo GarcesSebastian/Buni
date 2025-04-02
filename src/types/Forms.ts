@@ -1,5 +1,5 @@
 export type sectionFieldForm = "personal" | "academica" | "adicional";
-export type typeFieldForm = "texto" | "numero" | "email" | "fecha" | "seleccion" | "checkbox";
+export type typeFieldForm = "texto" | "numero" | "email" | "fecha" | "seleccion" | "checkbox" | "checklist_unico" | "checklist_multiple";
 
 export interface Form {
   id: number
