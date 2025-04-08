@@ -62,7 +62,7 @@ const permissionGroups = {
     "Eventos": ["create_event", "edit_event", "delete_event", "view_event"],
     "Usuarios": ["create_user", "edit_user", "delete_user", "view_user"],
     "Roles": ["create_role", "edit_role", "delete_role", "view_role"],
-    "Facultades": ["create_faculty", "edit_faculty", "delete_faculty", "view_faculty"],
+    "Programas": ["create_faculty", "edit_faculty", "delete_faculty", "view_faculty"],
     "Escenarios": ["create_scenery", "edit_scenery", "delete_scenery", "view_scenery"],
 };
 

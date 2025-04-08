@@ -40,8 +40,8 @@ export const ConfigSideBar: SideBar[] = [
         ],
     },
     {
-        title: "Facultades",
-        href: "/faculties",
+        title: "Programas",
+        href: "/programs",
         icon: <LayoutDashboard className="h-4 w-4" />,
     },
     {

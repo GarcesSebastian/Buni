@@ -1,7 +1,7 @@
 import { ConfigFaculty, ConfigFormFaculty, TableFaculty } from "@/types/Faculty"
 
 export const tableFaculty: TableFaculty = {
-    name: "Facultades",
+    name: "Programas",
     key: "faculty",
 }
 

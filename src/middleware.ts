@@ -43,13 +43,6 @@ export async function middleware(req: NextRequest) {
     const params = path.split('/').filter(Boolean);
     const token = req.cookies.get('token')?.value;
 
-    console.log('--------------------------------');
-    console.log('path', path);
-    console.log('params', params);
-    console.log('token', token);
-    console.log('isPublicPath', isPublicPath(path));
-    console.log('--------------------------------');
-
     if (path === '/' && token) {
         return NextResponse.redirect(new URL('/dashboard', req.url));
     }

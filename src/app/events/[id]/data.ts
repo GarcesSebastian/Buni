@@ -119,7 +119,7 @@ export const eventosEjemplo: Event[] = [
                     },
                     {
                         id: "facultad_1742294260490",
-                        nombre: "Facultad",
+                        nombre: "Programa",
                         tipo: "seleccion",
                         requerido: true,
                         seccion: "personal",
@@ -182,7 +182,7 @@ export const eventosEjemplo: Event[] = [
                     },
                     {
                         id: "facultad_1742294260490",
-                        nombre: "Facultad",
+                        nombre: "Programa",
                         tipo: "seleccion",
                         requerido: true,
                         seccion: "personal",
@@ -243,7 +243,7 @@ export const eventosEjemplo: Event[] = [
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Facultad",
+                    nombre: "Programa",
                     tipo: "seleccion",
                     requerido: true,
                     seccion: "personal",
@@ -303,7 +303,7 @@ export const eventosEjemplo: Event[] = [
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Facultad",
+                    nombre: "Programa",
                     tipo: "seleccion",
                     requerido: true,
                     seccion: "personal",
@@ -390,7 +390,7 @@ export const eventosEjemplo: Event[] = [
                     },
                     {
                         id: "facultad_1742294260490",
-                        nombre: "Facultad",
+                        nombre: "Programa",
                         tipo: "seleccion",
                         requerido: true,
                         seccion: "personal",
@@ -453,7 +453,7 @@ export const eventosEjemplo: Event[] = [
                     },
                     {
                         id: "facultad_1742294260490",
-                        nombre: "Facultad",
+                        nombre: "Programa",
                         tipo: "seleccion",
                         requerido: true,
                         seccion: "personal",
@@ -514,7 +514,7 @@ export const eventosEjemplo: Event[] = [
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Facultad",
+                    nombre: "Programa",
                     tipo: "seleccion",
                     requerido: true,
                     seccion: "personal",
@@ -574,7 +574,7 @@ export const eventosEjemplo: Event[] = [
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Facultad",
+                    nombre: "Programa",
                     tipo: "seleccion",
                     requerido: true,
                     seccion: "personal",

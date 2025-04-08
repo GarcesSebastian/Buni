@@ -16,6 +16,8 @@ import { useState } from "react"
 import { Form, FormField, sectionFieldForm, typeFieldForm } from "@/types/Forms"
 import { configField, configFieldSection } from "@/config/Forms"
 import CheckList from "@/components/ui/CheckList"
+import { Star, Heart, ThumbsUp } from "lucide-react"
+import { configQualification, configQualificationIcons } from "@/config/Forms"
 
 interface Props{
     currentForm: Form | null
@@ -39,6 +41,9 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
     const [newField, setNewField] = useState<FormField>(DialogDefault)
     const [optionsField, setOptionsField] = useState<string>("")
     const [showOptionsField, setShowOptionsField] = useState<boolean>(false)
+    const [isQualification, setIsQualification] = useState<boolean>(false)
+    const [maxQualification, setMaxQualification] = useState<number>(configQualification.default)
+    const [qualificationIcon, setQualificationIcon] = useState<typeof configQualificationIcons[number]["id"]>("star")
 
     const addField = () => {
         if (!currentForm || !newField.nombre) return
@@ -58,6 +63,11 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
             campo.opciones = itemsList.map((item) => item.value)
         }
 
+        if (campo.tipo === "qualification") {
+            campo.maxQualification = maxQualification
+            campo.qualificationIcon = qualificationIcon
+        }
+
         setCurrentForm({
             ...currentForm,
             campos: [...currentForm.campos, campo],
@@ -67,6 +77,12 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
         setOptionsField("")
         setShowOptionsField(false)
         setDialogAddField(false)
+    }
+
+    const handleChangeSelect = (value: typeFieldForm) => {
+        setNewField({ ...newField, tipo: value })
+        setShowOptionsField(value === "seleccion" || value === "checklist_unico" || value === "checklist_multiple")
+        setIsQualification(value === "qualification")
     }
 
     return(
@@ -91,20 +107,17 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                     <Label htmlFor="tipo-campo">Tipo de Campo</Label>
                     <Select
                         value={newField.tipo}
-                        onValueChange={(valor: typeFieldForm) => {
-                            setNewField({ ...newField, tipo: valor })
-                            setShowOptionsField(valor === "seleccion" || valor === "checklist_unico" || valor === "checklist_multiple")
-                        }}
+                        onValueChange={handleChangeSelect}
                     >
                         <SelectTrigger id="tipo-campo">
                         <SelectValue placeholder="Seleccione un tipo" />
                         </SelectTrigger>
                         <SelectContent>
-                        {configField.map((tipo) => (
-                            <SelectItem key={tipo.id} value={tipo.id}>
-                            {tipo.nombre}
-                            </SelectItem>
-                        ))}
+                            {configField.map((tipo) => (
+                                <SelectItem key={tipo.id} value={tipo.id}>
+                                    {tipo.nombre}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -118,7 +131,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                         }}
                     >
                         <SelectTrigger id="seccion-campo">
-                        <SelectValue placeholder="Seleccione una seccion" />
+                            <SelectValue placeholder="Seleccione una seccion" />
                         </SelectTrigger>
                         <SelectContent>
                         {configFieldSection.map((tipo) => (
@@ -134,6 +147,59 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                     <div className="grid gap-2">
                         <Label htmlFor="opciones-campo">Opciones</Label>
                         <CheckList itemsList={itemsList} setItemsList={setItemsList}/>
+                    </div>
+                )}
+
+                {isQualification && (
+                    <div className="grid grid-cols-4 gap-2">
+                        <div className="w-full col-span-2 grid gap-2">
+                            <Label htmlFor="max-qualification">Calificación Máxima</Label>
+                            <Select
+                                value={maxQualification.toString()}
+                                onValueChange={(value) => setMaxQualification(Number(value))}
+                            >
+                                <SelectTrigger id="max-qualification" className="w-full">
+                                    <SelectValue placeholder="Seleccione la calificación máxima" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from(
+                                        { length: (configQualification.max - configQualification.min) / configQualification.step + 1 },
+                                        (_, i) => configQualification.min + i * configQualification.step
+                                    ).map((num) => (
+                                        <SelectItem key={num} value={num.toString()}>
+                                            {num}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="w-full col-span-2 grid gap-2">
+                            <Label htmlFor="qualification-icon">Icono de Calificación</Label>
+                            <Select
+                                value={qualificationIcon}
+                                onValueChange={(value: typeof configQualificationIcons[number]["id"]) => setQualificationIcon(value)}
+                            >
+                                <SelectTrigger id="qualification-icon" className="w-full">
+                                    <SelectValue>
+                                        {qualificationIcon === "star" && <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />}
+                                        {qualificationIcon === "heart" && <Heart className="w-5 h-5 fill-red-500 text-red-500" />}
+                                        {qualificationIcon === "thumbs-up" && <ThumbsUp className="w-5 h-5 fill-blue-500 text-blue-500" />}
+                                    </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {configQualificationIcons.map((icon) => (
+                                        <SelectItem key={icon.id} value={icon.id} spellCheck="false">
+                                            <div className="flex items-center gap-2">
+                                                {icon.id === "star" && <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />}
+                                                {icon.id === "heart" && <Heart className="w-4 h-4 fill-red-500 text-red-500" />}
+                                                {icon.id === "thumbs-up" && <ThumbsUp className="w-4 h-4 fill-blue-500 text-blue-500" />}
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 )}
 

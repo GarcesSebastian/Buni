@@ -1,5 +1,5 @@
 export type sectionFieldForm = "personal" | "academica" | "adicional";
-export type typeFieldForm = "texto" | "numero" | "email" | "fecha" | "seleccion" | "checkbox" | "checklist_unico" | "checklist_multiple";
+export type typeFieldForm = "texto" | "numero" | "email" | "fecha" | "seleccion" | "checkbox" | "checklist_unico" | "checklist_multiple" | "qualification";
 
 export interface Form {
   id: number
@@ -25,4 +25,13 @@ export interface FormField {
   opciones?: string[]
   valor?: string
   seccion?: string
+  maxQualification?: number
+  qualificationIcon?: "star" | "heart" | "thumbs-up"
+}
+
+export interface Qualification {
+  id: number
+  nombre: string
+  descripcion: string
+  opciones: string[]
 }

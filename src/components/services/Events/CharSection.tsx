@@ -24,8 +24,6 @@ export function ChartSection({
 }: ChartSectionProps) {
   const hasData = data && data.length > 0
 
-  console.log(data)
-
   return (
     <Card>
       <CardHeader className="flex flex-col space-y-4">

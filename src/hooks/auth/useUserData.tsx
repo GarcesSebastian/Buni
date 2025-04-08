@@ -182,7 +182,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                         },
                         {
                             "id": "facultad_1742294260490",
-                            "nombre": "Facultad",
+                            "nombre": "Programa",
                             "tipo": "seleccion",
                             "requerido": false,
                             "seccion": "personal",
@@ -277,7 +277,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
                 },
                 {
                     "id": "facultad_1742294260490",
-                    "nombre": "Facultad",
+                    "nombre": "Programa",
                     "tipo": "seleccion",
                     "requerido": false,
                     "seccion": "personal",

@@ -4,6 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/Checkbox"
 import { FormField } from "@/types/Forms"
 import { formOptionsType } from "@/app/forms/[[...params]]/page"
+import { Star, Heart, ThumbsUp } from "lucide-react"
+import { configQualificationIcons } from "@/config/Forms"
 
 type formValuesType = Record<string, formOptionsType>
 
@@ -176,6 +178,56 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                             </div>
                         )
                     })}
+                </div>
+                {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
+            </div>
+        )
+
+        case "qualification":
+        return (
+            <div className="grid gap-2" key={field.id}>
+                <Label className="font-medium">
+                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                </Label>
+                <div className="flex gap-2">
+                    {Array.from({ length: field.maxQualification || 5 }).map((_, index) => {
+                        const isSelected = index < Number(formValues[field.id] || 0);
+                        const iconConfig = configQualificationIcons.find(icon => icon.id === field.qualificationIcon) || configQualificationIcons[0];
+                        
+                        return (
+                            <button
+                                key={index}
+                                type="button"
+                                onClick={() => handleChange(field.id, (index + 1).toString())}
+                                className="hover:scale-110 transition-transform"
+                            >
+                                {iconConfig.id === "star" && (
+                                    <Star 
+                                        className={`w-6 h-6 ${isSelected ? iconConfig.selectedColor : iconConfig.unselectedColor}`}
+                                        fill={isSelected ? "currentColor" : "none"}
+                                    />
+                                )}
+                                {iconConfig.id === "heart" && (
+                                    <Heart 
+                                        className={`w-6 h-6 ${isSelected ? iconConfig.selectedColor : iconConfig.unselectedColor}`}
+                                        fill={isSelected ? "currentColor" : "none"}
+                                    />
+                                )}
+                                {iconConfig.id === "thumbs-up" && (
+                                    <ThumbsUp 
+                                        className={`w-6 h-6 ${isSelected ? iconConfig.selectedColor : iconConfig.unselectedColor}`}
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        onClick={() => handleChange(field.id, "0")}
+                        className="hover:scale-110 transition-transform"
+                    >
+                        <span className="text-gray-400 text-sm">Ninguna</span>
+                    </button>
                 </div>
                 {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
             </div>

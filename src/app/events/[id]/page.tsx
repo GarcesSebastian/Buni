@@ -370,7 +370,7 @@ export default function EventDetailPage() {
 
                                                 <div className="flex items-start">
                                                     <div>
-                                                        <p className="text-sm font-medium">Facultad</p>
+                                                        <p className="text-sm font-medium">Programa</p>
                                                         <Badge variant="outline" className="text-xs sm:text-sm">
                                                             {event.faculty?.data.nombre}
                                                         </Badge>
