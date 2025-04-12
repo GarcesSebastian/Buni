@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { AlertTriangle, ArrowLeft, Calendar, Clock, Loader, MapPin, Users } from "lucide-react"
 import Link from "next/link"
-import type { Assists, Event } from "@/types/Events"
+import type { Assists, Event, Scenery } from "@/types/Events"
 import type { User } from "@/hooks/auth/useUserData"
 
 import { DataTable } from "@/components/services/Events/TableEvent"
@@ -23,8 +23,7 @@ import { Alert, AlertTitle } from "@/components/ui/Alert"
 import { Form } from "@/types/Forms"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { generateSampleData } from "./data"
-import { ErrorMessage } from "@/components/ui/ErrorMessage"
-import { ERROR_MESSAGES } from "@/constants/errorMessages"
+import { Faculty } from "@/types/Faculty"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 
@@ -34,74 +33,17 @@ export default function EventDetailPage() {
     const eventId = params.id as string
     const {user, setUser, updateEvent} = useUserData()
     const { sendMessage, lastMessage } = useWebSocket()
-    const [event, setEvent] = useState<Event | null>(null)
+    const [event, setEvent] = useState<Event | undefined>()
+    const [formAssists, setFormAssists] = useState<Form | undefined>()
+    const [formInscriptions, setFormInscriptions] = useState<Form | undefined>()
+    const [scenery, setScenery] = useState<Scenery | undefined>()
+    const [faculty, setFaculty] = useState<Faculty | undefined>()
     const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
     const [generatingData, setGeneratingData] = useState(false)
-
-    useEffect(() => {
-        if (event) {
-            const assistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-            const inscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-            setSelectedAssistsDistribution(assistsField)
-            setSelectedInscriptionsDistribution(inscriptionsField)
-        }
-    }, [event])
-
-    useEffect(() => {
-        setLoading(true)
-        const foundEvent = user.events.find((e) => e.id === Number(eventId))
-
-        if (foundEvent) {
-            setEvent(foundEvent)
-        } else {
-            router.push("/events")
-        }
-
-        setLoading(false)
-    }, [eventId, router, user.events])
-
-    useEffect(() => {
-        if (lastMessage?.type === "UPDATE_DATA" && (lastMessage.payload as { users: User })?.users) {
-            const updatedUser = (lastMessage.payload as { users: User }).users;
-            const updatedEvent = updatedUser.events.find((e: Event) => e.id === Number(eventId));
-            
-            if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
-                setEvent(updatedEvent);
-                updateEvent(Number(eventId), updatedEvent);
-            }
-        }
-    }, [lastMessage, eventId, updateEvent, event]);
-
-    const idFormAssists = event?.formAssists?.id
-    const idFormInscriptions = event?.formInscriptions?.id
-
-    const formAssists = user.form.find((f) => f.id == Number(idFormAssists))
-    const formInscriptions = user.form.find((f) => f.id == Number(idFormInscriptions))
-
-    const idFaculty = event?.faculty?.id
-    const idScenery = event?.scenery?.id
-
-    const faculty = user.faculty.find((f) => f.id == Number(idFaculty))
-    const scenery = user.scenery.find((s) => s.id == Number(idScenery))
-
-    if (!formAssists && !formInscriptions) {
-        return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
-    }
-
-    if (!scenery) {
-        return <ErrorMessage {...ERROR_MESSAGES.SCENERY_NOT_FOUND} />
-    }
-
-    if (!faculty) {
-        return <ErrorMessage {...ERROR_MESSAGES.FACULTY_NOT_FOUND} />
-    }
-
-    const defaultAssistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-    const defaultInscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
     
-    const [selectedAssistsDistribution, setSelectedAssistsDistribution] = useState<string>(defaultAssistsField)
-    const [selectedInscriptionsDistribution, setSelectedInscriptionsDistribution] = useState<string>(defaultInscriptionsField)
+    const [selectedAssistsDistribution, setSelectedAssistsDistribution] = useState<string | undefined>()
+    const [selectedInscriptionsDistribution, setSelectedInscriptionsDistribution] = useState<string | undefined>()
 
     const [assistsFilters, setAssistsFilters] = useState<Record<string, string | string[]>>({})
     const [inscriptionsFilters, setInscriptionsFilters] = useState<Record<string, string | string[]>>({})
@@ -117,6 +59,53 @@ export default function EventDetailPage() {
         currentPage: 1,
         rowsPerPage: 10,
     })
+
+    useEffect(() => {
+        setLoading(true)
+        const foundEvent = user.events.find((e) => e.id === Number(eventId))
+
+        if (foundEvent) {
+            setEvent(foundEvent)
+
+            const idFormAssists = foundEvent?.formAssists?.id
+            const idFormInscriptions = foundEvent?.formInscriptions?.id
+            const idFaculty = foundEvent?.faculty?.id
+            const idScenery = foundEvent?.scenery?.id
+
+            setFormAssists(user.form.find((f) => f.id == Number(idFormAssists)) ?? undefined)
+            setFormInscriptions(user.form.find((f) => f.id == Number(idFormInscriptions)) ?? undefined)
+            setFaculty(user.faculty.find((f) => f.id == Number(idFaculty)) ?? undefined)
+            setScenery(user.scenery.find((s) => s.id == Number(idScenery)) ?? undefined)
+            
+            const assistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+            const inscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+            setSelectedAssistsDistribution(assistsField)
+            setSelectedInscriptionsDistribution(inscriptionsField)
+
+            const defaultAssistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+            const defaultInscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+
+            setSelectedAssistsDistribution(defaultAssistsField)
+            setSelectedInscriptionsDistribution(defaultInscriptionsField)
+
+        } else {
+            router.push("/events")
+        }
+
+        setLoading(false)
+    }, [eventId, router, user.events, formAssists, formInscriptions, faculty, scenery, user.form, user.faculty, user.scenery])
+
+    useEffect(() => {
+        if (lastMessage?.type === "UPDATE_DATA" && (lastMessage.payload as { users: User })?.users) {
+            const updatedUser = (lastMessage.payload as { users: User }).users;
+            const updatedEvent = updatedUser.events.find((e: Event) => e.id === Number(eventId));
+            
+            if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
+                setEvent(updatedEvent);
+                updateEvent(Number(eventId), updatedEvent);
+            }
+        }
+    }, [lastMessage, eventId, updateEvent, event]);
 
     const filteredAssists = event?.assists?.filter((assists) => {
         return Object.entries(assistsFilters).every(([key, value]) => {
@@ -231,6 +220,7 @@ export default function EventDetailPage() {
         const structure: {[key: string]: string | number | boolean}[] = []
 
         formUse.campos.forEach((campo) => {
+            console.log(campo)
             structure.push({
                 key: campo.id.split("_")[0],
                 label: campo.nombre,

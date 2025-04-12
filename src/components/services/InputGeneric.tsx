@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { User } from "@/hooks/auth/useUserData";
-import { Form } from "@/types/Forms";
 
 interface PropsInputBasic {
     data: {
@@ -32,15 +31,28 @@ interface PropsInputBasic {
 const options = ["text", "number", "date", "time", "email"]
 
 export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
-    let valueFormatted: string | { id: number; nombre: string; } = "";
+    let valueFormatted: string | {id: number, nombre: string} = "";
+
+    const getValueFormatted = (user: User, value: string | {id: number, key: string}, key: string): string | {id: number, nombre: string} => {
+        if(typeof value != "object"){
+            return value
+        }
+
+        const keyData = user[key as keyof User];
+        const valueFormatted = keyData?.find((d: { id: number }) => d.id == Number(value.id)) as { id: number, nombre: string }
+
+        if(!valueFormatted){
+            return ""
+        }
+
+        return valueFormatted
+    }
 
     if(user){
         const keyFormatted = data.key == "formAssists" || data.key == "formInscriptions" ? "form" : data.key
         const valueInit = formData[data.key]
-        const userData = user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[];
-        valueFormatted = typeof valueInit == "object" 
-            ? userData?.find((d: { id: number }) => d.id == Number((valueInit as { data: { id: string } }).data.id)) || { id: 0, nombre: "" } 
-            : valueInit
+
+        valueFormatted = getValueFormatted(user, valueInit, keyFormatted)
     }
 
     if (options.includes(data.form.type)) {

@@ -140,8 +140,8 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
           const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
           if(findDataUser){
             updatedFormData[key] = {
-              value: updatedFormData[key] as string,
-              data: findDataUser
+              id: findDataUser.id,
+              key: keyFormatted,
             }
           }
         }

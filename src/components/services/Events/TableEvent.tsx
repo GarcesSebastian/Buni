@@ -43,6 +43,7 @@ export function DataTable({
     pagination.currentPage * pagination.rowsPerPage,
   )
 
+  console.log(columns)
   return (
     <div className="space-y-4">
       {hasActiveFilters && (
