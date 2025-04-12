@@ -25,6 +25,7 @@ interface Props{
     dialogAddField: boolean 
     setDialogAddField: (dialogAddField: boolean) => void
     editingField?: FormField
+    setEditingField: (editingField: FormField | undefined) => void
 }
 
 export type ItemList = {id: number, value: string}
@@ -37,14 +38,23 @@ const DialogDefault: FormField = {
     seccion: "personal"
 }
 
-const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAddField, editingField}: Props) => {
+const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAddField, editingField, setEditingField}: Props) => {
     const [itemsList, setItemsList] = useState<ItemList[]>([])
     const [newField, setNewField] = useState<FormField>(editingField || DialogDefault)
-    const [optionsField, setOptionsField] = useState<string>("")
     const [showOptionsField, setShowOptionsField] = useState<boolean>(false)
     const [isQualification, setIsQualification] = useState<boolean>(false)
     const [maxQualification, setMaxQualification] = useState<number>(editingField?.maxQualification || configQualification.default)
     const [qualificationIcon, setQualificationIcon] = useState<typeof configQualificationIcons[number]["id"]>(editingField?.qualificationIcon || "star")
+    const [error, setError] = useState<string>("")
+
+    const normalizeString = (str: string) => {
+        return str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          .replace(/[^a-z0-9]/g, "")
+    }
 
     useEffect(() => {
         if (editingField) {
@@ -68,20 +78,37 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
             setMaxQualification(configQualification.default)
             setQualificationIcon("star")
         }
+        setError("")
     }, [editingField])
 
     const addField = () => {
-        if (!currentForm || !newField.nombre) return
+        if (!currentForm) return
 
-        const campoId = editingField?.id || newField.nombre.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now()
+        if (!newField.nombre.trim()) {
+            setError("El nombre del campo no puede estar vacío")
+            return
+        }
+
+        const fieldExists = currentForm.campos.some(
+            campo => campo.id !== editingField?.id && 
+            normalizeString(campo.nombre) === normalizeString(newField.nombre)
+        )
+
+        if (fieldExists) {
+            setError("Ya existe un campo con este nombre")
+            return
+        }
+
+        const campoId = editingField?.id || newField.nombre.toLowerCase() + "_" + Date.now()
+        console.log(campoId, editingField)
 
         const campo: FormField = {
             ...newField,
             id: campoId,
         }
 
-        if (campo.tipo === "seleccion" && optionsField) {
-            campo.opciones = optionsField.split(",")
+        if (campo.tipo === "seleccion") {
+            campo.opciones = itemsList.map((item) => item.value)
         }
 
         if (campo.tipo === "checklist_unico" || campo.tipo === "checklist_multiple") {
@@ -106,9 +133,11 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
         }
 
         setNewField(DialogDefault)
-        setOptionsField("")
         setShowOptionsField(false)
         setDialogAddField(false)
+        setItemsList([])
+        setError("")
+        setEditingField(undefined)
     }
 
     const handleChangeSelect = (value: typeFieldForm) => {
@@ -131,8 +160,12 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                     <Input
                         id="nombre-campo"
                         value={newField.nombre}
-                        onChange={(e) => setNewField({ ...newField, nombre: e.target.value })}
+                        onChange={(e) => {
+                            setNewField({ ...newField, nombre: e.target.value })
+                            setError("")
+                        }}
                     />
+                    {error && <p className="text-sm text-red-500">{error}</p>}
                 </div>
 
                 <div className="grid gap-2">
@@ -178,7 +211,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                 {showOptionsField && (
                     <div className="grid gap-2">
                         <Label htmlFor="opciones-campo">Opciones</Label>
-                        <CheckList itemsList={itemsList} setItemsList={setItemsList}/>
+                        <CheckList itemsList={itemsList} setItemsList={setItemsList} normalizeString={normalizeString}/>
                     </div>
                 )}
 
@@ -252,7 +285,6 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                     variant="outline"
                     onClick={() => {
                         setNewField(DialogDefault)
-                        setOptionsField("")
                         setShowOptionsField(false)
                         setDialogAddField(false)
                     }}

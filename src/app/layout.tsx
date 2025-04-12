@@ -5,6 +5,7 @@ import "../styles/globals.css"
 
 import { TopNav } from "@/components/ui/TopNav"
 import { UserDataProvider } from "@/hooks/auth/useUserData"
+import { WebSocketProvider } from "@/hooks/server/useWebSocket"
 import { NotificationProvider } from "@/components/ui/Notification"
 import { Suspense } from "react"
 
@@ -30,11 +31,13 @@ export default function RootLayout({
           <TopNav/>
           <div className="flex overflow-hidden">
             <UserDataProvider>
-              <NotificationProvider>
-                <Suspense>
-                  <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
-                </Suspense>
-              </NotificationProvider>
+              <WebSocketProvider>
+                <NotificationProvider>
+                  <Suspense>
+                    <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
+                  </Suspense>
+                </NotificationProvider>
+              </WebSocketProvider>
             </UserDataProvider>
           </div>
         </div>

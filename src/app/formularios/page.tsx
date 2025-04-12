@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
@@ -139,6 +139,10 @@ export default function FormulariosPage() {
   const [currentForm, setCurrentForm] = useState<Form | null>(null)
   const [dialogAddField, setDialogAddField] = useState<boolean>(false)
   const [editingField, setEditingField] = useState<FormField | undefined>(undefined)
+  const [personalSection, setPersonalSection] = useState<FormField[]>([])
+  const [academySection, setAcademySection] = useState<FormField[]>([])
+  const [aditionalSection, setAditionalSection] = useState<FormField[]>([])
+  const [error, setError] = useState<string>("")
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -191,10 +195,30 @@ export default function FormulariosPage() {
     })
   }
 
+  const normalizeString = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9]/g, "")
+  }
+
   const createForm = () => {
+    const nombreFormulario = "Nuevo Formulario " + (user.form.length + 1)
+    
+    const formExists = user.form.some(
+      form => normalizeString(form.nombre) === normalizeString(nombreFormulario)
+    )
+
+    if (formExists) {
+      setError("Ya existe un formulario con este nombre")
+      return
+    }
+
     const nuevoFormulario = {
       id: Date.now(),
-      nombre: "Nuevo Formulario",
+      nombre: nombreFormulario,
       descripcion: "Descripción del formulario",
       campos: [],
       state: false,
@@ -208,6 +232,7 @@ export default function FormulariosPage() {
     setUser(newData)
     setCurrentForm({ ...nuevoFormulario })
     sendMessage("UPDATE_DATA", {users: newData})
+    setError("")
   }
 
   const editForm = (formulario: Form) => {
@@ -231,6 +256,16 @@ export default function FormulariosPage() {
   const updateForm = () => {
     if (!currentForm) return
 
+    const formExists = user.form.some(
+      form => form.id !== currentForm.id && 
+      normalizeString(form.nombre) === normalizeString(currentForm.nombre)
+    )
+
+    if (formExists) {
+      setError("Ya existe un formulario con este nombre")
+      return
+    }
+
     const newData = {
       ...user,
       form: user.form.map((f) => (f.id === currentForm.id ? currentForm : f))
@@ -239,6 +274,7 @@ export default function FormulariosPage() {
     setUser(newData)
     setCurrentForm(null)
     sendMessage("UPDATE_DATA", {users: newData})
+    setError("")
   }
 
   const deleteField = (campoId: string) => {
@@ -270,16 +306,27 @@ export default function FormulariosPage() {
     sendMessage("UPDATE_DATA", {users: newData})
   }
 
+  useEffect(() => {
+    if (currentForm) {
+      setPersonalSection(currentForm.campos.filter((c) => c.seccion === "personal"))
+      setAcademySection(currentForm.campos.filter((c) => c.seccion === "academica"))
+      setAditionalSection(currentForm.campos.filter((c) => c.seccion === "adicional"))
+    }
+  }, [currentForm])
+
   return (
     <div className="flex h-full flex-col">
         <Section>
           <div className="space-y-6 p-4 shadow-lg shadow-black/5 rounded-lg bg-white">
             <div className="flex justify-between items-center max-md:flex-col max-md:items-start max-md:gap-2">
               <h1 className="text-2xl font-bold">Formularios</h1>
-              <Button onClick={createForm} className="bg-primary hover:bg-primary/90">
-                <Plus className="mr-2 h-4 w-4" />
-                Nuevo Formulario
-              </Button>
+              <div className="flex flex-col items-end gap-2">
+                {error && <p className="text-sm text-red-500">{error}</p>}
+                <Button onClick={createForm} className="bg-primary hover:bg-primary/90">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nuevo Formulario
+                </Button>
+              </div>
             </div>
 
             <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
@@ -400,8 +447,12 @@ export default function FormulariosPage() {
                         <Input
                           id="nombre-formulario"
                           value={currentForm.nombre}
-                          onChange={(e) => setCurrentForm({ ...currentForm, nombre: e.target.value })}
+                          onChange={(e) => {
+                            setCurrentForm({ ...currentForm, nombre: e.target.value })
+                            setError("")
+                          }}
                         />
+                        {error && <p className="text-sm text-red-500">{error}</p>}
                       </div>
 
                       <div className="grid gap-2">
@@ -433,9 +484,29 @@ export default function FormulariosPage() {
                                 items={currentForm.campos.map((campo) => campo.id)}
                                 strategy={verticalListSortingStrategy}
                               >
-                                <div className="space-y-2">
-                                  {currentForm.campos.map((campo, index) => (
-                                    <div key={campo.id} className="relative">
+                                <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
+                                  <Label className="font-medium">Datos Personales</Label>
+                                  {personalSection.length > 0 ? (
+                                    personalSection.map((campo, index) => (
+                                      <div key={campo.id} className="w-full">
+                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} data={{
+                                          index: index,
+                                          moveFieldDown,
+                                          moveFieldUp,
+                                          currentForm
+                                      }} />
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">No hay campos personales</p>
+                                  )}
+                                </div>
+
+                                <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
+                                  <Label className="font-medium">Datos Académicos</Label>
+                                  {academySection.length > 0 ? (
+                                    academySection.map((campo, index) => (
+                                      <div key={campo.id} className="w-full">
                                       <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} data={{
                                         index: index,
                                         moveFieldDown,
@@ -443,8 +514,30 @@ export default function FormulariosPage() {
                                         currentForm
                                       }} />
                                     </div>
-                                  ))}
+                                  ))
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">No hay campos académicos</p>
+                                  )}
                                 </div>
+
+                                <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
+                                  <Label className="font-medium">Datos Adicionales</Label>
+                                  {aditionalSection.length > 0 ? (
+                                    aditionalSection.map((campo, index) => (
+                                      <div key={campo.id} className="w-full">
+                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} data={{ 
+                                        index: index,
+                                        moveFieldDown,
+                                        moveFieldUp,
+                                        currentForm
+                                      }} />
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">No hay campos adicionales</p>
+                                  )}
+                                </div>
+
                               </SortableContext>
                             </DndContext>
                           </div>
@@ -517,6 +610,7 @@ export default function FormulariosPage() {
               dialogAddField={dialogAddField}
               setDialogAddField={setDialogAddField}
               editingField={editingField}
+              setEditingField={setEditingField}
             />
           </div>
         </Section>

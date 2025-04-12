@@ -1,6 +1,3 @@
-import { Faculty } from "./Faculty"
-import { Form } from "./Forms"
-
 export interface TableEvent {
   name: string,
   key: string,

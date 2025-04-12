@@ -35,8 +35,8 @@ interface HandleSubmitProps {
 }
 
 interface FormattedData {
-  value: string;
-  data: { id: number; nombre: string };
+  id: number;
+  key: string;
 }
 
 type UpdatedFormData = Record<string, string | number | FormattedData>;
@@ -75,8 +75,8 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
         const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
         if(findDataUser){
           updatedFormData[key] = {
-            value: updatedFormData[key],
-            data: findDataUser
+            id: findDataUser.id,
+            key: keyFormatted,
           }
         }
       }
