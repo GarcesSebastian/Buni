@@ -20,9 +20,11 @@ interface Registro {
     [key: string]: string;
 }
 
-export function generateSampleData(count: number, form: Form) {
+export function generateSampleData(count: number, form: Form | undefined) {
+    if (!form) return [];
+
     const data: Registro[] = [];
-    const campos = form.data?.campos || form.campos;
+    const campos = form.campos;
 
     const getRandomValue = (campo: Campo): string => {
         switch (campo.tipo) {
@@ -66,146 +68,20 @@ export const eventosEjemplo: Event[] = [
         hora: "05:39",
         cupos: -1,
         faculty: {
-            value: "Ingenieria_1",
-            data: {
-                nombre: "Ingenieria",
-                state: "true",
-                id: 1,
-            },
+            id: 1,
+            key: "faculty"
         },
         scenery: {
-            value: "Auditorio Santillana_1",
-            data: {
-                nombre: "Auditorio Santillana",
-                state: "true",
-                id: 1,
-            },
+            id: 1,
+            key: "scenery"
         },
         formAssists: {
-            value: "Formulario de Inscripcion_1742291990002",
-            data: {
-                id: 1742291990002,
-                nombre: "Formulario de Inscripcion",
-                descripcion: "Por favor ingrese los datos correctamente",
-                campos: [
-                    {
-                        id: "nombre_1742294172313",
-                        nombre: "Nombre",
-                        tipo: "texto",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "correo_electronico_1742294180033",
-                        nombre: "Correo Electronico",
-                        tipo: "email",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "numero_telefonico_1742294190390",
-                        nombre: "Numero Telefonico",
-                        tipo: "numero",
-                        requerido: false,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "semestre_1742294209768",
-                        nombre: "Semestre",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
-                    },
-                    {
-                        id: "facultad_1742294260490",
-                        nombre: "Programa",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
-                    },
-                    {
-                        id: "estrato_1742294281482",
-                        nombre: "Estrato",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "adicional",
-                        opciones: ["Bajo", "Medio", "Alto"],
-                    },
-                    {
-                        id: "direccion_1742294297671",
-                        nombre: "Direccion",
-                        tipo: "texto",
-                        requerido: false,
-                        seccion: "adicional",
-                    },
-                ],
-                state: true,
-            },
+            id: 1,
+            key: "form"
         },
         formInscriptions: {
-            value: "Formulario de Inscripcion_1742291990002",
-            data: {
-                id: 1742291990002,
-                nombre: "Formulario de Inscripcion",
-                descripcion: "Por favor ingrese los datos correctamente",
-                campos: [
-                    {
-                        id: "nombre_1742294172313",
-                        nombre: "Nombre",
-                        tipo: "texto",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "correo_electronico_1742294180033",
-                        nombre: "Correo Electronico",
-                        tipo: "email",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "numero_telefonico_1742294190390",
-                        nombre: "Numero Telefonico",
-                        tipo: "numero",
-                        requerido: false,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "semestre_1742294209768",
-                        nombre: "Semestre",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
-                    },
-                    {
-                        id: "facultad_1742294260490",
-                        nombre: "Programa",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
-                    },
-                    {
-                        id: "estrato_1742294281482",
-                        nombre: "Estrato",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "adicional",
-                        opciones: ["Bajo", "Medio", "Alto"],
-                    },
-                    {
-                        id: "direccion_1742294297671",
-                        nombre: "Direccion",
-                        tipo: "texto",
-                        requerido: false,
-                        seccion: "adicional",
-                    },
-                ],
-                state: true,
-            },
+            id: 1,
+            key: "form"
         },
         assists: generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,
@@ -337,146 +213,20 @@ export const eventosEjemplo: Event[] = [
         hora: "14:00",
         cupos: 100,
         faculty: {
-            value: "Ingenieria_1",
-            data: {
-                nombre: "Ingenieria",
-                state: "true",
-                id: 1,
-            },
+            id: 1,
+            key: "faculty"
         },
         scenery: {
-            value: "Sala de Conferencias A_2",
-            data: {
-                nombre: "Sala de Conferencias A",
-                state: "true",
-                id: 2,
-            },
+            id: 2,
+            key: "scenery"
         },
         formAssists: {
-            value: "Formulario de Inscripcion_1742291990002",
-            data: {
-                id: 1742291990002,
-                nombre: "Formulario de Inscripcion",
-                descripcion: "Por favor ingrese los datos correctamente",
-                campos: [
-                    {
-                        id: "nombre_1742294172313",
-                        nombre: "Nombre",
-                        tipo: "texto",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "correo_electronico_1742294180033",
-                        nombre: "Correo Electronico",
-                        tipo: "email",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "numero_telefonico_1742294190390",
-                        nombre: "Numero Telefonico",
-                        tipo: "numero",
-                        requerido: false,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "semestre_1742294209768",
-                        nombre: "Semestre",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
-                    },
-                    {
-                        id: "facultad_1742294260490",
-                        nombre: "Programa",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
-                    },
-                    {
-                        id: "estrato_1742294281482",
-                        nombre: "Estrato",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "adicional",
-                        opciones: ["Bajo", "Medio", "Alto"],
-                    },
-                    {
-                        id: "direccion_1742294297671",
-                        nombre: "Direccion",
-                        tipo: "texto",
-                        requerido: false,
-                        seccion: "adicional",
-                    },
-                ],
-                state: true,
-            },
+            id: 1742291990002,
+            key: "form",
         },
         formInscriptions: {
-            value: "Formulario de Inscripcion_1742291990002",
-            data: {
-                id: 1742291990002,
-                nombre: "Formulario de Inscripcion",
-                descripcion: "Por favor ingrese los datos correctamente",
-                campos: [
-                    {
-                        id: "nombre_1742294172313",
-                        nombre: "Nombre",
-                        tipo: "texto",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "correo_electronico_1742294180033",
-                        nombre: "Correo Electronico",
-                        tipo: "email",
-                        requerido: true,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "numero_telefonico_1742294190390",
-                        nombre: "Numero Telefonico",
-                        tipo: "numero",
-                        requerido: false,
-                        seccion: "personal",
-                    },
-                    {
-                        id: "semestre_1742294209768",
-                        nombre: "Semestre",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
-                    },
-                    {
-                        id: "facultad_1742294260490",
-                        nombre: "Programa",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "personal",
-                        opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
-                    },
-                    {
-                        id: "estrato_1742294281482",
-                        nombre: "Estrato",
-                        tipo: "seleccion",
-                        requerido: true,
-                        seccion: "adicional",
-                        opciones: ["Bajo", "Medio", "Alto"],
-                    },
-                    {
-                        id: "direccion_1742294297671",
-                        nombre: "Direccion",
-                        tipo: "texto",
-                        requerido: false,
-                        seccion: "adicional",
-                    },
-                ],
-                state: true,
-            },
+            id: 1742291990002,
+            key: "form"
         },
         assists: generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,

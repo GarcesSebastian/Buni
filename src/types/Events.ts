@@ -17,24 +17,24 @@ export interface Event {
   nombre: string
   organizador: string
   scenery: {
-    value: string,
-    data: Scenery
+    id: number
+    key: string
   }
   faculty: {
-    value: string,
-    data: Faculty
+    id: number
+    key: string
   }
   cupos: number
   fecha: string
   hora: string
   state: string
   formAssists: {
-    value: string,
-    data: Form
+    id: number
+    key: string
   }
   formInscriptions: {
-    value: string,
-    data: Form
+    id: number
+    key: string
   }
   assists: Assists[]
   inscriptions: Assists[]

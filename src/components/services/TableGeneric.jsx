@@ -93,19 +93,17 @@ export function TableGeneric({structure, structureForm, table}) {
   }
 
   const normalizeData = (data, value) => {
-    const dataFormatted = typeof data[value] === "object" 
-      ? (data[value]).value 
-      : data[value];
-    const dataSplit = typeof dataFormatted === "string" ? dataFormatted.split("_") : []
-
-    if (dataSplit.length <= 1){
-      return dataFormatted
+    if(typeof data[value] != "object"){
+      return data[value]
     }
 
-    const id = dataSplit[dataSplit.length - 1]
-    const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
-    
-    const dataFind = user[valueFormatted]?.find((f) => f.id === Number(id))
+    const DataEvent = data[value]
+
+    if(!DataEvent || !DataEvent.key){
+      return data[value]
+    }
+
+    const dataFind = user[DataEvent.key]?.find((f) => f.id === Number(DataEvent.id))
     return dataFind?.nombre
   }
 

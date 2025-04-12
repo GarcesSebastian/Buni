@@ -23,6 +23,8 @@ import { Alert, AlertTitle } from "@/components/ui/Alert"
 import { Form } from "@/types/Forms"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { generateSampleData } from "./data"
+import { ErrorMessage } from "@/components/ui/ErrorMessage"
+import { ERROR_MESSAGES } from "@/constants/errorMessages"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 
@@ -36,9 +38,67 @@ export default function EventDetailPage() {
     const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
     const [generatingData, setGeneratingData] = useState(false)
-    
-    const defaultAssistsField = event?.formAssists?.data.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-    const defaultInscriptionsField = event?.formInscriptions?.data.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+
+    useEffect(() => {
+        if (event) {
+            const assistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+            const inscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+            setSelectedAssistsDistribution(assistsField)
+            setSelectedInscriptionsDistribution(inscriptionsField)
+        }
+    }, [event])
+
+    useEffect(() => {
+        setLoading(true)
+        const foundEvent = user.events.find((e) => e.id === Number(eventId))
+
+        if (foundEvent) {
+            setEvent(foundEvent)
+        } else {
+            router.push("/events")
+        }
+
+        setLoading(false)
+    }, [eventId, router, user.events])
+
+    useEffect(() => {
+        if (lastMessage?.type === "UPDATE_DATA" && (lastMessage.payload as { users: User })?.users) {
+            const updatedUser = (lastMessage.payload as { users: User }).users;
+            const updatedEvent = updatedUser.events.find((e: Event) => e.id === Number(eventId));
+            
+            if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
+                setEvent(updatedEvent);
+                updateEvent(Number(eventId), updatedEvent);
+            }
+        }
+    }, [lastMessage, eventId, updateEvent, event]);
+
+    const idFormAssists = event?.formAssists?.id
+    const idFormInscriptions = event?.formInscriptions?.id
+
+    const formAssists = user.form.find((f) => f.id == Number(idFormAssists))
+    const formInscriptions = user.form.find((f) => f.id == Number(idFormInscriptions))
+
+    const idFaculty = event?.faculty?.id
+    const idScenery = event?.scenery?.id
+
+    const faculty = user.faculty.find((f) => f.id == Number(idFaculty))
+    const scenery = user.scenery.find((s) => s.id == Number(idScenery))
+
+    if (!formAssists && !formInscriptions) {
+        return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
+    }
+
+    if (!scenery) {
+        return <ErrorMessage {...ERROR_MESSAGES.SCENERY_NOT_FOUND} />
+    }
+
+    if (!faculty) {
+        return <ErrorMessage {...ERROR_MESSAGES.FACULTY_NOT_FOUND} />
+    }
+
+    const defaultAssistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+    const defaultInscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
     
     const [selectedAssistsDistribution, setSelectedAssistsDistribution] = useState<string>(defaultAssistsField)
     const [selectedInscriptionsDistribution, setSelectedInscriptionsDistribution] = useState<string>(defaultInscriptionsField)
@@ -88,40 +148,6 @@ export default function EventDetailPage() {
         selectedAssistsDistribution,
         selectedInscriptionsDistribution
     )
-
-    useEffect(() => {
-        if (event) {
-            const assistsField = event.formAssists?.data.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-            const inscriptionsField = event.formInscriptions?.data.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-            setSelectedAssistsDistribution(assistsField)
-            setSelectedInscriptionsDistribution(inscriptionsField)
-        }
-    }, [event])
-
-    useEffect(() => {
-        setLoading(true)
-        const foundEvent = user.events.find((e) => e.id === Number(eventId))
-
-        if (foundEvent) {
-            setEvent(foundEvent)
-        } else {
-            router.push("/events")
-        }
-
-        setLoading(false)
-    }, [eventId, router, user.events])
-
-    useEffect(() => {
-        if (lastMessage?.type === "UPDATE_DATA" && (lastMessage.payload as { users: User })?.users) {
-            const updatedUser = (lastMessage.payload as { users: User }).users;
-            const updatedEvent = updatedUser.events.find((e: Event) => e.id === Number(eventId));
-            
-            if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
-                setEvent(updatedEvent);
-                updateEvent(Number(eventId), updatedEvent);
-            }
-        }
-    }, [lastMessage, eventId, updateEvent, event]);
 
     const handleFilter = (column: string, value: string | string[], type: TabsEvent) => {
         if (type === "assists") {
@@ -199,20 +225,18 @@ export default function EventDetailPage() {
         }
     }
 
-    const getColumnsForm = (formUse: { value: string; data: Form }): {[key: string]: string | number | boolean}[] => {
+    const getColumnsForm = (formUse: Form | undefined): {[key: string]: string | number | boolean}[] => {
         if (!formUse) return []
 
         const structure: {[key: string]: string | number | boolean}[] = []
 
-        if ("data" in formUse) {
-            formUse.data.campos.forEach((campo) => {
-                structure.push({
-                    key: campo.id.split("_")[0],
-                    label: campo.nombre,
-                    filterable: true,
-                })
+        formUse.campos.forEach((campo) => {
+            structure.push({
+                key: campo.id.split("_")[0],
+                label: campo.nombre,
+                filterable: true,
             })
-        }
+        })
 
         return structure
     }
@@ -225,8 +249,8 @@ export default function EventDetailPage() {
             const inscriptionsCount = Math.floor(Math.random() * (99999 - 1000 + 1)) + 1000;
             const assistsCount = Math.floor(Math.random() * (inscriptionsCount - 0 + 1)) + 0;
 
-            const newInscriptions = generateSampleData(inscriptionsCount, event.formInscriptions.data);
-            const newAssists = generateSampleData(assistsCount, event.formAssists.data);
+            const newInscriptions = generateSampleData(inscriptionsCount, formInscriptions);
+            const newAssists = generateSampleData(assistsCount, formAssists);
 
             setEvent({
                 ...event,
@@ -354,7 +378,7 @@ export default function EventDetailPage() {
                                                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
                                                         <p className="text-sm font-medium">Escenario</p>
-                                                        <p className="text-sm sm:text-base">{event.scenery?.data.nombre}</p>
+                                                        <p className="text-sm sm:text-base">{scenery?.nombre}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -372,7 +396,7 @@ export default function EventDetailPage() {
                                                     <div>
                                                         <p className="text-sm font-medium">Programa</p>
                                                         <Badge variant="outline" className="text-xs sm:text-sm">
-                                                            {event.faculty?.data.nombre}
+                                                            {faculty?.nombre}
                                                         </Badge>
                                                     </div>
                                                 </div>
@@ -518,7 +542,7 @@ export default function EventDetailPage() {
                                         <DataImportExport
                                             type="assists"
                                             data={filteredAssists}
-                                            columns={getColumnsForm(event.formAssists) as Assists[]}
+                                            columns={getColumnsForm(formAssists) as Assists[]}
                                             fileName={`asistencias_evento_${event.id}`}
                                             onImport={(data) => handleImportData("assists", data)}
                                         />
@@ -528,14 +552,14 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type={currentTab}
                                             data={currentTab === "assists" ? filteredAssists : filteredInscriptions}
-                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists) : getColumnsForm(event.formInscriptions)}
+                                            columns={currentTab === "assists" ? getColumnsForm(formAssists) : getColumnsForm(formInscriptions)}
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
                                             onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
                                             hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
-                                            form={currentTab === "assists" ? event.formAssists.data : event.formInscriptions.data}
+                                            form={currentTab === "assists" ? formAssists : formInscriptions}
                                         />
                                     </CardContent>
                                 </Card>
@@ -549,7 +573,7 @@ export default function EventDetailPage() {
                                                         <SelectValue placeholder="Distribuir por..." />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {event.formAssists?.data.campos
+                                                        {formAssists?.campos
                                                             .filter(campo => campo.tipo === "seleccion" || campo.tipo === "checklist_unico" || campo.tipo === "checklist_multiple")
                                                             .map((campo) => (
                                                                 <SelectItem key={campo.id} value={campo.id.split("_")[0]}>
@@ -589,7 +613,7 @@ export default function EventDetailPage() {
                                         <DataImportExport
                                             type="inscriptions"
                                             data={filteredInscriptions}
-                                            columns={getColumnsForm(event.formInscriptions) as Assists[]}
+                                            columns={getColumnsForm(formInscriptions) as Assists[]}
                                             fileName={`inscripciones_evento_${event.id}`}
                                             onImport={(data) => handleImportData("inscriptions", data)}
                                         />
@@ -599,14 +623,14 @@ export default function EventDetailPage() {
                                         <DataTable
                                             type={currentTab}
                                             data={currentTab === "assists" ? filteredAssists : filteredInscriptions}
-                                            columns={currentTab === "assists" ? getColumnsForm(event.formAssists) : getColumnsForm(event.formInscriptions)}
+                                            columns={currentTab === "assists" ? getColumnsForm(formAssists) : getColumnsForm(formInscriptions)}
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
                                             onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
                                             hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
-                                            form={currentTab === "assists" ? event.formAssists.data : event.formInscriptions.data}
+                                            form={currentTab === "assists" ? formAssists : formInscriptions}
                                         />
                                     </CardContent>
                                 </Card>
@@ -620,7 +644,7 @@ export default function EventDetailPage() {
                                                         <SelectValue placeholder="Distribuir por..." />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {event.formInscriptions?.data.campos
+                                                        {formInscriptions?.campos
                                                             .filter(campo => campo.tipo === "seleccion")
                                                             .map((campo) => (
                                                                 <SelectItem key={campo.id} value={campo.id.split("_")[0]}>

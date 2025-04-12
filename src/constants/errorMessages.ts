@@ -16,5 +16,17 @@ export const ERROR_MESSAGES = {
     description: "Los parámetros proporcionados no son válidos.",
     buttonText: "Volver al inicio",
     buttonHref: "/"
+  },
+  SCENERY_NOT_FOUND: {
+    title: "Error",
+    description: "No se encontró el escenario especificado.",
+    buttonText: "Volver al inicio",
+    buttonHref: "/"
+  },
+  FACULTY_NOT_FOUND: {
+    title: "Error",
+    description: "No se encontró la facultad especificada.",
+    buttonText: "Volver al inicio",
+    buttonHref: "/"
   }
 } 

@@ -189,42 +189,48 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                 <Label className="font-medium">
                     {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
                 </Label>
-                <div className="flex gap-2">
-                    {Array.from({ length: field.maxQualification || 5 }).map((_, index) => {
-                        const isSelected = index < Number(formValues[field.id] || 0);
-                        const iconConfig = configQualificationIcons.find(icon => icon.id === field.qualificationIcon) || configQualificationIcons[0];
-                        
-                        return (
-                            <button
-                                key={index}
-                                type="button"
-                                onClick={() => handleChange(field.id, (index + 1).toString())}
-                                className="hover:scale-110 transition-transform"
-                            >
-                                {iconConfig.id === "star" && (
-                                    <Star 
-                                        className={`w-6 h-6 ${isSelected ? iconConfig.selectedColor : iconConfig.unselectedColor}`}
-                                        fill={isSelected ? "currentColor" : "none"}
-                                    />
-                                )}
-                                {iconConfig.id === "heart" && (
-                                    <Heart 
-                                        className={`w-6 h-6 ${isSelected ? iconConfig.selectedColor : iconConfig.unselectedColor}`}
-                                        fill={isSelected ? "currentColor" : "none"}
-                                    />
-                                )}
-                                {iconConfig.id === "thumbs-up" && (
-                                    <ThumbsUp 
-                                        className={`w-6 h-6 ${isSelected ? iconConfig.selectedColor : iconConfig.unselectedColor}`}
-                                    />
-                                )}
-                            </button>
-                        );
-                    })}
+                <div className="flex flex-col justify-start items-star">
+                    <div className="flex gap-2">
+                        {Array.from({ length: field.maxQualification || 5 }).map((_, index) => {
+                            const isSelected = index < Number(formValues[field.id] || 0);
+                            const iconConfig = configQualificationIcons.find(icon => icon.id === field.qualificationIcon) || configQualificationIcons[0];
+                            
+                            const classIcons = `w-6 h-6 stroke-none ${isSelected ? iconConfig.selectedColor : iconConfig.unselectedColor}`
+                            const fillIcons = isSelected ? "currentColor" : "#c7c6c6"
+
+                            return (
+                                <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() => handleChange(field.id, (index + 1).toString())}
+                                    className="hover:scale-110 transition-transform"
+                                >
+                                    {iconConfig.id === "star" && (
+                                        <Star 
+                                            className={classIcons}
+                                            fill={fillIcons}
+                                        />
+                                    )}
+                                    {iconConfig.id === "heart" && (
+                                        <Heart 
+                                            className={classIcons}
+                                            fill={fillIcons}
+                                        />
+                                    )}
+                                    {iconConfig.id === "thumbs-up" && (
+                                        <ThumbsUp 
+                                            className={classIcons}
+                                            fill={fillIcons}
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                     <button
                         type="button"
                         onClick={() => handleChange(field.id, "0")}
-                        className="hover:scale-110 transition-transform"
+                        className="hover:scale-110 transition-transform w-fit"
                     >
                         <span className="text-gray-400 text-sm">Ninguna</span>
                     </button>

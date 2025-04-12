@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Form, FormField, sectionFieldForm, typeFieldForm } from "@/types/Forms"
 import { configField, configFieldSection } from "@/config/Forms"
 import CheckList from "@/components/ui/CheckList"
@@ -24,6 +24,7 @@ interface Props{
     setCurrentForm: (currentForm: Form) => void
     dialogAddField: boolean 
     setDialogAddField: (dialogAddField: boolean) => void
+    editingField?: FormField
 }
 
 export type ItemList = {id: number, value: string}
@@ -36,19 +37,43 @@ const DialogDefault: FormField = {
     seccion: "personal"
 }
 
-const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAddField}: Props) => {
+const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAddField, editingField}: Props) => {
     const [itemsList, setItemsList] = useState<ItemList[]>([])
-    const [newField, setNewField] = useState<FormField>(DialogDefault)
+    const [newField, setNewField] = useState<FormField>(editingField || DialogDefault)
     const [optionsField, setOptionsField] = useState<string>("")
     const [showOptionsField, setShowOptionsField] = useState<boolean>(false)
     const [isQualification, setIsQualification] = useState<boolean>(false)
-    const [maxQualification, setMaxQualification] = useState<number>(configQualification.default)
-    const [qualificationIcon, setQualificationIcon] = useState<typeof configQualificationIcons[number]["id"]>("star")
+    const [maxQualification, setMaxQualification] = useState<number>(editingField?.maxQualification || configQualification.default)
+    const [qualificationIcon, setQualificationIcon] = useState<typeof configQualificationIcons[number]["id"]>(editingField?.qualificationIcon || "star")
+
+    useEffect(() => {
+        if (editingField) {
+            setNewField(editingField)
+            setShowOptionsField(editingField.tipo === "seleccion" || editingField.tipo === "checklist_unico" || editingField.tipo === "checklist_multiple")
+            setIsQualification(editingField.tipo === "qualification")
+            if (editingField.opciones) {
+                setItemsList(editingField.opciones.map((opcion, index) => ({ id: index, value: opcion })))
+            }
+            if (editingField.maxQualification) {
+                setMaxQualification(editingField.maxQualification)
+            }
+            if (editingField.qualificationIcon) {
+                setQualificationIcon(editingField.qualificationIcon)
+            }
+        } else {
+            setNewField(DialogDefault)
+            setShowOptionsField(false)
+            setIsQualification(false)
+            setItemsList([])
+            setMaxQualification(configQualification.default)
+            setQualificationIcon("star")
+        }
+    }, [editingField])
 
     const addField = () => {
         if (!currentForm || !newField.nombre) return
 
-        const campoId = newField.nombre.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now()
+        const campoId = editingField?.id || newField.nombre.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now()
 
         const campo: FormField = {
             ...newField,
@@ -68,10 +93,17 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
             campo.qualificationIcon = qualificationIcon
         }
 
-        setCurrentForm({
-            ...currentForm,
-            campos: [...currentForm.campos, campo],
-        })
+        if (editingField) {
+            setCurrentForm({
+                ...currentForm,
+                campos: currentForm.campos.map((c) => c.id === editingField.id ? campo : c),
+            })
+        } else {
+            setCurrentForm({
+                ...currentForm,
+                campos: [...currentForm.campos, campo],
+            })
+        }
 
         setNewField(DialogDefault)
         setOptionsField("")
@@ -89,8 +121,8 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
         <Dialog open={dialogAddField} onOpenChange={setDialogAddField}>
             <DialogContent>
             <DialogHeader>
-                <DialogTitle>Agregar Nuevo Campo</DialogTitle>
-                <DialogDescription>Defina las propiedades del nuevo campo para el formulario</DialogDescription>
+                <DialogTitle>{editingField ? "Editar Campo" : "Agregar Nuevo Campo"}</DialogTitle>
+                <DialogDescription>{editingField ? "Modifique las propiedades del campo" : "Defina las propiedades del nuevo campo para el formulario"}</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-4 max-h-full">

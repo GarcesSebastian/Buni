@@ -24,7 +24,6 @@ import { Event } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
 import { User, useUserData } from "@/hooks/auth/useUserData"
 import Link from "next/link"
-import { Form } from "@/types/Forms"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { ErrorMessage } from "@/components/ui/ErrorMessage"
 import { ERROR_MESSAGES } from "@/constants/errorMessages"
@@ -43,10 +42,10 @@ export default function FormsPage() {
   const { params: dynamicParams } = params || {}; 
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
-
   const keyForm = typeForm ? `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}` : '';
 
   const [event, setEvent] = useState<Event | undefined>(undefined)
+
   const [formValues, setFormValues] = useState<Record<string, (formOptionsType)>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -54,8 +53,7 @@ export default function FormsPage() {
   const [progress, setProgress] = useState(0)
   const [showPreview, setShowPreview] = useState(false)
   const [isActive] = useState<boolean>(true)
-
-  // Efectos
+  
   useEffect(() => {
     if (user && idEvent) {
       const eventFound = getEvent(user, Number(idEvent))
@@ -65,10 +63,9 @@ export default function FormsPage() {
 
   useEffect(() => {
     if (event && keyForm) {
-      const form = event[keyForm as keyof Event] as { value: string, data: Form}
       if (form) {
         const initialValues: Record<string, (string | boolean)> = {}
-        form.data.campos.forEach((campo) => {
+        form.campos.forEach((campo) => {
           initialValues[campo.id] = campo.tipo === "checkbox" ? false : ""
         })
         setFormValues(initialValues)
@@ -78,10 +75,9 @@ export default function FormsPage() {
 
   useEffect(() => {
     if (event && keyForm) {
-      const form = event[keyForm as keyof Event] as { value: string, data: Form}
       if (form) {
-        const totalFields = form.data.campos.filter((campo) => campo.requerido).length
-        const completedFields = form.data.campos
+        const totalFields = form.campos.filter((campo) => campo.requerido).length
+        const completedFields = form.campos
           .filter((campo) => campo.requerido)
           .filter((campo) => {
             if (campo.tipo === "checkbox") return formValues[campo.id] === true
@@ -94,6 +90,7 @@ export default function FormsPage() {
     }
   }, [formValues, event, keyForm])
 
+
   if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
     return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
   }
@@ -102,24 +99,32 @@ export default function FormsPage() {
     return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
   }
 
-  const form = event[keyForm as keyof Event] as { value: string, data: Form}
+  const idForm = (event[keyForm as keyof Event] as { id: number, key: string }).id
+  const form = user.form.find((f) => f.id == Number(idForm))
 
   if (!form) {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
 
+  const idScenery = (event.scenery as { id: number, key: string }).id
+  const scenery = user.scenery.find((s) => s.id == Number(idScenery))
+
+  if (!scenery) {
+    return <ErrorMessage {...ERROR_MESSAGES.SCENERY_NOT_FOUND} />
+  }
+
   const secciones = {
-      personal: form.data.campos.filter((campo) => campo.seccion === "personal") || [],
-      academica: form.data.campos.filter((campo) => campo.seccion === "academica") || [],
-      adicional: form.data.campos.filter((campo) => campo.seccion === "adicional") || [],
+      personal: form.campos.filter((campo) => campo.seccion === "personal") || [],
+      academica: form.campos.filter((campo) => campo.seccion === "academica") || [],
+      adicional: form.campos.filter((campo) => campo.seccion === "adicional") || [],
   }
 
   const validateForm = (sectionToValidate?: string) => {
     const newErrors: Record<string, string> = {}
 
     const camposAValidar = sectionToValidate
-      ? form.data.campos.filter((campo) => campo.seccion === sectionToValidate)
-      : form.data.campos
+      ? form.campos.filter((campo) => campo.seccion === sectionToValidate)
+      : form.campos
 
     camposAValidar.forEach((campo) => {
       if (campo.requerido) {
@@ -210,8 +215,8 @@ export default function FormsPage() {
                   </Button>
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
-                <h1 className="text-2xl font-bold">{form.data.nombre}</h1>
-                <p className="text-muted-foreground">{form.data.descripcion}</p>
+                <h1 className="text-2xl font-bold">{form.nombre}</h1>
+                <p className="text-muted-foreground">{form.descripcion}</p>
               </div>
             </div>
 
@@ -227,7 +232,7 @@ export default function FormsPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-xl">{event?.nombre}</CardTitle>
-                  <CardDescription>{form.data.descripcion}</CardDescription>
+                  <CardDescription>{form.descripcion}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div className="flex items-center">
@@ -240,7 +245,7 @@ export default function FormsPage() {
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{event.scenery.value.split("_")[0]}</span>
+                    <span className="text-sm">{scenery.nombre}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -292,7 +297,7 @@ export default function FormsPage() {
             <Card className="mb-8 print:shadow-none">
               <CardHeader className="flex flex-col">
                 <CardTitle>{event.nombre}</CardTitle>
-                <CardDescription>{form.data.descripcion}</CardDescription>
+                <CardDescription>{form.descripcion}</CardDescription>
               </CardHeader>
 
               {submitted ? (

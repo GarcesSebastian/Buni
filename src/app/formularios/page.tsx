@@ -47,6 +47,7 @@ import { useWebSocket } from "@/hooks/server/useWebSocket"
 interface SorteableFieldProps {
   campo: FormField,
   onDelete: (id: string) => void,
+  onEdit: (id: string) => void,
   data: {
     index: number,
     moveFieldUp: (index: number) => void,
@@ -55,7 +56,7 @@ interface SorteableFieldProps {
   }
 }
 
-function SortableCampo({ campo, onDelete, data }: SorteableFieldProps) {
+function SortableCampo({ campo, onDelete, onEdit, data }: SorteableFieldProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: campo.id })
 
   const style = {
@@ -119,6 +120,14 @@ function SortableCampo({ campo, onDelete, data }: SorteableFieldProps) {
         >
           <Trash2 className="h-4 w-4" />
         </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(campo.id)}
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   )
@@ -129,6 +138,7 @@ export default function FormulariosPage() {
   const { sendMessage } = useWebSocket()
   const [currentForm, setCurrentForm] = useState<Form | null>(null)
   const [dialogAddField, setDialogAddField] = useState<boolean>(false)
+  const [editingField, setEditingField] = useState<FormField | undefined>(undefined)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -238,6 +248,16 @@ export default function FormulariosPage() {
       ...currentForm,
       campos: currentForm.campos.filter((c) => c.id !== campoId),
     })
+  }
+
+  const editField = (campoId: string) => {
+    if (!currentForm) return
+
+    const campo = currentForm.campos.find((c) => c.id === campoId)
+    if (!campo) return
+
+    setEditingField(campo)
+    setDialogAddField(true)
   }
 
   const toggleStateForm = (id: number) => {
@@ -416,7 +436,7 @@ export default function FormulariosPage() {
                                 <div className="space-y-2">
                                   {currentForm.campos.map((campo, index) => (
                                     <div key={campo.id} className="relative">
-                                      <SortableCampo campo={campo} onDelete={deleteField} data={{
+                                      <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} data={{
                                         index: index,
                                         moveFieldDown,
                                         moveFieldUp,
@@ -496,6 +516,7 @@ export default function FormulariosPage() {
               setCurrentForm={setCurrentForm}
               dialogAddField={dialogAddField}
               setDialogAddField={setDialogAddField}
+              editingField={editingField}
             />
           </div>
         </Section>
