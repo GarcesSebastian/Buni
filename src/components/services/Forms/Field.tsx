@@ -24,8 +24,8 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             ...prev,
             [id]: value,
         }))
-  
-        if (value && errors[id]) {
+        
+        if (formValues[id]) {
             setErrors((prev: Record<string, string>) => {
                 const newErrors: Record<string, string> = { ...prev }
                 delete newErrors[id]
@@ -35,7 +35,6 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
     }
     const [columnsGrid, setColumnsGrid] = useState<string[]>([])
 
-
     useEffect(() => {
         if (field.tipo === "checklist_unico_grid" || field.tipo === "checklist_multiple_grid") {
             const firstOption = field.opciones?.[0]
@@ -43,8 +42,9 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
         }
     }, [field])
 
-    console.log(formValues, field)
-        switch (field.tipo) {
+    console.log(formValues)
+
+    switch (field.tipo) {
         case "texto":
         case "email":
         return (
@@ -220,18 +220,70 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                         </thead>
                         <tbody>
                             {field.opciones?.map((row, index) => (
-                                typeof row === 'string' ? null : (
+                                typeof row === 'object' && (
                                     <tr key={index} className="border-t">
                                         <td className="p-2">{row.row}</td>
                                         {row.data.map((data, i) => (
                                             <td key={i} className="text-center p-2">
                                                 <Checkbox
                                                     id={`${field.id}-${row.row}-${data}`}
-                                                    checked={formValues[field.id] === data}
-                                                    onCheckedChange={() => handleChange(field.id, data)}
+                                                    checked={formValues[`${field.id}-${row.row}`] === data}
+                                                    onCheckedChange={() => handleChange(`${field.id}-${row.row}`, data)}
                                                 />
                                             </td>
                                         ))}
+                                    </tr>
+                                )
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        )
+
+        case "checklist_multiple_grid":
+        return (
+            <div className="grid gap-2" key={field.id}>
+                <Label className="font-medium">
+                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                </Label>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr>
+                                <th className="text-left p-2">Pregunta</th>
+                                {columnsGrid.map((column, index) => (
+                                    <th key={index} className="text-center p-2">
+                                        {column}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {field.opciones?.map((row, index) => (
+                                typeof row === 'object' && (
+                                    <tr key={index} className="border-t">
+                                        <td className="p-2">{row.row}</td>
+                                        {row.data.map((data, i) => {
+                                            const currentValues = formValues[`${field.id}-${row.row}`] as string[] || [];
+                                            return (
+                                                <td key={i} className="text-center p-2">
+                                                    <Checkbox
+                                                        id={`${field.id}-${row.row}-${data}`}
+                                                        variant="square"
+                                                        checked={currentValues.includes(data)}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                handleChange(`${field.id}-${row.row}`, [...currentValues, data]);
+                                                            } else {
+                                                                handleChange(`${field.id}-${row.row}`, currentValues.filter(v => v !== data));
+                                                            }
+                                                        }}
+                                                    />
+                                                </td>
+                                            )
+                                        })}
                                     </tr>
                                 )
                             ))}
