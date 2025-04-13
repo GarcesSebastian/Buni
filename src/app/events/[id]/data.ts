@@ -50,7 +50,7 @@ export function generateSampleData(count: number, form: Form | undefined) {
         const registro: Registro = {};
         campos.forEach((campo) => {
             const key = campo.id.split("_")[0];
-            registro[key] = getRandomValue(campo);
+            registro[key] = getRandomValue(campo as Campo);
         });
         data.push(registro);
     }
