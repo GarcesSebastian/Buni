@@ -63,15 +63,15 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {fieldInfo.opciones?.map((option) => (
                     <button
-                      key={option}
-                      onClick={() => handleOptionToggle(option)}
+                      key={typeof option === 'string' ? option : option.row}
+                      onClick={() => handleOptionToggle(typeof option === 'string' ? option : option.row)}
                       className={`px-3 py-1.5 text-sm rounded-md border transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-muted ${
-                        selectedOptions.includes(option)
+                        selectedOptions.includes(typeof option === 'string' ? option : option.row)
                           ? "bg-muted border-foreground/20"
                           : "bg-background border-input hover:border-foreground/20"
                       }`}
                     >
-                      {option}
+                      {typeof option === 'string' ? option : option.row}
                     </button>
                   ))}
                 </div>

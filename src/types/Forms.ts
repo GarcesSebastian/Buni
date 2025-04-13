@@ -1,5 +1,7 @@
+import { configQualificationIcons } from "@/config/Forms"
+
 export type sectionFieldForm = "personal" | "academica" | "adicional";
-export type typeFieldForm = "texto" | "numero" | "email" | "fecha" | "seleccion" | "checkbox" | "checklist_unico" | "checklist_multiple" | "qualification";
+export type typeFieldForm = "texto" | "numero" | "email" | "fecha" | "hora" | "checkbox" | "qualification" | "seleccion" | "checklist_unico" | "checklist_multiple" | "checklist_unico_grid" | "checklist_multiple_grid";
 
 export interface Form {
   id: number
@@ -14,11 +16,11 @@ export interface FormField {
   nombre: string
   tipo: typeFieldForm
   requerido: boolean
-  opciones?: string[]
+  seccion: sectionFieldForm
+  opciones?: (string | { row: string; data: string[]; })[]
   valor?: string
-  seccion?: string
   maxQualification?: number
-  qualificationIcon?: "star" | "heart" | "thumbs-up"
+  qualificationIcon?: typeof configQualificationIcons[number]["id"]
 }
 
 export interface Qualification {
