@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Form, FormField, sectionFieldForm, typeFieldForm } from "@/types/Forms"
 import { configField, configFieldSection } from "@/config/Forms"
 import CheckList from "@/components/ui/CheckList"
@@ -115,15 +115,14 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
             setShowOptionsField(editingField.tipo === "seleccion" || editingField.tipo === "checklist_unico" || editingField.tipo === "checklist_multiple")
             setIsQualification(editingField.tipo === "qualification")
             setIsGrid(editingField.tipo === "checklist_unico_grid" || editingField.tipo === "checklist_multiple_grid")
-            console.log(editingField.tipo)
 
             if (editingField.opciones) {
                 if (typeof editingField.opciones[0] === 'string') {
                     setItemsList(editingField.opciones.map((opcion, index) => ({ id: index, value: opcion as string })))
                 } else {
-                    const gridOptions = editingField.opciones as unknown as { row: string; data: string; }[]
+                    const gridOptions = editingField.opciones as unknown as { row: string; data: string[] }[]
                     const uniqueRows = [...new Set(gridOptions.map(opt => opt.row))]
-                    const uniqueCols = [...new Set(gridOptions.map(opt => opt.data))]
+                    const uniqueCols = gridOptions[0]?.data || []
                     setGridRows(uniqueRows.map((row, index) => ({ id: index, value: row })))
                     setGridCols(uniqueCols.map((col, index) => ({ id: index, value: col })))
                 }
@@ -167,7 +166,6 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
         }
 
         const campoId = editingField?.id || newField.nombre.toLowerCase() + "_" + Date.now()
-        console.log(campoId, editingField)
 
         const campo: FormField = {
             ...newField,
@@ -196,8 +194,6 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
             campo.qualificationIcon = qualificationIcon
         }
 
-        console.log(campo)
-
         if (editingField) {
             setCurrentForm({
                 ...currentForm,
@@ -225,7 +221,6 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
         setIsGrid(value === "checklist_unico_grid" || value === "checklist_multiple_grid")
     }
     
-
     return(
         <Dialog open={dialogAddField} onOpenChange={setDialogAddField}>
             <DialogContent className="grid grid-rows-[auto_1fr] max-h-[90vh] overflow-y-hidden">
