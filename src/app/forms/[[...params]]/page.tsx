@@ -130,6 +130,21 @@ export default function FormsPage() {
       if (campo.requerido) {
         if (campo.tipo === "checkbox" && !formValues[campo.id]) {
           newErrors[campo.id] = "Este campo es obligatorio"
+        } else if (campo.tipo === "checklist_unico_grid" || campo.tipo === "checklist_multiple_grid") {
+          const hasAllRowsSelected = campo.opciones?.every((opcion) => {
+            if (typeof opcion === 'object') {
+              const rowKey = `${campo.id}-${opcion.row}`;
+              return formValues[rowKey] !== undefined && 
+                (campo.tipo === "checklist_unico_grid" ? 
+                  formValues[rowKey] !== "" : 
+                  (formValues[rowKey] as string[] || []).length > 0);
+            }
+            return false;
+          });
+
+          if (!hasAllRowsSelected) {
+            newErrors[campo.id] = "Debe seleccionar al menos una opción en cada fila"
+          }
         } else if (
           campo.tipo !== "checkbox" &&
           (!formValues[campo.id] || formValues[campo.id].toString().trim() === "")

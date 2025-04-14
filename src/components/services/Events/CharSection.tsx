@@ -24,6 +24,20 @@ export function ChartSection({
 }: ChartSectionProps) {
   const hasData = data && data.length > 0
 
+  const formatValue = (value: string | number) => {
+    if (typeof value === "string") {
+      if (value === "true") return "Sí"
+      if (value === "false") return "No"
+      if (value === "0") return "Ninguna"
+      if (value === "1") return "1 estrella"
+      if (value === "2") return "2 estrellas"
+      if (value === "3") return "3 estrellas"
+      if (value === "4") return "4 estrellas"
+      if (value === "5") return "5 estrellas"
+    }
+    return value
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-col space-y-4">
@@ -44,7 +58,7 @@ export function ChartSection({
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${formatValue(name)}: ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -53,14 +67,25 @@ export function ChartSection({
                         <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
-                    <Legend />
+                    <Tooltip 
+                      formatter={(value: number) => [`${value}`, "Cantidad"]}
+                      labelFormatter={(label) => formatValue(label)}
+                    />
+                    <Legend 
+                      formatter={(value) => formatValue(value)}
+                    />
                   </PieChart>
                 ) : (
                   <BarChart data={data}>
-                    <XAxis dataKey="name" />
+                    <XAxis 
+                      dataKey="name" 
+                      tickFormatter={(value) => String(formatValue(value as string))}
+                    />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip 
+                      formatter={(value: number) => [`${value}`, "Cantidad"]}
+                      labelFormatter={(label) => formatValue(label)}
+                    />
                     <Bar dataKey="value" fill={colors[0]} />
                   </BarChart>
                 )}

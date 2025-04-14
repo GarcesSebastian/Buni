@@ -13,46 +13,90 @@ interface Campo {
     tipo: typeFieldForm;
     requerido: boolean;
     seccion?: string;
-    opciones?: string[];
+    opciones?: string[] | { row: string; data: string[] }[];
+    maxQualification?: number;
+    qualificationIcon?: string;
 }
 
 interface Registro {
-    [key: string]: string;
+    [key: string]: string | number | Record<string, string | string[]>;
 }
 
-export function generateSampleData(count: number, form: Form | undefined) {
+export async function generateSampleData(count: number, form: Form | undefined, onProgress?: (progress: number) => void) {
     if (!form) return [];
 
     const data: Registro[] = [];
     const campos = form.campos;
 
-    const getRandomValue = (campo: Campo): string => {
+    const getRandomValue = (campo: Campo): string | number | Record<string, string | string[]> => {
         switch (campo.tipo) {
             case "seleccion":
-                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
+                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || ""
             case "checklist_unico":
-                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
+                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || ""
             case "checklist_multiple":
-                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || "";
+                const numSelections = Math.min(3, Math.floor(Math.random() * (campo.opciones?.length || 0)) + 1)
+                return (campo.opciones?.slice(0, numSelections) || []).join(", ")
+            case "checklist_unico_grid":
+            case "checklist_multiple_grid":
+                if (!Array.isArray(campo.opciones)) return {}
+                const gridValue: Record<string, string | string[]> = {}
+                campo.opciones.forEach(opt => {
+                    if (typeof opt === 'object' && 'row' in opt && 'data' in opt) {
+                        const rowKey = `${campo.id}-${opt.row}`
+                        if (campo.tipo === "checklist_unico_grid") {
+                            gridValue[rowKey] = opt.data[Math.floor(Math.random() * opt.data.length)]
+                        } else {
+                            const numSelections = Math.min(3, Math.floor(Math.random() * opt.data.length) + 1)
+                            gridValue[rowKey] = opt.data.slice(0, numSelections)
+                        }
+                    }
+                })
+                return gridValue
             case "email":
                 return `estudiante${Math.floor(Math.random() * 1000)}@universidad.edu.co`;
             case "numero":
-                return Math.floor(Math.random() * 1000000).toString();
+                return Math.floor(Math.random() * 1000000);
             case "texto":
-            case "fecha":
                 return `Estudiante ${Math.floor(Math.random() * 1000)}`;
+            case "fecha":
+                const date = new Date();
+                date.setDate(date.getDate() - Math.floor(Math.random() * 365));
+                return date.toISOString().split('T')[0];
+            case "hora":
+                return `${Math.floor(Math.random() * 24).toString().padStart(2, '0')}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
+            case "checkbox":
+                return Math.random() > 0.5 ? 1 : 0;
+            case "qualification":
+                return Math.floor(Math.random() * (campo.maxQualification || 5) + 1);
             default:
                 return "";
         }
     };
 
-    for (let i = 0; i < count; i++) {
-        const registro: Registro = {};
-        campos.forEach((campo) => {
-            const key = campo.id.split("_")[0];
-            registro[key] = getRandomValue(campo as Campo);
-        });
-        data.push(registro);
+    const BATCH_SIZE = 100;
+    const totalBatches = Math.ceil(count / BATCH_SIZE);
+
+    for (let batch = 0; batch < totalBatches; batch++) {
+        const batchSize = Math.min(BATCH_SIZE, count - (batch * BATCH_SIZE));
+        const batchData: Registro[] = [];
+
+        for (let i = 0; i < batchSize; i++) {
+            const registro: Registro = {};
+            campos.forEach((campo) => {
+                const key = campo.id.split("_")[0];
+                registro[key] = getRandomValue(campo as Campo);
+            });
+            batchData.push(registro);
+        }
+
+        data.push(...batchData);
+
+        if (onProgress) {
+            onProgress(Math.min(100, Math.round((batch + 1) / totalBatches * 100)));
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     return data;
@@ -83,7 +127,7 @@ export const eventosEjemplo: Event[] = [
             id: 1,
             key: "form"
         },
-        assists: generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
+        assists: await generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,
             nombre: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",
@@ -143,7 +187,7 @@ export const eventosEjemplo: Event[] = [
             ],
             state: true,
         }),
-        inscriptions: generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
+        inscriptions: await generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
             id: 1742291990002,
             nombre: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",
@@ -228,7 +272,7 @@ export const eventosEjemplo: Event[] = [
             id: 1742291990002,
             key: "form"
         },
-        assists: generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
+        assists: await generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,
             nombre: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",
@@ -288,7 +332,7 @@ export const eventosEjemplo: Event[] = [
             ],
             state: true,
         }),
-        inscriptions: generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
+        inscriptions: await generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
             id: 1742291990002,
             nombre: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",

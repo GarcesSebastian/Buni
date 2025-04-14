@@ -97,6 +97,23 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             </div>
         )
 
+        case "hora":
+        return (
+            <div className="grid gap-2" key={field.id}>
+                <Label htmlFor={field.id} className="font-medium">
+                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                </Label>
+                <Input
+                    id={field.id}
+                    type="time"
+                    value={formValues[field.id] as string || ""}
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                    className={errors[field.id] ? "border-red-500" : ""}
+                />  
+                {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
+            </div>
+        )
+
         case "seleccion":
         return (
             <div className="grid gap-2" key={field.id}>

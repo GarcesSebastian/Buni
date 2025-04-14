@@ -6,7 +6,7 @@ export interface TableEvent {
 }
 
 export interface Assists {
-  [key: string]: string | number; 
+  [key: string]: string | number | Record<string, string | string[]>;
 }
 
 export interface Event {
