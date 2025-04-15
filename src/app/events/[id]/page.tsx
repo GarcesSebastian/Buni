@@ -659,15 +659,6 @@ export default function EventDetailPage() {
                     </div>
                 </main>
             </div>
-
-            {isGenerating && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg flex flex-col items-center gap-4">
-                        <Loader className="mr-2 size-8 animate-spin" />
-                        <h3 className="text-lg font-semibold">Generando datos aleatorios...</h3>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

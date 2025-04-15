@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import { Filter } from "lucide-react"
 import { FilterDialog } from "./FilterEvent"
 import { Pagination } from "@/components/services/Pagination"
 import { Badge } from "@/components/ui/Badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
@@ -23,6 +24,34 @@ interface DataTableProps {
   form?: Form
 }
 
+type DataToShow = {
+  type: string
+  data: { row: string; value: string | string[] }[]
+}
+
+interface ButtonDataGridProps {
+  data: DataToShow
+  setShowData: (showData: boolean) => void
+  setDataToShow: (dataToShow: DataToShow | null) => void
+}
+
+const ButtonDataGrid = ({ data, setShowData, setDataToShow }: ButtonDataGridProps) => {
+  const handleShowData = () => {
+    setShowData(true)
+    setDataToShow(data)
+  }
+
+  return (
+    <Button 
+      variant="secondary"
+      className="text-xs"
+      onClick={handleShowData}
+    >
+      Ver datos
+    </Button>
+  )
+}
+
 export function DataTable({
   type,
   data,
@@ -36,6 +65,8 @@ export function DataTable({
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
   const [assistsFilters, setAssistsFilters] = useState<Record<string, string | string[] | number>>({})
   const [inscriptionsFilters, setInscriptionsFilters] = useState<Record<string, string | string[] | number>>({})
+  const [showData, setShowData] = useState(false);
+  const [dataToShow, setDataToShow] = useState<DataToShow | null>(null);
 
   const filteredData = data.filter((item) => {
     const filters = type === "assists" ? assistsFilters : inscriptionsFilters
@@ -62,7 +93,7 @@ export function DataTable({
         return Number(itemValue) === Number(value)
       } else if (fieldInfo?.tipo === "checklist_unico_grid" || fieldInfo?.tipo === "checklist_multiple_grid") {
         if (!itemValue || typeof itemValue !== "object") return false
-        
+
         const rowKey = `${fieldInfo.id}-${value}`
         const gridValue = itemValue as Record<string, string | string[]>
         
@@ -120,34 +151,39 @@ export function DataTable({
       )
     } else if (fieldInfo?.tipo === "checklist_unico_grid" || fieldInfo?.tipo === "checklist_multiple_grid") {
       if (!value) return "-"
+
+      let valueParsed = value
+
+      if (typeof value === "string") {
+        valueParsed = JSON.parse(value)
+      }
       
-      const gridData = fieldInfo.opciones?.map((row: string | { row: string; data: string[] }) => {
-        if (typeof row === 'object') {
-          const rowValue = (value as Record<string, string | string[]>)[`${fieldInfo.id}-${row.row}`]
-          if (!rowValue) return null
-          
-          if (fieldInfo.tipo === "checklist_unico_grid") {
-            return `${row.row}: ${rowValue}`
-          } else {
-            return `${row.row}: ${Array.isArray(rowValue) ? rowValue.join(", ") : rowValue}`
+      const gridData = {
+        type: fieldInfo.tipo,
+        data: fieldInfo.opciones?.map((row: string | { row: string; data: string[] }) => {
+          if (typeof row === 'object') {
+            const rowValue = (valueParsed as Record<string, string | string[]>)[`${fieldInfo.id}-${row.row}`]
+            if (!rowValue) return null
+            
+            return { row: row.row, value: rowValue }
           }
-        }
-        return null
-      }).filter((item): item is string => item !== null)
+          return null
+        }).filter((item): item is { row: string; value: string | string[] } => item !== null) || []
+      }
 
       return (
         <div className="space-y-1">
-          {gridData?.map((item, index) => (
-            <div key={index} className="text-sm">
-              {item}
-            </div>
-          ))}
+          <ButtonDataGrid data={gridData} setShowData={setShowData} setDataToShow={setDataToShow} />
         </div>
       )
     }
     
     return typeof value === "object" ? JSON.stringify(value) : value?.toString() || "-"
   }
+
+  useEffect(() => {
+    console.log("data",data)
+  }, [showData])
 
   return (
     <div className="space-y-4">
@@ -236,6 +272,34 @@ export function DataTable({
           form={form}
         />
       )}
+
+      <Dialog open={showData} onOpenChange={setShowData}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalles de la selección</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {dataToShow?.data.map((item, index) => (
+              <div key={index} className="border rounded-lg p-4">
+                <h3 className="font-medium mb-2">{item.row}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(item.value) ? (
+                    item.value.map((val, i) => (
+                      <Badge key={i} variant="outline">
+                        {val}
+                      </Badge>
+                    ))
+                  ) : (
+                    <Badge variant="outline">
+                      {item.value}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

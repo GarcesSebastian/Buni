@@ -74,7 +74,7 @@ export async function generateSampleData(count: number, form: Form | undefined, 
         }
     };
 
-    const BATCH_SIZE = 100;
+    const BATCH_SIZE = 10000;
     const totalBatches = Math.ceil(count / BATCH_SIZE);
 
     for (let batch = 0; batch < totalBatches; batch++) {

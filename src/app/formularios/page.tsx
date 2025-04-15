@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import Section from "@/components/ui/Section"
 import CreateDialog from "@/components/services/Dialogs/Forms/CreateDialog"
 
-import { Plus, MoreVertical, Save, Edit, Check, X, Trash2, GripVertical, ArrowUp, ArrowDown } from "lucide-react"
+import { Plus, MoreVertical, Save, Edit, Check, X, Trash2, GripVertical } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -47,16 +47,10 @@ import { useWebSocket } from "@/hooks/server/useWebSocket"
 interface SorteableFieldProps {
   campo: FormField,
   onDelete: (id: string) => void,
-  onEdit: (id: string) => void,
-  data: {
-    index: number,
-    moveFieldUp: (index: number) => void,
-    moveFieldDown: (index: number) => void,
-    currentForm: Form
-  }
+  onEdit: (id: string) => void
 }
 
-function SortableCampo({ campo, onDelete, onEdit, data }: SorteableFieldProps) {
+function SortableCampo({ campo, onDelete, onEdit }: SorteableFieldProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: campo.id })
 
   const style = {
@@ -89,29 +83,6 @@ function SortableCampo({ campo, onDelete, onEdit, data }: SorteableFieldProps) {
       </div>
 
       <div className="flex justify-center items-center gap-2">
-        <div className="flex flex-col justify-center items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 flex justify-center items-center text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-            onClick={() => data.moveFieldUp(data.index)}
-            disabled={data.index === 0}
-          >
-            <ArrowUp className="h-4 w-4" />
-            <span className="sr-only">Mover arriba</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 flex justify-center items-center text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-            onClick={() => data.moveFieldDown(data.index)}
-            disabled={data.index === data.currentForm.campos.length - 1}
-          >
-            <ArrowDown className="h-4 w-4" />
-            <span className="sr-only">Mover abajo</span>
-          </Button>
-        </div>
-
         <Button
           variant="ghost"
           size="sm"
@@ -169,30 +140,6 @@ export default function FormulariosPage() {
         campos: newCampos,
       })
     }
-  }
-
-  const moveFieldUp = (index: number) => {
-    if (!currentForm || index <= 0) return
-
-    const newCampos = [...currentForm.campos]
-    ;[newCampos[index], newCampos[index - 1]] = [newCampos[index - 1], newCampos[index]]
-
-    setCurrentForm({
-      ...currentForm,
-      campos: newCampos,
-    })
-  }
-
-  const moveFieldDown = (index: number) => {
-    if (!currentForm || index >= currentForm.campos.length - 1) return
-
-    const newCampos = [...currentForm.campos]
-    ;[newCampos[index], newCampos[index + 1]] = [newCampos[index + 1], newCampos[index]]
-
-    setCurrentForm({
-      ...currentForm,
-      campos: newCampos,
-    })
   }
 
   const normalizeString = (str: string) => {
@@ -487,14 +434,9 @@ export default function FormulariosPage() {
                                 <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
                                   <Label className="font-medium">Datos Personales</Label>
                                   {personalSection.length > 0 ? (
-                                    personalSection.map((campo, index) => (
+                                    personalSection.map((campo) => (
                                       <div key={campo.id} className="w-full">
-                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} data={{
-                                          index: index,
-                                          moveFieldDown,
-                                          moveFieldUp,
-                                          currentForm
-                                      }} />
+                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
                                       </div>
                                     ))
                                   ) : (
@@ -505,14 +447,9 @@ export default function FormulariosPage() {
                                 <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
                                   <Label className="font-medium">Datos Académicos</Label>
                                   {academySection.length > 0 ? (
-                                    academySection.map((campo, index) => (
+                                    academySection.map((campo) => (
                                       <div key={campo.id} className="w-full">
-                                      <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} data={{
-                                        index: index,
-                                        moveFieldDown,
-                                        moveFieldUp,
-                                        currentForm
-                                      }} />
+                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
                                     </div>
                                   ))
                                   ) : (
@@ -523,14 +460,9 @@ export default function FormulariosPage() {
                                 <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
                                   <Label className="font-medium">Datos Adicionales</Label>
                                   {aditionalSection.length > 0 ? (
-                                    aditionalSection.map((campo, index) => (
+                                    aditionalSection.map((campo) => (
                                       <div key={campo.id} className="w-full">
-                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} data={{ 
-                                        index: index,
-                                        moveFieldDown,
-                                        moveFieldUp,
-                                        currentForm
-                                      }} />
+                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
                                       </div>
                                     ))
                                   ) : (
