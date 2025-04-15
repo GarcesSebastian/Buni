@@ -8,7 +8,7 @@ import { Star, Heart, ThumbsUp } from "lucide-react"
 import { configQualificationIcons } from "@/config/Forms"
 import { useEffect, useState } from "react"
 
-type formValuesType = Record<string, formOptionsType>
+type formValuesType = Record<string, formOptionsType | Record<string, formOptionsType>>
 
 interface Props{
     field: FormField,
@@ -19,11 +19,24 @@ interface Props{
 }
 
 const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => {
-    const handleChange = (id: string, value: formOptionsType) => {
-        setFormValues((prev) => ({
-            ...prev,
-            [id]: value,
-        }))
+    const handleChange = (id: string, value: formOptionsType, superId?: string) => {
+        if (superId) {
+            setFormValues((prev) => {
+                const currentSuperValue = (prev[superId] as Record<string, formOptionsType>) || {}
+                return {
+                    ...prev,
+                    [superId]: {
+                        ...currentSuperValue,
+                        [id]: value
+                    }
+                }
+            })
+        } else {
+            setFormValues((prev) => ({
+                ...prev,
+                [id]: value,
+            }))
+        }
         
         if (formValues[id]) {
             setErrors((prev: Record<string, string>) => {
@@ -33,6 +46,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             })
         }
     }
+    
     const [columnsGrid, setColumnsGrid] = useState<string[]>([])
 
     useEffect(() => {
@@ -94,6 +108,23 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                 className={errors[field.id] ? "border-red-500" : ""}
             />
             {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
+            </div>
+        )
+
+        case "hora":
+        return (
+            <div className="grid gap-2" key={field.id}>
+                <Label htmlFor={field.id} className="font-medium">
+                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                </Label>
+                <Input
+                    id={field.id}
+                    type="time"
+                    value={formValues[field.id] as string || ""}
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                    className={errors[field.id] ? "border-red-500" : ""}
+                />  
+                {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
             </div>
         )
 
@@ -227,8 +258,8 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                                             <td key={i} className="text-center p-2">
                                                 <Checkbox
                                                     id={`${field.id}-${row.row}-${data}`}
-                                                    checked={formValues[`${field.id}-${row.row}`] === data}
-                                                    onCheckedChange={() => handleChange(`${field.id}-${row.row}`, data)}
+                                                    checked={(formValues[field.id] as Record<string, string>)?.[`${field.id}-${row.row}`] === data}
+                                                    onCheckedChange={() => handleChange(`${field.id}-${row.row}`, data, field.id)}
                                                 />
                                             </td>
                                         ))}
@@ -266,7 +297,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                                     <tr key={index} className="border-t">
                                         <td className="p-2">{row.row}</td>
                                         {row.data.map((data, i) => {
-                                            const currentValues = formValues[`${field.id}-${row.row}`] as string[] || [];
+                                            const currentValues = (formValues[field.id] as Record<string, string[]>)?.[`${field.id}-${row.row}`] || []
                                             return (
                                                 <td key={i} className="text-center p-2">
                                                     <Checkbox
@@ -275,9 +306,9 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                                                         checked={currentValues.includes(data)}
                                                         onCheckedChange={(checked) => {
                                                             if (checked) {
-                                                                handleChange(`${field.id}-${row.row}`, [...currentValues, data]);
+                                                                handleChange(`${field.id}-${row.row}`, [...currentValues, data], field.id)
                                                             } else {
-                                                                handleChange(`${field.id}-${row.row}`, currentValues.filter(v => v !== data));
+                                                                handleChange(`${field.id}-${row.row}`, currentValues.filter(v => v !== data), field.id)
                                                             }
                                                         }}
                                                     />
@@ -312,7 +343,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                                 <button
                                     key={index}
                                     type="button"
-                                    onClick={() => handleChange(field.id, (index + 1).toString())}
+                                    onClick={() => handleChange(field.id, (index + 1))}
                                     className="hover:scale-110 transition-transform"
                                 >
                                     {iconConfig.id === "star" && (
@@ -339,7 +370,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                     </div>
                     <button
                         type="button"
-                        onClick={() => handleChange(field.id, "0")}
+                        onClick={() => handleChange(field.id, 0)}
                         className="hover:scale-110 transition-transform w-fit"
                     >
                         <span className="text-gray-400 text-sm">Ninguna</span>

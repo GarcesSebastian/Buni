@@ -31,8 +31,8 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    const {user, setUser, updateEvent} = useUserData()
-    const { sendMessage, lastMessage } = useWebSocket()
+    const {user, updateEvent} = useUserData()
+    const { lastMessage } = useWebSocket()
     const [event, setEvent] = useState<Event | undefined>()
     const [formAssists, setFormAssists] = useState<Form | undefined>()
     const [formInscriptions, setFormInscriptions] = useState<Form | undefined>()
@@ -40,7 +40,6 @@ export default function EventDetailPage() {
     const [faculty, setFaculty] = useState<Faculty | undefined>()
     const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
-    const [generatingData, setGeneratingData] = useState(false)
     
     const [selectedAssistsDistribution, setSelectedAssistsDistribution] = useState<string | undefined>()
     const [selectedInscriptionsDistribution, setSelectedInscriptionsDistribution] = useState<string | undefined>()
@@ -52,13 +51,15 @@ export default function EventDetailPage() {
 
     const [assistsPagination, setAssistsPagination] = useState<Record<string, number>>({
         currentPage: 1,
-        rowsPerPage: 10,
+        rowsPerPage: 5,
     })
 
     const [inscriptionsPagination, setInscriptionsPagination] = useState<Record<string, number>>({
         currentPage: 1,
-        rowsPerPage: 10,
+        rowsPerPage: 5,
     })
+
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         setLoading(true)
@@ -135,22 +136,10 @@ export default function EventDetailPage() {
         }, 
         selectedFaculty, 
         selectedAssistsDistribution,
-        selectedInscriptionsDistribution
+        selectedInscriptionsDistribution,
+        formAssists,
+        formInscriptions
     )
-
-    const handleFilter = (column: string, value: string | string[], type: TabsEvent) => {
-        if (type === "assists") {
-            setAssistsFilters(prev => ({
-                ...prev,
-                [column]: value
-            }))
-        } else {
-            setInscriptionsFilters(prev => ({
-                ...prev,
-                [column]: value
-            }))
-        }
-    }
 
     const handleClearFilters = (type: TabsEvent) => {
         if (type === "assists") {
@@ -220,7 +209,6 @@ export default function EventDetailPage() {
         const structure: {[key: string]: string | number | boolean}[] = []
 
         formUse.campos.forEach((campo) => {
-            console.log(campo)
             structure.push({
                 key: campo.id.split("_")[0],
                 label: campo.nombre,
@@ -231,38 +219,51 @@ export default function EventDetailPage() {
         return structure
     }
 
-    const generateRandomData = async () => {
-        if (!event) return;
-        setGeneratingData(true);
+    const getDistributionOptions = (form: Form | undefined) => {
+        if (!form) return []
 
-        try {
-            const inscriptionsCount = Math.floor(Math.random() * (99999 - 1000 + 1)) + 1000;
-            const assistsCount = Math.floor(Math.random() * (inscriptionsCount - 0 + 1)) + 0;
+        return form.campos.filter(campo => {
+            const hasOptions = campo.opciones && campo.opciones.length > 0
+            const isSelectableType = [
+                "seleccion",
+                "checklist_unico",
+                "checklist_multiple",
+                "qualification",
+                "checkbox"
+            ].includes(campo.tipo)
 
-            const newInscriptions = generateSampleData(inscriptionsCount, formInscriptions);
-            const newAssists = generateSampleData(assistsCount, formAssists);
+            if (campo.tipo === "checkbox" || campo.tipo === "qualification") {
+                return true
+            }
 
-            setEvent({
-                ...event,
+            return hasOptions && isSelectableType
+        }).map(campo => ({
+            value: campo.id.split("_")[0],
+            label: campo.nombre
+        }))
+    }
+
+    const handleGenerateData = async () => {
+        setIsGenerating(true);
+
+        const inscriptionsCount = Math.floor(Math.random() * (99999 - 1000 + 1)) + 1000;
+        const assistsCount = Math.floor(Math.random() * (inscriptionsCount - 0 + 1)) + 0;
+
+        const [newInscriptions, newAssists] = await Promise.all([
+            generateSampleData(inscriptionsCount, formInscriptions),
+            generateSampleData(assistsCount, formAssists)
+        ]);
+
+        setEvent((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
                 inscriptions: newInscriptions,
                 assists: newAssists
-            });
-
-            const updatedUser = {
-                ...user,
-                events: user.events.map(e => 
-                    e.id === event.id 
-                        ? { ...e, inscriptions: newInscriptions, assists: newAssists }
-                        : e
-                )
             };
-            setUser(updatedUser);
-            sendMessage("UPDATE_DATA", { users: updatedUser });
-        } catch (error) {
-            console.error("Error generating random data:", error);
-        } finally {
-            setGeneratingData(false);
-        }
+        });
+
+        setIsGenerating(false);
     };
 
     if (loading) {
@@ -317,11 +318,11 @@ export default function EventDetailPage() {
                                 </div>
                             </div>
                             <Button 
-                                onClick={generateRandomData}
-                                disabled={generatingData}
+                                onClick={handleGenerateData}
+                                disabled={isGenerating}
                                 className="bg-primary hover:bg-primary/90"
                             >
-                                {generatingData ? (
+                                {isGenerating ? (
                                     <>
                                         <Loader className="mr-2 h-4 w-4 animate-spin" />
                                         Generando datos...
@@ -546,9 +547,7 @@ export default function EventDetailPage() {
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
-                                            onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
-                                            hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
                                             form={currentTab === "assists" ? formAssists : formInscriptions}
                                         />
                                     </CardContent>
@@ -563,13 +562,11 @@ export default function EventDetailPage() {
                                                         <SelectValue placeholder="Distribuir por..." />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {formAssists?.campos
-                                                            .filter(campo => campo.tipo === "seleccion" || campo.tipo === "checklist_unico" || campo.tipo === "checklist_multiple")
-                                                            .map((campo) => (
-                                                                <SelectItem key={campo.id} value={campo.id.split("_")[0]}>
-                                                                    {campo.nombre}
-                                                                </SelectItem>
-                                                            ))}
+                                                        {getDistributionOptions(formAssists).map((option) => (
+                                                            <SelectItem key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ))}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -617,9 +614,7 @@ export default function EventDetailPage() {
                                             pagination={currentTab === "assists" ? assistsPagination : inscriptionsPagination}
                                             onPageChange={(page) => handlePageChange(currentTab, page)}
                                             onRowsPerPageChange={(rows) => handleRowsPerPageChange(currentTab, rows)}
-                                            onFilter={(column, value) => handleFilter(column, value, currentTab)}
                                             onClearFilters={() => handleClearFilters(currentTab)}
-                                            hasActiveFilters={Object.keys(currentTab === "assists" ? assistsFilters : inscriptionsFilters).length > 0}
                                             form={currentTab === "assists" ? formAssists : formInscriptions}
                                         />
                                     </CardContent>
@@ -634,13 +629,11 @@ export default function EventDetailPage() {
                                                         <SelectValue placeholder="Distribuir por..." />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {formInscriptions?.campos
-                                                            .filter(campo => campo.tipo === "seleccion")
-                                                            .map((campo) => (
-                                                                <SelectItem key={campo.id} value={campo.id.split("_")[0]}>
-                                                                    {campo.nombre}
-                                                                </SelectItem>
-                                                            ))}
+                                                        {getDistributionOptions(formInscriptions).map((option) => (
+                                                            <SelectItem key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ))}
                                                     </SelectContent>
                                                 </Select>
                                             </div>

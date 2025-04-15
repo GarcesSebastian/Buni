@@ -28,7 +28,7 @@ import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { ErrorMessage } from "@/components/ui/ErrorMessage"
 import { ERROR_MESSAGES } from "@/constants/errorMessages"
 
-export type formOptionsType = string | boolean | string[]
+export type formOptionsType = string | boolean | string[] | number
 
 const getEvent = (user: User, eventId: number): Event | undefined => {
   const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId)
@@ -46,7 +46,7 @@ export default function FormsPage() {
 
   const [event, setEvent] = useState<Event | undefined>(undefined)
 
-  const [formValues, setFormValues] = useState<Record<string, (formOptionsType)>>({})
+  const [formValues, setFormValues] = useState<Record<string, formOptionsType | Record<string, formOptionsType>>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [currentSection, setCurrentSection] = useState("personal")
@@ -130,6 +130,23 @@ export default function FormsPage() {
       if (campo.requerido) {
         if (campo.tipo === "checkbox" && !formValues[campo.id]) {
           newErrors[campo.id] = "Este campo es obligatorio"
+        } else if (campo.tipo === "checklist_unico_grid" || campo.tipo === "checklist_multiple_grid") {
+          const gridValues = formValues[campo.id] as Record<string, string | string[]> || {}
+          const hasAllRowsSelected = campo.opciones?.every((opcion) => {
+            if (typeof opcion === 'object') {
+              const rowKey = `${campo.id}-${opcion.row}`
+              if (campo.tipo === "checklist_unico_grid") {
+                return gridValues[rowKey] !== undefined && gridValues[rowKey] !== ""
+              } else {
+                return Array.isArray(gridValues[rowKey]) && (gridValues[rowKey] as string[]).length > 0
+              }
+            }
+            return false
+          })
+
+          if (!hasAllRowsSelected) {
+            newErrors[campo.id] = "Debe seleccionar al menos una opción en cada fila"
+          }
         } else if (
           campo.tipo !== "checkbox" &&
           (!formValues[campo.id] || formValues[campo.id].toString().trim() === "")
@@ -153,24 +170,29 @@ export default function FormsPage() {
     if (validateForm()) {
       const newFormValues: Record<string, formOptionsType> = {}
       Object.keys(formValues).forEach((key) => {
-        newFormValues[key.split("_")[0]] = formValues[key]
+        const value = formValues[key]
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          newFormValues[key.split("_")[0]] = JSON.stringify(value)
+        } else {
+          newFormValues[key.split("_")[0]] = value as formOptionsType
+        }
       })
       
       const event = user.events.find((evt) => evt.id == Number(idEvent))
       const sanitizedFormValues: Record<string, string | number> = {};
       Object.keys(newFormValues).forEach((key) => {
-        const value = newFormValues[key] as formOptionsType;
+        const value = newFormValues[key]
         if (typeof value === "boolean") {
-          sanitizedFormValues[key] = value ? 1 : 0;
+          sanitizedFormValues[key] = value ? 1 : 0
         } else if (Array.isArray(value)) {
-          sanitizedFormValues[key] = value.join(", ");
+          sanitizedFormValues[key] = value.join(", ")
         } else {
-          sanitizedFormValues[key] = value;
+          sanitizedFormValues[key] = value as string
         }
-      });
+      })
 
-      if (typeForm === "inscriptions") event?.inscriptions?.push(sanitizedFormValues);
-      if (typeForm === "assists") event?.assists?.push(sanitizedFormValues);
+      if (typeForm === "inscriptions") event?.inscriptions?.push(sanitizedFormValues)
+      if (typeForm === "assists") event?.assists?.push(sanitizedFormValues)
 
       setSubmitted(true)
       sendMessage("UPDATE_DATA", {users: user})
@@ -312,7 +334,7 @@ export default function FormsPage() {
                     </p>
                     <div className="space-y-4">
                       <p className="text-sm">
-                        Se ha enviado un correo de confirmación a <strong>{formValues.email}</strong> con los detalles
+                        Se ha enviado un correo de confirmación a <strong>{(formValues.email as string) || ""}</strong> con los detalles
                         del evento.
                       </p>
                     </div>

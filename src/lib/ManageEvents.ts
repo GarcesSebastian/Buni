@@ -1,4 +1,5 @@
 import { Event } from "@/types/Events"
+import { Form } from "@/types/Forms"
 
 export const COLORS = [
   "#0088FE",
@@ -17,7 +18,9 @@ export const getDataForCharts = (
     event: Event, 
     selectedFacultad: string, 
     assistsDistributionField: string = "carrera",
-    inscriptionsDistributionField: string = "carrera"
+    inscriptionsDistributionField: string = "carrera",
+    formAssists?: Form,
+    formInscriptions?: Form
 ) => {
     if (!event?.assists || !event?.inscriptions) return { assistData: [], inscriptionData: [] }
 
@@ -34,7 +37,31 @@ export const getDataForCharts = (
     const assistsPorCampo = assistsFiltradas.reduce(
       (acc: Record<string, number>, asistencia) => {
         const valor = asistencia[assistsDistributionField]
-        acc[valor] = (acc[valor] || 0) + 1
+        const campo = formAssists?.campos.find(c => c.id.split("_")[0] === assistsDistributionField)
+        
+        if (campo?.tipo === "checkbox") {
+          acc[valor === 1 ? "true" : "false"] = (acc[valor === 1 ? "true" : "false"] || 0) + 1
+        } else if (campo?.tipo === "qualification") {
+          const maxQualification = campo.maxQualification || 5
+          if (typeof valor === "number" && valor >= 1 && valor <= maxQualification) {
+            acc[valor.toString()] = (acc[valor.toString()] || 0) + 1
+          }
+        } else if (campo?.tipo === "checklist_unico_grid" || campo?.tipo === "checklist_multiple_grid") {
+          if (typeof valor === "object") {
+            Object.entries(valor).forEach(([key, value]) => {
+              if (campo.tipo === "checklist_unico_grid") {
+                acc[`${key}: ${value}`] = (acc[`${key}: ${value}`] || 0) + 1
+              } else if (Array.isArray(value)) {
+                value.forEach((v: string) => {
+                  acc[`${key}: ${v}`] = (acc[`${key}: ${v}`] || 0) + 1
+                })
+              }
+            })
+          }
+        } else {
+          const key = typeof valor === "object" ? JSON.stringify(valor) : String(valor)
+          acc[key] = (acc[key] || 0) + 1
+        }
         return acc
       },
       {} as Record<string, number>,
@@ -43,7 +70,31 @@ export const getDataForCharts = (
     const inscriptionsPorCampo = inscriptionsFiltradas.reduce(
       (acc: Record<string, number>, inscripcion) => {
         const valor = inscripcion[inscriptionsDistributionField]
-        acc[valor] = (acc[valor] || 0) + 1
+        const campo = formInscriptions?.campos.find(c => c.id.split("_")[0] === inscriptionsDistributionField)
+        
+        if (campo?.tipo === "checkbox") {
+          acc[valor === 1 ? "true" : "false"] = (acc[valor === 1 ? "true" : "false"] || 0) + 1
+        } else if (campo?.tipo === "qualification") {
+          const maxQualification = campo.maxQualification || 5
+          if (typeof valor === "number" && valor >= 1 && valor <= maxQualification) {
+            acc[valor.toString()] = (acc[valor.toString()] || 0) + 1
+          }
+        } else if (campo?.tipo === "checklist_unico_grid" || campo?.tipo === "checklist_multiple_grid") {
+          if (typeof valor === "object") {
+            Object.entries(valor).forEach(([key, value]) => {
+              if (campo.tipo === "checklist_unico_grid") {
+                acc[`${key}: ${value}`] = (acc[`${key}: ${value}`] || 0) + 1
+              } else if (Array.isArray(value)) {
+                value.forEach((v: string) => {
+                  acc[`${key}: ${v}`] = (acc[`${key}: ${v}`] || 0) + 1
+                })
+              }
+            })
+          }
+        } else {
+          const key = typeof valor === "object" ? JSON.stringify(valor) : String(valor)
+          acc[key] = (acc[key] || 0) + 1
+        }
         return acc
       },
       {} as Record<string, number>,
@@ -60,4 +111,4 @@ export const getDataForCharts = (
     }))
 
     return { assistData, inscriptionData }
-  }
+}
