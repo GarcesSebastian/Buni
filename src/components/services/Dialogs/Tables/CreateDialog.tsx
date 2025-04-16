@@ -16,7 +16,6 @@ import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { GeneralStructureForm } from "@/types/Table"
 import { InputBasic } from "../../InputGeneric"
 import { dataExtra } from "@/config/Data"
-import { useRouter } from "next/navigation"
 import Cookies from "js-cookie"
 import { useNotification } from "@/components/ui/Notification"
 
@@ -44,7 +43,6 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
   const { sendMessage } = useWebSocket();
-  const router = useRouter();
   const { showNotification } = useNotification();
 
   const RestartFormData = () => {
@@ -64,66 +62,6 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       
       if (!token) {
         throw new Error('No hay token de autenticación');
-      }
-
-      if (data.table.key === 'users') {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/create`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: formData.nombre,
-            email: formData.email,
-            password: formData.password,
-            role: formData.role
-          }),
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            Cookies.remove('token');
-            router.push('/');
-            return;
-          }
-          const errorData = await response.json();
-          showNotification({
-            title: "Error",
-            message: errorData.error || 'Error al crear el usuario',
-            type: "error"
-          });
-          return;
-        }
-
-        const usersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/get`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include'
-        });
-
-        if (!usersResponse.ok) {
-          throw new Error('Error al obtener la lista de usuarios');
-        }
-
-        const users = await usersResponse.json();
-        setUser({
-          ...user,
-          users
-        });
-
-        showNotification({
-          title: "Éxito",
-          message: "Usuario creado exitosamente",
-          type: "success"
-        });
-
-        RestartFormData();
-        onOpenChange(false);
-        return;
       }
 
       const keyData = user[data.table.key as keyof typeof user];

@@ -88,7 +88,7 @@ export function RoleDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[600px] w-full grid grid-rows-[auto_1fr] max-h-[90vh] overflow-y-hidden">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? 'Editar Rol' : 'Crear Nuevo Rol'}</DialogTitle>
                     <DialogDescription>
@@ -96,7 +96,7 @@ export function RoleDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-2">
+                <div className="space-y-4 py-2 max-h-[100vh] overflow-y-auto">
                     <div className="space-y-2">
                         <label htmlFor="roleName" className="text-sm font-medium">
                             Nombre del Rol
