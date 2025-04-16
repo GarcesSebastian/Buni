@@ -110,7 +110,7 @@ export const eventosEjemplo: Event[] = [
         state: "activo",
         fecha: "2025-03-18",
         hora: "05:39",
-        cupos: -1,
+        cupos: "-1",
         faculty: {
             id: 1,
             key: "faculty"
@@ -255,7 +255,7 @@ export const eventosEjemplo: Event[] = [
         state: "inactivo",
         fecha: "2024-03-15",
         hora: "14:00",
-        cupos: 100,
+        cupos: "100",
         faculty: {
             id: 1,
             key: "faculty"
