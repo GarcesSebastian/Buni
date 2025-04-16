@@ -12,6 +12,7 @@ import { EditDialog } from "./Dialogs/Tables/EditDialog"
 import { DeleteDialog } from "./Dialogs/Tables/DeleteDialog"
 import { useUserData } from "@/hooks/auth/useUserData"
 import { useRouter } from "next/navigation"
+import { Input } from "@/components/ui/Input"
 
 export function TableGeneric({structure, structureForm, table}) {
   const { user } = useUserData()
@@ -31,6 +32,8 @@ export function TableGeneric({structure, structureForm, table}) {
   const [eventToEdit, setEventToEdit] = useState(null)
   const [openDelete, setOpenDelete] = useState(false)
   const [eventToDelete, setEventToDelete] = useState(null)
+  const [showPassword, setShowPassword] = useState(false)
+
 
   const userTableData = user[table.key];
   const sortedAndFilteredEvents = useMemo(() => {
@@ -97,6 +100,30 @@ export function TableGeneric({structure, structureForm, table}) {
       if (value === "cupos" && data[value] === "-1") {
         return "Ilimitado"
       }
+
+      if (value === "password") {
+
+        return (
+          <div className="flex flex-row gap-2">
+            <Input 
+              disabled 
+              type={showPassword ? "text" : "password"} 
+              className="w-full border-none" 
+              value={data[value]} 
+              style={{ 
+                cursor: 'default',
+                color: 'var(--foreground)',
+                WebkitTextFillColor: 'var(--foreground)',
+                opacity: 1
+              }}
+            />
+            <Button variant="ghost" className="h-fit w-fit p-0" onClick={() => setShowPassword(!showPassword)}>
+              <Eye className="h-4 w-4 p-0" />
+            </Button>
+          </div>
+        )
+      }
+
       return data[value]
     }
 
@@ -131,6 +158,7 @@ export function TableGeneric({structure, structureForm, table}) {
     })
   },[])
 
+
   return (
     <div className="space-y-4">
       <div className="flex flex-row justify-between gap-4 max-md:flex-col">
@@ -155,11 +183,14 @@ export function TableGeneric({structure, structureForm, table}) {
                       <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
                         {value.value}
                       </span>
-                      <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
-                        <Button variant="ghost" onClick={() => setOpenFilter(value.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
-                          <Filter className="h-4 w-4" />
-                        </Button>
-                      </span>
+
+                      {value.filter && (
+                        <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
+                          <Button variant="ghost" onClick={() => setOpenFilter(value.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
+                            <Filter className="h-4 w-4" />
+                          </Button>
+                        </span>
+                      )}
                     </div>
                 </TableHead>
                 ))}

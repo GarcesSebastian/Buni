@@ -6,6 +6,7 @@ export interface TableUser {
 export interface ConfigUser {
   key: string;
   value: string;
+  filter?: boolean;
 }
 
 export interface ConfigFormUser {
