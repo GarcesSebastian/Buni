@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import { Filter } from "lucide-react"
@@ -180,10 +180,6 @@ export function DataTable({
     
     return typeof value === "object" ? JSON.stringify(value) : value?.toString() || "-"
   }
-
-  useEffect(() => {
-    console.log("data",data)
-  }, [showData])
 
   return (
     <div className="space-y-4">

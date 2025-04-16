@@ -9,13 +9,10 @@ type PermissionKey =
     | 'create_faculty' | 'edit_faculty' | 'delete_faculty' | 'view_faculty'
     | 'create_scenery' | 'edit_scenery' | 'delete_scenery' | 'view_scenery';
 
-interface Role {
+export interface Role {
     id: number;
     name: string;
-    permissions: {
-        [key in PermissionKey]: boolean;
-    };
-    created_at: string;
+    permissions: Record<PermissionKey, boolean>;
 }
 
 interface UseRolesReturn {

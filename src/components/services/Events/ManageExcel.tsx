@@ -132,13 +132,15 @@ export function DataImportExport({ type, data, columns, fileName, onImport }: Da
   }
 
   return (
-    <div className="flex space-x-2">
+    <div className="flex space-x-2 max-sm:flex-col max-sm:items-end max-sm:justify-center max-sm:space-y-2 max-sm:w-full">
       <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className="hidden" ref={fileInputRef} />
-      <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+
+      <Button className="w-full" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
         <Upload className="mr-2 h-4 w-4" />
         Importar Excel
       </Button>
-      <Button variant="outline" size="sm" onClick={exportToExcel}>
+
+      <Button className="w-full" variant="outline" size="sm" onClick={exportToExcel}>
         <FileSpreadsheet className="mr-2 h-4 w-4" />
         Exportar a Excel
       </Button>

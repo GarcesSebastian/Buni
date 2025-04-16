@@ -52,12 +52,13 @@ export default function FormsPage() {
   const [currentSection, setCurrentSection] = useState("personal")
   const [progress, setProgress] = useState(0)
   const [showPreview, setShowPreview] = useState(false)
-  const [isActive] = useState<boolean>(true)
+  const [isActive, setIsActive] = useState<boolean>(true)
   
   useEffect(() => {
     if (user && idEvent) {
       const eventFound = getEvent(user, Number(idEvent))
       setEvent(eventFound)
+      setIsActive(eventFound?.state === "true")
     }
   }, [user, idEvent])
 
@@ -243,7 +244,7 @@ export default function FormsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Card className="md:col-span-2">
+              <Card className={`${isActive ? "md:col-span-2" : "md:col-span-3"}`}>
                 <CardHeader className="pb-3 flex flex-col">
                   <div className="flex justify-between items-center gap-2">
                     <Badge variant="outline" className="mb-2 flex justify-center items-center text-center">
@@ -272,48 +273,50 @@ export default function FormsPage() {
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">
-                      {event?.cupos == -1 && event?.cupos ? "Cupos ilimitados" : event?.cupos + " Cupos"}
+                      {event?.cupos == "-1" ? "Cupos ilimitados" : event?.cupos + " Cupos"}
                     </span>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Progreso del registro</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Progress value={progress} className="h-2" />
-                  <p className="text-sm text-center">{progress}% completado</p>
+              {isActive && (
+                <Card>
+                  <CardHeader>
+                      <CardTitle className="text-lg">Progreso del registro</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Progress value={progress} className="h-2" />
+                    <p className="text-sm text-center">{progress}% completado</p>
 
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Información Personal</span>
-                      <Badge variant={currentSection === "personal" ? "default" : "outline"} className="text-xs">
-                        {currentSection === "personal" ? "Actual" : "Espera"}
-                      </Badge>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Información Personal</span>
+                        <Badge variant={currentSection === "personal" ? "default" : "outline"} className="text-xs">
+                          {currentSection === "personal" ? "Actual" : "Espera"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Información Académica</span>
+                        <Badge variant={currentSection === "academica" ? "default" : "outline"} className="text-xs">
+                          {currentSection === "academica" ? "Actual" : "Espera"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Información Adicional</span>
+                        <Badge variant={currentSection === "adicional" ? "default" : "outline"} className="text-xs">
+                          {currentSection === "adicional" ? "Actual" : "Espera"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Revisión y Envío</span>
+                        <Badge variant={showPreview ? "default" : "outline"} className="text-xs">
+                          {showPreview ? "Actual" : "Espera"}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Información Académica</span>
-                      <Badge variant={currentSection === "academica" ? "default" : "outline"} className="text-xs">
-                        {currentSection === "academica" ? "Actual" : "Espera"}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Información Adicional</span>
-                      <Badge variant={currentSection === "adicional" ? "default" : "outline"} className="text-xs">
-                        {currentSection === "adicional" ? "Actual" : "Espera"}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Revisión y Envío</span>
-                      <Badge variant={showPreview ? "default" : "outline"} className="text-xs">
-                        {showPreview ? "Actual" : "Espera"}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             <Card className="mb-8 print:shadow-none">
@@ -343,7 +346,7 @@ export default function FormsPage() {
               ) : (
                 <form onSubmit={handleSubmit}>
                   <CardContent>
-                    {!showPreview && (
+                    {!showPreview && isActive && (
                       <Tabs value={currentSection} className="w-full">
                         <TabsList className="grid w-full grid-cols-3 mb-8">
                           <TabsTrigger
@@ -388,14 +391,24 @@ export default function FormsPage() {
                         </TabsContent>
                       </Tabs>
                     )}
+
+                    {!isActive && (
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <h3 className="text-xl font-semibold mb-2">¡Formulario cerrado!</h3>
+                        <p className="text-muted-foreground mb-6">
+                          El registro para este evento ha sido cerrado.
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
 
-                  <CardFooter className="flex justify-between border-t px-6 py-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handlePrevSection}
-                      disabled={currentSection === "personal"}
+                  {isActive && (
+                    <CardFooter className="flex justify-between border-t px-6 py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handlePrevSection}
+                        disabled={currentSection === "personal"}
                     >
                       <ChevronLeft className="mr-2 h-4 w-4" />
                       Anterior
@@ -413,6 +426,7 @@ export default function FormsPage() {
                       </Button>
                     )}
                   </CardFooter>
+                  )}
                 </form>
               )}
             </Card>

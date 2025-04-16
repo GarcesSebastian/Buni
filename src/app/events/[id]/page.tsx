@@ -597,14 +597,14 @@ export default function EventDetailPage() {
                                             <CardTitle className="text-lg sm:text-xl">Inscripciones</CardTitle>
                                             <CardDescription className="text-sm">Lista de personas inscritas al evento</CardDescription>
                                         </div>
-                                        <div className="mt-4 sm:mt-0">
-                                        <DataImportExport
-                                            type="inscriptions"
-                                            data={filteredInscriptions}
-                                            columns={getColumnsForm(formInscriptions) as Assists[]}
-                                            fileName={`inscripciones_evento_${event.id}`}
-                                            onImport={(data) => handleImportData("inscriptions", data)}
-                                        />
+                                        <div className="mt-4 sm:mt-0 max-sm:w-full">
+                                            <DataImportExport
+                                                type="inscriptions"
+                                                data={filteredInscriptions}
+                                                columns={getColumnsForm(formInscriptions) as Assists[]}
+                                                fileName={`inscripciones_evento_${event.id}`}
+                                                onImport={(data) => handleImportData("inscriptions", data)}
+                                            />
                                         </div>
                                     </CardHeader>
                                     <CardContent className="p-4 sm:p-6">
