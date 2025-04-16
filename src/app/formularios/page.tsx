@@ -82,7 +82,7 @@ function SortableCampo({ campo, onDelete, onEdit }: SorteableFieldProps) {
         </div>
       </div>
 
-      <div className="flex justify-center items-center gap-2">
+      <div className="flex justify-center items-center gap-2 max-sm:hidden">
         <Button
           variant="ghost"
           size="sm"
@@ -412,9 +412,9 @@ export default function FormulariosPage() {
                       </div>
 
                       <div className="border rounded-md p-4">
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex justify-between items-center mb-4 max-sm:flex-col max-sm:items-start max-sm:gap-2">
                           <h3 className="font-medium">Campos del Formulario</h3>
-                          <Button variant="outline" size="sm" onClick={() => setDialogAddField(true)}>
+                          <Button variant="outline" size="sm" className="max-sm:w-full" onClick={() => setDialogAddField(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             Agregar Campo
                           </Button>

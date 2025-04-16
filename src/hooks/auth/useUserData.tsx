@@ -44,7 +44,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         events: [{
             "nombre": "Induccion Universidad del Sinu",
             "organizador": "Universidad del Sinu",
-            "cupos": -1,
+            "cupos": "-1",
             "hora": "06:30",
             "fecha": "2025-03-07",
             "faculty": {

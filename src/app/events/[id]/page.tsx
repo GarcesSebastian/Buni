@@ -308,11 +308,11 @@ export default function EventDetailPage() {
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Link href="/events" className="sm:mr-4">
-                                <Button variant="outline" size="icon" className="flex justify-center items-center">
-                                    <ArrowLeft className="h-4 w-4" />
-                                </Button>
-                            </Link>
-                            <div>
+                                    <Button variant="outline" size="icon" className="flex justify-center items-center">
+                                        <ArrowLeft className="h-4 w-4" />
+                                    </Button>
+                                </Link>
+                                <div>
                                     <h1 className="text-xl sm:text-2xl font-bold">{event.nombre}</h1>
                                     <p className="text-sm sm:text-base text-muted-foreground">{event.organizador}</p>
                                 </div>
@@ -378,8 +378,9 @@ export default function EventDetailPage() {
                                                 <div className="flex items-center">
                                                     <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
-                                                        <p className="text-sm font-medium">Cupos</p>
-                                                        <p className="text-sm sm:text-base">{event.cupos === -1 ? "Ilimitados" : event.cupos}</p>
+                                                        <Badge variant="outline" className="text-xs sm:text-sm">
+                                                            {event.cupos === "-1" ? "Cupos ilimitados" : `${event.cupos} cupos`}
+                                                        </Badge>
                                                     </div>
                                                 </div>
 
@@ -432,7 +433,7 @@ export default function EventDetailPage() {
                                                                         {event.inscriptions?.length || 0}
                                                                     </h3>
                                                                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                                                                        {event.cupos === -1 
+                                                                        {event.cupos === "-1" 
                                                                             ? "Cupos ilimitados" 
                                                                             : `${event.inscriptions?.length || 0} de ${event.cupos} cupos ocupados`}
                                                                     </p>

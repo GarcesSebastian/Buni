@@ -29,11 +29,6 @@ export function ChartSection({
       if (value === "true") return "Sí"
       if (value === "false") return "No"
       if (value === "0") return "Ninguna"
-      if (value === "1") return "1 estrella"
-      if (value === "2") return "2 estrellas"
-      if (value === "3") return "3 estrellas"
-      if (value === "4") return "4 estrellas"
-      if (value === "5") return "5 estrellas"
     }
     return value
   }

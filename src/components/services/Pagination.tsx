@@ -54,6 +54,7 @@ export function Pagination({
         <Button
           variant="outline"
           size="icon"
+          className="flex justify-center items-center"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
