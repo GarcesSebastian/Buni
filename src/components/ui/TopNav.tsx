@@ -10,7 +10,7 @@ export function TopNav() {
   const isAuthenticated = pathname !== "/"
 
   return (
-    <header className="border-b">
+    <header className="border-b max-sm:hidden">
       <div className="flex h-16 items-center px-4">
         <Link href="/" className="flex items-center size-fit">
           <Image src={"https://i.ibb.co/K8mMDbP/Logo.png"} width={160} height={40} alt="Logo Bienestar Universitario Cartagena"></Image>

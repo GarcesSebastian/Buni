@@ -64,21 +64,23 @@ function SortableCampo({ campo, onDelete, onEdit }: SorteableFieldProps) {
       style={style}
       className="flex items-center justify-between border p-3 rounded-md bg-white hover:bg-gray-50 cursor-move"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 max-sm:gap-2">
         <div
-          className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+          className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing max-sm:hidden"
           {...attributes}
           {...listeners}
         >
           <GripVertical className="h-5 w-5" />
         </div>
         <div>
-          <p className="font-medium">{campo.nombre}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="font-medium max-sm:text-sm">{campo.nombre}</p>
+          <p className="text-sm text-muted-foreground max-sm:text-xs">
             Tipo: {configField.find((t) => t.id === campo.tipo)?.nombre || campo.tipo}
             {campo.requerido && " (Requerido)"}
           </p>
-          {campo.opciones && <p className="text-xs text-muted-foreground">Opciones: {campo.opciones.join(", ")}</p>}
+          <span className="flex items-center gap-2 max-[350px]:hidden">
+            {campo.opciones && <p className="text-xs text-muted-foreground max-sm:text-xs">Opciones: {campo.opciones.join(", ")}</p>}
+          </span>
         </div>
       </div>
 
@@ -99,6 +101,27 @@ function SortableCampo({ campo, onDelete, onEdit }: SorteableFieldProps) {
         >
           <Edit className="h-4 w-4" />
         </Button>
+      </div>
+
+      <div className="flex justify-center items-center sm:hidden w-fit">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-5 w-5 flex justify-center items-center hover:bg-muted">
+              <span className="sr-only">Abrir menú</span>
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(campo.id)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onDelete(campo.id)} className="text-red-500">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )
@@ -378,7 +401,7 @@ export default function FormulariosPage() {
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-col">
+                <CardHeader className="flex flex-col p-0">
                   <CardTitle>{currentForm ? `Editar: ${currentForm.nombre}` : "Detalles del Formulario"}</CardTitle>
                   <CardDescription>
                     {currentForm
@@ -414,7 +437,7 @@ export default function FormulariosPage() {
                       <div className="border rounded-md p-4">
                         <div className="flex justify-between items-center mb-4 max-sm:flex-col max-sm:items-start max-sm:gap-2">
                           <h3 className="font-medium">Campos del Formulario</h3>
-                          <Button variant="outline" size="sm" className="max-sm:w-full" onClick={() => setDialogAddField(true)}>
+                          <Button variant="outline" size="sm" className="max-sm:w-full max-sm:text-xs" onClick={() => setDialogAddField(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             Agregar Campo
                           </Button>
@@ -484,17 +507,19 @@ export default function FormulariosPage() {
                     </div>
                   )}
                 </CardContent>
+
                 {currentForm && (
                   <CardFooter className="flex justify-end space-x-2 p-6 pt-0">
                     <Button variant="outline" onClick={() => setCurrentForm(null)}>
                       Cancelar
                     </Button>
-                    <Button onClick={updateForm} className="bg-primary hover:bg-primary/90">
+                    <Button onClick={updateForm} className="bg-primary hover:bg-primary/90 max-md:text-xs">
                       <Save className="mr-2 h-4 w-4" />
                       Guardar Formulario
                     </Button>
                   </CardFooter>
                 )}
+
               </Card>
             </div>
 

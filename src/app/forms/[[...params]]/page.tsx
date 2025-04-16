@@ -272,7 +272,7 @@ export default function FormsPage() {
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">
-                      {event?.cupos == -1 && event?.cupos ? "Cupos ilimitados" : event?.cupos + " Cupos"}
+                      {event?.cupos == "-1" ? "Cupos ilimitados" : event?.cupos + " Cupos"}
                     </span>
                   </div>
                 </CardContent>
