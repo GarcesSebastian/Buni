@@ -56,8 +56,6 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
         }
     }, [field])
 
-    console.log(formValues)
-
     switch (field.tipo) {
         case "texto":
         case "email":

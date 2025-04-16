@@ -118,7 +118,6 @@ export function TableGeneric({structure, structureForm, table}) {
     Object.keys(structureForm).forEach(value => {
       const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
       if(structureForm[value].type == "selection" && user[valueFormatted]){
-
         const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {
           return {
             value: s.nombre,

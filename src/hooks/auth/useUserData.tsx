@@ -15,11 +15,11 @@ export interface User {
     users: UserType[];
     roles: {
         id: number;
-        name: string;
+        nombre: string;
         permissions: {
             [key: string]: boolean;
         };
-        created_at: string;
+        state: string;
     }[];
 }
 

@@ -34,7 +34,7 @@ export default function RootLayout({
               <WebSocketProvider>
                 <NotificationProvider>
                   <Suspense>
-                    <main className="w-full overflow-hidden h-screen">{children}</main>
+                    <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
                   </Suspense>
                 </NotificationProvider>
               </WebSocketProvider>

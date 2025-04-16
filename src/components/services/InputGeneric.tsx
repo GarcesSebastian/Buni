@@ -118,30 +118,30 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
         )
     } else if(data.form.type == "selection"){
         return(
-        <>
-        <Label htmlFor="faculty">{data.form.name}</Label>
-        <Select
-            key={data.index}
-            value={typeof valueFormatted == "object" ? valueFormatted.nombre + "_" + valueFormatted.id : valueFormatted}
-            onValueChange={data.onChange}
-            required={data.form.required}
-        >
-            <SelectTrigger>
-            <SelectValue placeholder={`Seleccione una ${data.form.name}`} />
-            </SelectTrigger>
-            <SelectContent>
-            {data.form.options.length > 0 ? (
-                data.form.options.map((option, index) => (
-                <SelectItem key={index} value={`${option.value}${option.id ? '_' + option.id : ''}`}>
-                    {option.label}
-                </SelectItem>
-                ))
-            ) : (
-                <p className="text-gray-500 text-sm p-2">No se encontraron opciones</p>
-            )}
-            </SelectContent>
-        </Select>
-        </>
+            <>
+                <Label htmlFor="faculty">{data.form.name}</Label>
+                <Select
+                    key={data.index}
+                    value={typeof valueFormatted == "object" ? valueFormatted.nombre + "_" + valueFormatted.id : valueFormatted}
+                    onValueChange={data.onChange}
+                    required={data.form.required}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder={`Seleccione un/una ${data.form.name}`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {data.form.options.length > 0 ? (
+                            data.form.options.map((option, index) => (
+                            <SelectItem key={index} value={`${option.value}${option.id ? '_' + option.id : ''}`}>
+                                {option.label}
+                            </SelectItem>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 text-sm p-2">No se encontraron opciones</p>
+                        )}
+                    </SelectContent>
+                </Select>
+            </>
         )
   }
 }
