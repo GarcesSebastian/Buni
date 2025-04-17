@@ -22,7 +22,7 @@ const isPublicPath = (path: string): boolean => {
 
 async function verifyTokenWithBackend(token: string): Promise<boolean> {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/verify-session`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-session`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

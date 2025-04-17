@@ -10,7 +10,7 @@ export interface ConfigUser {
 }
 
 export interface ConfigFormUser {
-  nombre: {
+  name: {
     name: string;
     type: "text";
     required?: boolean;
@@ -39,4 +39,13 @@ export interface User {
   email: string;
   roles: string;
   created_at: string;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  permissions: {
+      [key: string]: boolean;
+  };
+  state: string;
 }

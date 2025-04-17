@@ -5,22 +5,16 @@ import Cookies from "js-cookie";
 import type { Form } from "@/types/Forms";
 import { Event, Scenery } from "@/types/Events";
 import { Faculty } from "@/types/Faculty";
-import { User as UserType } from "@/types/User"; 
-
+import { Role, User as UserType } from "@/types/User";
+import useRoles from "../server/useRoles";
+import useUsers from "../server/useUsers";
 export interface User {
     events: Event[];
     faculty: Faculty[];
     scenery: Scenery[];
     form: Form[];
     users: UserType[];
-    roles: {
-        id: number;
-        nombre: string;
-        permissions: {
-            [key: string]: boolean;
-        };
-        state: string;
-    }[];
+    roles: Role[];
 }
 
 export interface States {
@@ -36,10 +30,13 @@ const UserDataContext = createContext<{
     updateEvent: (eventId: number, updatedEvent: Event) => void;
     states: States,
     setStates: (data: States) => void;
+    isLoaded: boolean;
+    setIsLoaded: (data: boolean) => void;
 } | null>(null);
 
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     const [states, setStates] = useState<States>({});
+    const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [user, setUserState] = useState<User>({
         events: [{
             "nombre": "Induccion Universidad del Sinu",
@@ -324,7 +321,8 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         users: [],
         roles: []
     });
-
+    const { roles, getRoles } = useRoles();
+    const { users, getUsers } = useUsers();
     const setUser = (data: User) => {
         setUserState(data);
     };
@@ -339,6 +337,33 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     useEffect(() => {
+        const token = Cookies.get("token");
+        if (!token) {
+            setIsLoaded(true);
+            return;
+        }
+
+        const fetchRoles = async () => {
+            setIsLoaded(false);
+            await getRoles();
+            await getUsers();
+            setIsLoaded(true);
+        };
+
+        fetchRoles();
+    }, []);
+
+    useEffect(() => {
+        if (roles.length > 0) {
+            setUserState(prevUser => ({ ...prevUser, roles: roles }));
+        }
+
+        if (users.length > 0) {
+            setUserState(prevUser => ({ ...prevUser, users: users }));
+        }
+    }, [roles, users]);
+
+    useEffect(() => {
         Cookies.set("events", JSON.stringify(user.events), { expires: 7 });
         Cookies.set("faculty", JSON.stringify(user.faculty), { expires: 7 });
         Cookies.set("scenery", JSON.stringify(user.scenery), { expires: 7 });
@@ -348,9 +373,9 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     }, [user]);
     
     return (
-        <UserDataContext.Provider value={{ user, setUser, updateEvent, states, setStates }}>
+        <UserDataContext.Provider value={{ user, setUser, updateEvent, states, setStates, isLoaded, setIsLoaded }}>
             {children}
-        </UserDataContext.Provider>
+        </UserDataContext.Provider> 
     );
 };
 
@@ -360,10 +385,13 @@ export const useUserData = (): {
     updateEvent: (eventId: number, updatedEvent: Event) => void;
     states: States;
     setStates: (data: States) => void;
+    isLoaded: boolean;
+    setIsLoaded: (data: boolean) => void;
 } => {
     const context = useContext(UserDataContext);
     if (!context) {
         throw new Error("useUserData debe estar dentro de un UserDataProvider");
     }
+
     return context;
 };
