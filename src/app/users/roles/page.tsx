@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import Section from "@/components/ui/Section"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { Plus, MoreVertical, Edit, Trash, Eye } from "lucide-react"
+import { Plus, MoreVertical, Edit, Trash, Eye, Loader } from "lucide-react"
 import { useNotification } from "@/components/ui/Notification"
 import {
   Dialog,
@@ -21,16 +21,19 @@ import {
 import ShowPermissions from "@/components/services/Dialogs/Roles/ShowPermissions";
 import CreateDialog from "@/components/services/Dialogs/Roles/CreateDialog";
 import { useUserData } from "@/hooks/auth/useUserData"
+import useRoles from "@/hooks/server/useRoles";
+
 
 export interface Role {
     id: number;
-    nombre: string;
+    name: string;
     permissions: Record<PermissionKey, boolean>;
     state: string;
 }
 
 export default function RolesPage() {
-    const { user, setUser } = useUserData();
+    const { user, setUser, isLoaded } = useUserData();
+    const { createRole, deleteRole } = useRoles();
     const { showNotification } = useNotification();
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -38,17 +41,20 @@ export default function RolesPage() {
     const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleCreateRole = async (role: { name: string; permissions: Record<PermissionKey, boolean> }) => {
         const newRole = {
             id: user.roles.length + 1,
-            nombre: role.name,
+            name: role.name,
             permissions: role.permissions,
             state: "true"
         };
 
         try {
-            setUser({ ...user, roles: [...user.roles, newRole] });
+            setIsCreating(true);
+            setIsLoading(true);
+            await createRole(newRole);
         } catch (error) {
             console.error(error);
             showNotification({
@@ -62,6 +68,10 @@ export default function RolesPage() {
                 message: "El rol ha sido creado correctamente",
                 type: "success"
             });
+
+            setIsLoading(false);
+            setIsCreating(false);
+            setUser({ ...user, roles: [...user.roles, newRole] });
         }
     };
 
@@ -99,7 +109,8 @@ export default function RolesPage() {
         if (!roleToDelete) return;
 
         try {
-            setUser({ ...user, roles: user.roles.filter(r => r.id !== roleToDelete.id) });
+            setIsDeleting(true);
+            await deleteRole(roleToDelete.id);
         } catch (error) {
             console.error(error);
             showNotification({
@@ -110,12 +121,13 @@ export default function RolesPage() {
         } finally {
             setIsDeleting(false);
             setRoleToDelete(null);
-
+            setUser({ ...user, roles: user.roles.filter(r => r.id !== roleToDelete.id) });
+            
             showNotification({
                 title: "Rol eliminado",
                 message: "El rol ha sido eliminado correctamente",
                 type: "success"
-            }); 
+            });
         }
     };
 
@@ -143,9 +155,10 @@ export default function RolesPage() {
                         </Button>
                     </div>
 
-                    <div className="rounded-md border">
-                        <Table>
-                            <TableHeader>
+                    {isLoaded ? (
+                        <div className="rounded-md border">
+                            <Table>
+                                <TableHeader>
                                 <TableRow>
                                     <TableHead>N°</TableHead>
                                     <TableHead>Nombre</TableHead>
@@ -160,10 +173,10 @@ export default function RolesPage() {
                                             No se encontraron roles
                                         </TableCell>
                                     </TableRow>
-                                ) : user.roles.map((role, index) => (
+                                ) : user.roles.map((role) => (
                                     <TableRow key={role.id}>
-                                        <TableCell>{index + 1}</TableCell>
-                                        <TableCell className="font-medium">{role.nombre}</TableCell>
+                                        <TableCell>{role.id}</TableCell>
+                                        <TableCell className="font-medium">{role.name}</TableCell>
                                         <TableCell>
                                             <Button
                                                 variant="outline"
@@ -197,8 +210,14 @@ export default function RolesPage() {
                                     </TableRow>
                                 ))}
                             </TableBody>
-                        </Table>
-                    </div>
+                            </Table>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-4 justify-center items-center h-full">
+                            <Loader className="h-10 w-10 animate-spin text-primary" />
+                            <p className="text-muted-foreground">Cargando roles...</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -229,6 +248,7 @@ export default function RolesPage() {
                     }}
                     isEditing={isEditing}
                     roleToEdit={roleToEdit}
+                    isLoading={isLoading}
                 />
             </Dialog>
 
@@ -237,7 +257,7 @@ export default function RolesPage() {
                     <DialogHeader>
                         <DialogTitle>Eliminar Rol</DialogTitle>
                         <DialogDescription>
-                            ¿Estás seguro de que deseas eliminar el rol &quot;{roleToDelete?.nombre}&quot;? Esta acción no se puede deshacer.
+                            ¿Estás seguro de que deseas eliminar el rol &quot;{roleToDelete?.name}&quot;? Esta acción no se puede deshacer.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

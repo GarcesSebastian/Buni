@@ -15,7 +15,7 @@ const ShowPermissions = ({open, onOpenChange, selectedRole}: Props) => {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[600px] grid grid-rows-[auto_1fr] max-h-[90vh] overflow-y-hidden">
                 <DialogHeader>
-                    <DialogTitle>Permisos del Rol: {selectedRole?.nombre}</DialogTitle>
+                    <DialogTitle>Permisos del Rol: {selectedRole?.name}</DialogTitle>
                     <DialogDescription>
                         Lista de permisos asignados al rol
                     </DialogDescription>

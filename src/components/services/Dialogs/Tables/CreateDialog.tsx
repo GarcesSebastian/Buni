@@ -99,6 +99,17 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
         [key]: [...user[key], updatedFormData],
       }
 
+      const body_response = JSON.parse(JSON.stringify(updatedFormData))
+
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body_response)
+      })
+
       if (Array.isArray(user[key])) {
         setUser(newData);
       }      

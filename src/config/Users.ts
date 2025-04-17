@@ -7,14 +7,14 @@ export const tableUser: TableUser = {
 
 export const configUser: ConfigUser[] = [
     { key: "id", value: "ID", filter: false },
-    { key: "nombre", value: "Nombre", filter: true },
+    { key: "name", value: "Nombre", filter: true },
     { key: "email", value: "Correo", filter: true },
     { key: "password", value: "Contraseña", filter: false },
     { key: "roles", value: "Rol", filter: false },
 ]
 
 export const configFormUser: ConfigFormUser = {
-    nombre: {
+    name: {
         name: "Nombre",
         type: "text",
         required: true

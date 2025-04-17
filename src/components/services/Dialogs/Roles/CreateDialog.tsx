@@ -11,10 +11,11 @@ interface CreateDialogProps {
     onRoleCreate: (role: { name: string; permissions: Record<PermissionKey, boolean> }) => void
     isEditing?: boolean
     roleToEdit?: Role | null
+    isLoading?: boolean
 }
 
-const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit }: CreateDialogProps) => {
-    const [roleName, setRoleName] = useState(roleToEdit?.nombre || "")
+const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit, isLoading }: CreateDialogProps) => {
+    const [roleName, setRoleName] = useState(roleToEdit?.name || "")
     const [selectedPermissions, setSelectedPermissions] = useState<string[]>(
         roleToEdit 
             ? Object.entries(roleToEdit.permissions)
@@ -25,7 +26,7 @@ const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit 
 
     useEffect(() => {
         if (open) {
-            setRoleName(roleToEdit?.nombre || "")
+            setRoleName(roleToEdit?.name || "")
             setSelectedPermissions(
                 roleToEdit 
                     ? Object.entries(roleToEdit.permissions)
@@ -41,25 +42,22 @@ const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit 
         selectedPermissions.forEach(permission => {
             permissions[permission as PermissionKey] = true
         })
-
+        
         onRoleCreate({
             name: roleName,
             permissions
         })
-        setRoleName("")
-        setSelectedPermissions([])
-        onOpenChange(false)
     }
 
     return (
         <RoleDialog 
             open={open}
             onOpenChange={(open) => {
-                if (!open) {
+                if (!open && !isLoading) {
                     setRoleName("")
                     setSelectedPermissions([])
+                    onOpenChange(open)
                 }
-                onOpenChange(open)
             }}
             roleName={roleName}
             setRoleName={setRoleName}
@@ -67,6 +65,7 @@ const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit 
             setSelectedPermissions={setSelectedPermissions}
             onSubmit={handleCreateRole}
             isEditing={isEditing}
+            isLoading={isLoading}
         />
     )
 }

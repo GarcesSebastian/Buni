@@ -49,7 +49,7 @@ export function useAuth() {
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

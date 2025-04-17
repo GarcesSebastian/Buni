@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, ChevronDown, ChevronRight } from "lucide-react"
+import { Check, ChevronDown, ChevronRight, Loader } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import {
   Dialog,
@@ -23,6 +23,7 @@ interface RoleDialogProps {
     setSelectedPermissions: React.Dispatch<React.SetStateAction<string[]>>
     onSubmit: () => void
     isEditing?: boolean
+    isLoading?: boolean
 }
 
 export function RoleDialog({ 
@@ -34,6 +35,7 @@ export function RoleDialog({
     setSelectedPermissions,
     onSubmit,
     isEditing,
+    isLoading
 }: RoleDialogProps) {
     const [expandedCategories, setExpandedCategories] = useState<string[]>(
         permissionModules.map((module) => module.id)
@@ -96,7 +98,7 @@ export function RoleDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-2 max-h-[100vh] overflow-y-auto">
+                <div className="space-y-4 p-2 max-h-[100vh] overflow-y-auto">
                     <div className="space-y-2">
                         <label htmlFor="roleName" className="text-sm font-medium">
                             Nombre del Rol
@@ -268,15 +270,27 @@ export function RoleDialog({
 
                 <DialogFooter className="sm:justify-end">
                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+                        <Button 
+                            variant="outline" 
+                            onClick={() => onOpenChange(false)} 
+                            className="w-full sm:w-auto"
+                            disabled={isLoading}
+                        >
                             Cancelar
                         </Button>
                         <Button
                             onClick={onSubmit}
-                            className="bg-primary text-white hover:bg-primary/90 w-full sm:w-auto"
-                            disabled={!roleName.trim()}
+                            className={`bg-primary text-white hover:bg-primary/90 w-full sm:w-auto ${isLoading ? 'flex items-center justify-center' : ''}`}
+                            disabled={!roleName.trim() || isLoading}
                         >
-                            {isEditing ? 'Actualizar' : 'Crear'}
+                            {isLoading ? (
+                                <>
+                                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                                    {isEditing ? 'Actualizando...' : 'Creando...'}
+                                </>
+                            ) : (
+                                isEditing ? 'Actualizar' : 'Crear'
+                            )}
                         </Button>
                     </div>
                 </DialogFooter>

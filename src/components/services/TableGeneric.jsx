@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
-import { Edit, Filter, MoreVertical, Plus, QrCode, Trash, Eye } from "lucide-react"
+import { Edit, Filter, MoreVertical, Plus, QrCode, Trash, Eye, Loader } from "lucide-react"
 import { CreateEventDialog } from "./Dialogs/Tables/CreateDialog"
 import { QRDialog } from "./Dialogs/QRDialog"
 import { FilterDialog } from "./Dialogs/Tables/FilterDialog"
@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/Input"
 
 export function TableGeneric({structure, structureForm, table}) {
-  const { user } = useUserData()
+  const { user, isLoaded } = useUserData()
   const router = useRouter()
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
@@ -34,9 +34,14 @@ export function TableGeneric({structure, structureForm, table}) {
   const [eventToDelete, setEventToDelete] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
 
+  const userTableData = useMemo(() => {
+    if (!isLoaded) return [];
+    return user[table.key] || [];
+  }, [isLoaded, user, table.key]);
 
-  const userTableData = user[table.key];
   const sortedAndFilteredEvents = useMemo(() => {
+    if (!isLoaded) return [];
+    
     const filteredEvents = userTableData.filter(
       (event) => {
         return Object.keys(filters).every((key) => {
@@ -60,7 +65,35 @@ export function TableGeneric({structure, structureForm, table}) {
     }
 
     return filteredEvents;
-  }, [userTableData, filters, sortConfig]);
+  }, [userTableData, filters, sortConfig, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    
+    Object.keys(structureForm).forEach(value => {
+      const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
+      if(structureForm[value].type == "selection" && user[valueFormatted]){
+        const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {
+          const name = s.name || s.nombre
+          return {
+            value: name,
+            label: name.charAt(0).toUpperCase() + name.slice(1),
+            id: s.id
+          }
+        })
+        structureForm[value].options = rest
+      }
+    })
+  }, [isLoaded, structureForm, user]);
+
+  if(!isLoaded){
+    return (
+      <div className="flex flex-col gap-4 justify-center items-center h-full">
+        <Loader className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-muted-foreground">Cargando datos...</p>
+      </div>
+    )
+  }
 
   const handleQRClick = (event, type) => {
     setSelectedEvent(event)
@@ -102,7 +135,6 @@ export function TableGeneric({structure, structureForm, table}) {
       }
 
       if (value === "password") {
-
         return (
           <div className="flex flex-row gap-2">
             <Input 
@@ -134,30 +166,12 @@ export function TableGeneric({structure, structureForm, table}) {
     }
 
     const dataFind = user[DataEvent.key]?.find((f) => f.id === Number(DataEvent.id))
-    return dataFind?.nombre
+    return dataFind?.name || dataFind?.nombre
   }
 
   const handleViewData = (data) => {
     router.push(`/${table.key}/${data.id}`)
   }
-
-  useEffect(() => {
-    Object.keys(structureForm).forEach(value => {
-      const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
-      if(structureForm[value].type == "selection" && user[valueFormatted]){
-        const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {
-          return {
-            value: s.nombre,
-            label: s.nombre.charAt(0).toUpperCase() + s.nombre.slice(1),
-            id: s.id
-          }
-        })
-
-        structureForm[value].options = rest
-      }
-    })
-  },[])
-
 
   return (
     <div className="space-y-4">
