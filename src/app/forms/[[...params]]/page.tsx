@@ -238,7 +238,7 @@ export default function FormsPage() {
                   </Button>
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
-                <h1 className="text-2xl font-bold">{form.nombre}</h1>
+                <h1 className="text-2xl font-bold">{form.name}</h1>
                 <p className="text-muted-foreground">{form.descripcion}</p>
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function FormsPage() {
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{scenery.nombre}</span>
+                    <span className="text-sm">{scenery.name}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />

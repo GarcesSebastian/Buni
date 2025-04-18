@@ -16,16 +16,21 @@ const useRoles = () => {
             });
             const data = await response.json();
 
-            const rolesFiltered = data.map((role: { id: number, name: string, permissions: Record<string, boolean>, state: string }) => ({
-                id: role.id,
-                name: role.name,
-                permissions: role.permissions,
-                state: "true"
-            }));
+            if (response.ok) {
+                const rolesFiltered = data.map((role: { id: number, name: string, permissions: Record<string, boolean>, state: string }) => ({
+                        id: role.id,
+                        name: role.name,
+                        permissions: role.permissions,
+                        state: "true"
+                }));
         
-            setRoles(rolesFiltered);
+                setRoles(rolesFiltered);
+                return rolesFiltered;
+            }
+
+            throw new Error(data.error || 'Error al obtener los roles');
         } catch (error) {
-            console.error(error);
+            throw error;
         }
     }
 
@@ -40,9 +45,15 @@ const useRoles = () => {
                 body: JSON.stringify(role)
             });
             const data = await response.json();
-            setRoles(data);
+
+            if (response.ok) {
+                setRoles(data);
+                return data;
+            }
+
+            throw new Error(data.error || 'Error al crear el rol');
         } catch (error) {
-            console.error(error);
+            throw error;
         }
     }
 
@@ -56,16 +67,23 @@ const useRoles = () => {
                 },
                 body: JSON.stringify(role)
             });
+
             const data = await response.json();
-            setRoles(data);
+
+            if (response.ok) {
+                setRoles(data);
+                return data;
+            }
+
+            throw new Error(data.error || 'Error al editar el rol');
         } catch (error) {
-            console.error(error);
+            throw error;
         }
     }
 
     const deleteRole = async (roleId: number) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/roles/${roleId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/${roleId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -73,9 +91,13 @@ const useRoles = () => {
                 }
             });
             const data = await response.json();
-            return data;
+
+            if (response.ok) {
+                return data;
+            }
+
+            throw new Error(data.error || 'Error al eliminar el rol');
         } catch (error) {
-            console.error(error);
             throw error;
         }
     }

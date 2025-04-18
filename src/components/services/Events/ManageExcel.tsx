@@ -6,7 +6,7 @@ import { useRef } from "react"
 import { Button } from "@/components/ui/Button"
 import { FileSpreadsheet, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
-import { useNotification } from "@/components/ui/Notification"
+import { useNotification } from "@/hooks/client/useNotification"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"

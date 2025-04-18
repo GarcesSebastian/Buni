@@ -8,6 +8,9 @@ import { Faculty } from "@/types/Faculty";
 import { Role, User as UserType } from "@/types/User";
 import useRoles from "../server/useRoles";
 import useUsers from "../server/useUsers";
+import useEvents from "../server/useEvents";
+import useScenery from "../server/useScenery";
+import useFaculty from "../server/useFaculty";
 import usePermissions from "../server/usePermissions";
 import { TemplateData } from "@/config/TemplateData";
 import { useAuth } from "./useAuth";
@@ -44,6 +47,9 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUserState] = useState<User>(TemplateData);
     const { roles, getRoles } = useRoles();
     const { users, getUsers } = useUsers();
+    const { events, getEvents } = useEvents();
+    const { scenery, getScenery } = useScenery();
+    const { faculty, getFaculty } = useFaculty();
     const { isAuthenticated } = useAuth();
     const { permissions, isSuperAdmin, hasPermission } = usePermissions();
 
@@ -66,6 +72,9 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
             try {
                 await getRoles();
                 await getUsers();
+                await getEvents();
+                await getScenery();
+                await getFaculty();
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -85,16 +94,14 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (isSuperAdmin) {
-            console.log("YOU ARE SUPER ADMIN");
+            // console.log("YOU ARE SUPER ADMIN");
         }
-
-        console.log("permissions", permissions);
 
         if (permissions) {
             const canCreateEvents = hasPermission("events", "create");
 
             if (canCreateEvents) {
-                console.log("YOU HAVE PERMISSION TO CREATE EVENTS");
+                // console.log("YOU HAVE PERMISSION TO CREATE EVENTS");
             }
         }
     }, [isSuperAdmin, permissions]);
@@ -107,7 +114,20 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         if (users.length > 0) {
             setUserState(prevUser => ({ ...prevUser, users: users }));
         }
-    }, [roles, users]);
+
+        if (events.length > 0) {
+            setUserState(prevUser => ({ ...prevUser, events: events }));
+        }
+
+        if (scenery.length > 0) {
+            setUserState(prevUser => ({ ...prevUser, scenery: scenery }));
+        }
+
+        if (faculty.length > 0) {
+            setUserState(prevUser => ({ ...prevUser, faculty: faculty }));
+        }
+
+    }, [roles, users, events, scenery, faculty]);
 
     useEffect(() => {
         Cookies.set("events", JSON.stringify(user.events), { expires: 7 });

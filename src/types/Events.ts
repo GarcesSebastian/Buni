@@ -97,7 +97,7 @@ export interface TableScenery {
 
 export interface Scenery {
   id: number;
-  nombre: string;
+  name: string;
   state: string;
 }
 
@@ -107,7 +107,7 @@ export interface ConfigScenery {
 }
 
 export interface ConfigFormScenery {
-  nombre: {
+  name: {
     name: string;
     type: string;
   };

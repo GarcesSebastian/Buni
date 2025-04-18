@@ -1,13 +1,13 @@
-import { User } from "@/types/User";
+import { Event } from "@/types/Events";
 import { useState } from "react";
 import Cookies from "js-cookie";
 
-const useUsers = () => {
-    const [users, setUsers] = useState<User[]>([]);
+const useEvents = () => {
+    const [events, setEvents] = useState<Event[]>([]);
 
-    const getUsers = async () => {  
+    const getEvents = async () => {  
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -17,72 +17,60 @@ const useUsers = () => {
             const data = await response.json();
 
             if (!data || !Array.isArray(data)) {
-                setUsers([]);
+                setEvents([]);
                 return;
             }
 
-            const usersFiltered = data.map((user: { id: number, name: string, email: string, password: string, role_id: number, created_at: string }) => ({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                password: user.password,
-                roles: {
-                    id: user.role_id,
-                    key: "roles"
-                },
-                created_at: user.created_at
-            }));
-
-            setUsers(usersFiltered);
+            setEvents(data);
         } catch (error) {
             console.error(error);
-            setUsers([]);
+            setEvents([]);
         }
     }
 
-    const createUser = async (user: User) => {
+    const createEvent = async (event: Event) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(user)
+                body: JSON.stringify(event)
             });
             const data = await response.json();
 
             if (response.ok) {  
-                setUsers(data);
+                setEvents(data);
                 return data;
             }
 
-            throw new Error(data.error || 'Error al crear el usuario');
+            throw new Error(data.error || 'Error al crear el evento');
         } catch (error) {
             throw error;
         }
     }
 
-    const updateUser = async (user: User) => {
+    const updateEvent = async (event: Event) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${event.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(user)
+                body: JSON.stringify(event)
             });
             const data = await response.json();
-            setUsers(data);
+            setEvents(data);
         } catch (error) {
             console.error(error);
         }
     }
 
-    const deleteUser = async (userId: number) => {
+    const deleteEvent = async (eventId: number) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -97,7 +85,7 @@ const useUsers = () => {
         }
     }
 
-    return { users, getUsers, createUser, updateUser, deleteUser };
+    return { events, getEvents, createEvent, updateEvent, deleteEvent };
 }
 
-export default useUsers;
+export default useEvents;

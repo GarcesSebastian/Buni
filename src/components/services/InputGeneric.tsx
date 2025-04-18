@@ -33,15 +33,15 @@ const options = ["text", "number", "date", "time", "email"]
 
 export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     const [isUnlimited, setIsUnlimited] = useState(formData[data.key] === "-1");
-    let valueFormatted: string | {id: number, nombre: string} = "";
+    let valueFormatted: string | {id: number, name: string} = "";
 
-    const getValueFormatted = (user: User, value: string | {id: number, key: string}, key: string): string | {id: number, nombre: string} => {
+    const getValueFormatted = (user: User, value: string | {id: number, key: string}, key: string): string | {id: number, name: string} => {
         if(typeof value != "object"){
             return value
         }
 
         const keyData = user[key as keyof User];
-        const valueFormatted = keyData?.find((d: { id: number }) => d.id == Number(value.id)) as { id: number, nombre: string }
+        const valueFormatted = keyData?.find((d: { id: number }) => d.id == Number(value.id)) as { id: number, name: string }
 
         if(!valueFormatted){
             return ""
@@ -122,7 +122,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
                 <Label htmlFor="faculty">{data.form.name}</Label>
                 <Select
                     key={data.index}
-                    value={typeof valueFormatted == "object" ? valueFormatted.nombre + "_" + valueFormatted.id : valueFormatted}
+                    value={typeof valueFormatted == "object" ? valueFormatted.name + "_" + valueFormatted.id : valueFormatted}
                     onValueChange={data.onChange}
                     required={data.form.required}
                 >

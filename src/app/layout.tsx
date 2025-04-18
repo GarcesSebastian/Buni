@@ -6,7 +6,7 @@ import "../styles/globals.css"
 import { TopNav } from "@/components/ui/TopNav"
 import { UserDataProvider } from "@/hooks/auth/useUserData"
 import { WebSocketProvider } from "@/hooks/server/useWebSocket"
-import { NotificationProvider } from "@/components/ui/Notification"
+import { NotificationProvider } from "@/hooks/client/useNotification"
 import { Suspense } from "react"
 import { AuthProvider } from "@/hooks/auth/useAuth"
 

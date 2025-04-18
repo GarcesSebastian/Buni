@@ -5,7 +5,7 @@ export type typeFieldForm = "texto" | "numero" | "email" | "fecha" | "hora" | "c
 
 export interface Form {
   id: number
-  nombre: string
+  name: string
   descripcion: string
   campos: FormField[]
   state: boolean

@@ -139,7 +139,7 @@ function NotificationItem({
   }
 
   const baseClasses =
-    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md z-50 transition-all duration-300 ease-in-out"
+    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md z-[9999] transition-all duration-300 ease-in-out"
   const variantClasses = getVariantClasses(type)
   const positionClasses = getPositionClasses(position)
   const visibilityClasses = isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -176,7 +176,7 @@ function NotificationContainer({
   onClose: (id: string) => void
 }) {
   return (
-    <div className={`fixed bg-red-500 z-50 ${position}`}>
+    <div className={`fixed z-[9999] ${position}`}>
       {notifications.map((notification, index) => (
         <NotificationItem
           key={notification.id}

@@ -1,5 +1,6 @@
 "use client"
 
+import Cookies from "js-cookie"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import {
@@ -11,13 +12,12 @@ import {
   DialogTitle,
 } from "@/components/ui/Dialog"
 import { Form } from "@/types/Forms"
-import { type User, useUserData } from "@/hooks/auth/useUserData"
-import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { GeneralStructureForm } from "@/types/Table"
 import { InputBasic } from "../../InputGeneric"
+import { type User, useUserData } from "@/hooks/auth/useUserData"
+import { useWebSocket } from "@/hooks/server/useWebSocket";
+import { useNotification } from "@/hooks/client/useNotification"
 import { dataExtra } from "@/config/Data"
-import Cookies from "js-cookie"
-import { useNotification } from "@/components/ui/Notification"
 
 type DataExtraValue = string | number | boolean | null | DataExtraValue[] | { [key: string]: DataExtraValue }
 
@@ -100,8 +100,9 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       }
 
       const body_response = JSON.parse(JSON.stringify(updatedFormData))
+      console.log("body_response", body_response);
 
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,15 +111,24 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
         body: JSON.stringify(body_response)
       })
 
-      if (Array.isArray(user[key])) {
-        setUser(newData);
-      }      
+      const data_response = await response.json();
+      console.log("data_response", data_response);
 
+      if (!response.ok) {
+        throw new Error(data_response.error || 'Error al crear el registro'); 
+      }
+
+      setUser(newData);
       RestartFormData();
       onOpenChange(false);
       sendMessage("UPDATE_DATA", {users: newData})
+
+      showNotification({
+        title: "Registro creado",
+        message: "El registro ha sido creado correctamente",
+        type: "success"
+      });
     } catch (error) {
-      console.error('Error:', error);
       showNotification({
         title: "Error",
         message: error instanceof Error ? error.message : 'Error inesperado',

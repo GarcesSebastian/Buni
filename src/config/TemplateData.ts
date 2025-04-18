@@ -1,46 +1,12 @@
 import { User } from "@/hooks/auth/useUserData";
 
 export const TemplateData: User = {
-    events: [{
-        "nombre": "Induccion Universidad del Sinu",
-        "organizador": "Universidad del Sinu",
-        "cupos": "-1",
-        "hora": "06:30",
-        "fecha": "2025-03-07",
-        "faculty": {
-            "id": 1,
-            "key": "faculty",
-        },
-        "scenery": {
-            "id": 1,
-            "key": "scenery",
-        },
-        "formAssists": {
-            "id": 1743070732515,
-            "key": "form"
-        },
-        "formInscriptions": {
-            "id": 1742291990002,
-            "key": "form"
-        },
-        "assists": [],
-        "inscriptions": [],
-        "state": "true",
-        "id": 1
-    }],
-    faculty: [{
-        "nombre": "Ingenieria",
-        "state": "true",
-        "id": 1
-    }],
-    scenery: [{
-        "id": 1,
-        "nombre": "Auditorio Santillana",
-        "state": "true"
-    }],
+    events: [],
+    faculty: [],
+    scenery: [],
     form: [{
         "id": 1742291990002,
-        "nombre": "Formulario de Inscripcion",
+        "name": "Formulario de Inscripcion",
         "descripcion": "Por favor ingrese los datos correctamente",
         "campos": [
             {
@@ -226,7 +192,7 @@ export const TemplateData: User = {
     },
     {
         "id": 1743070732515,
-        "nombre": "Formulario de Asistencia",
+        "name": "Formulario de Asistencia",
         "descripcion": "Diligenciar este formulario para la asistencia al evento",
         "campos": [
             {

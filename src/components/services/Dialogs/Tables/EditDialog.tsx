@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Cookies from "js-cookie"
 import { Button } from "@/components/ui/Button"
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { GeneralStructureForm } from "@/types/Table"
 import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { Form } from "@/types/Forms"
 import { InputBasic } from "../../InputGeneric"
+import { useNotification } from "@/hooks/client/useNotification"
 
 interface Props {
   data: {
@@ -43,8 +45,10 @@ type UpdatedFormData = Record<string, string | number | FormattedData>;
 
 export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [isEditing, setIsEditing] = useState(false);
   const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
-    const { sendMessage } = useWebSocket()
+  const { sendMessage } = useWebSocket()
+  const { showNotification } = useNotification()
   
   const RestartFormData = () => {
     const rest: Record<string, string> = {};
@@ -60,43 +64,82 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
     }
   }, [initialData])
 
-  const handleSubmit = (e: HandleSubmitProps) => {
+  const handleSubmit = async (e: HandleSubmitProps) => {
     e.preventDefault();
-    formData.id = initialData.id
-    const updatedFormData: UpdatedFormData = { ...formData } as UpdatedFormData;
-    
-    Object.keys(updatedFormData).forEach((key: string) => {
-      if (typeof updatedFormData[key] == "string"){
-        const dataSplit = updatedFormData[key].split("_")
-        if (dataSplit.length <= 1) return;
+    setIsEditing(true);
 
-        const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
-        const dataId = dataSplit[dataSplit.length - 1]
-        const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
-        if(findDataUser){
-          updatedFormData[key] = {
-            id: findDataUser.id,
-            key: keyFormatted,
+    try {
+      const token = Cookies.get('token');
+      
+      if (!token) {
+        throw new Error('No hay token de autenticación');
+      }
+
+      formData.id = initialData.id;
+      const updatedFormData: UpdatedFormData = { ...formData } as UpdatedFormData;
+      
+      Object.keys(updatedFormData).forEach((key: string) => {
+        if (typeof updatedFormData[key] == "string"){
+          const dataSplit = updatedFormData[key].split("_")
+          if (dataSplit.length <= 1) return;
+
+          const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
+          const dataId = dataSplit[dataSplit.length - 1]
+          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+          if(findDataUser){
+            updatedFormData[key] = {
+              id: findDataUser.id,
+              key: keyFormatted,
+            }
           }
         }
+      })
+
+      const key = data.table.key as keyof User;
+      const newData = {
+        ...user,
+        [data.table.key]: (user[key] as (Form | { id: number; nombre: string })[]).map((item: Form | { id: number; nombre: string }) =>
+          item.id === Number(initialData.id) ? updatedFormData : item
+        ),
       }
-    })
 
-    const key = data.table.key as keyof User;
-    const newData = {
-      ...user,
-      [data.table.key]: (user[key] as (Form | { id: number; nombre: string })[]).map((item: Form | { id: number; nombre: string }) =>
-        item.id === Number(initialData.id) ? updatedFormData : item
-      ),
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}/${initialData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedFormData)
+      });
+
+      const data_response = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data_response.error || 'Error al editar el registro');
+      }
+
+      if (Array.isArray(user[key])) {  
+        setUser(newData);
+      }
+
+      RestartFormData();
+      onOpenChange(false);
+      sendMessage("UPDATE_DATA", {users: newData});
+
+      showNotification({
+        title: "Registro editado",
+        message: "El registro ha sido editado correctamente",
+        type: "success"
+      });
+    } catch (error) {
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : 'Error inesperado al editar el registro',
+        type: "error"
+      });
+    } finally {
+      setIsEditing(false);
     }
-
-    if (Array.isArray(user[key])) {  
-      setUser(newData);
-    }
-
-    RestartFormData();
-    onOpenChange(false);
-    sendMessage("UPDATE_DATA", {users: newData})
   };
 
   return (
@@ -104,8 +147,8 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
       <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Editar dato para {data.table.name}</DialogTitle>
-            <DialogDescription>Complete los datos para {data.table.name}</DialogDescription>
+            <DialogTitle>Editar {data.table.name}</DialogTitle>
+            <DialogDescription>Complete los datos para editar el {data.table.name}</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4">
             {Object.keys(data.structureForm).map((value, index) => (
@@ -127,7 +170,12 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
+            <Button 
+              type="submit" 
+              className="bg-primary hover:bg-primary/90"
+              loading={isEditing}
+              loadingText="Editando..."
+            >
               Editar
             </Button>
           </DialogFooter>

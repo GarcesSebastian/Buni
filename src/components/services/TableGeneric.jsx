@@ -134,6 +134,16 @@ export function TableGeneric({structure, structureForm, table}) {
         return "Ilimitado"
       }
 
+      if (value === "state") {
+        return (
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+            data[value] === "true" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          }`}>
+            {data[value] === "true" ? "Activo" : "Inactivo"}
+          </span>
+        );
+      }
+
       if (value === "password") {
         return (
           <div className="flex flex-row gap-2">
@@ -191,54 +201,45 @@ export function TableGeneric({structure, structureForm, table}) {
           <TableHeader>
             <TableRow>
               <TableHead>N°</TableHead>
-              {structure.filter((value) => value.key !== "id").map((value) => (
-                <TableHead key={value.key} className="whitespace-nowrap">
-                    <div className="w-full" style={{ display: "table" }}>
-                      <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
-                        {value.value}
-                      </span>
+              {structure.filter(column => column.key !== "id").map((column) => (
+                <TableHead key={column.key} className="whitespace-nowrap">
+                  <div className="w-full" style={{ display: "table" }}>
+                    <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
+                      {column.value}
+                    </span>
 
-                      {value.filter && (
-                        <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
-                          <Button variant="ghost" onClick={() => setOpenFilter(value.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
-                            <Filter className="h-4 w-4" />
-                          </Button>
-                        </span>
-                      )}
-                    </div>
+                    {column.filter && (
+                      <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
+                        <Button variant="ghost" onClick={() => setOpenFilter(column.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
+                          <Filter className="h-4 w-4" />
+                        </Button>
+                      </span>
+                    )}
+                  </div>
                 </TableHead>
-                ))}
+              ))}
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedAndFilteredEvents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={Object.keys(structure).length + 2} className="text-center">
+                <TableCell colSpan={structure.length + 1} className="text-center">
                   No se encontraron datos
                 </TableCell>
               </TableRow>
             ) : (
               sortedAndFilteredEvents.map((data, index) => (
                 <TableRow key={data.id || index}>
-                  <TableCell>{data.id}</TableCell>
-                  {Object.keys(data)
-                    .filter((key) => key !== "id")
-                    .map((value) =>
-                      structure.find(st => st.key == value) ? (
-                        value === "state" ? (
-                          <TableCell key={value}>
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              data[value] === "true" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                            }`}>
-                              {data[value] === "true" ? "Activo" : "No activo"}
-                            </span>
-                          </TableCell>
-                        ) : (
-                          <TableCell key={value}>{normalizeData(data, value)}</TableCell>
-                        )
-                      ) : null
-                  )}
+                  <TableCell>{index + 1}</TableCell>
+                  {structure.map((column) => {
+                    if (column.key === "id") return null;
+                    return (
+                      <TableCell key={column.key}>
+                        {normalizeData(data, column.key)}
+                      </TableCell>
+                    );
+                  })}
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -256,40 +257,30 @@ export function TableGeneric({structure, structureForm, table}) {
                           <Trash className="mr-2 h-4 w-4 text-red-800" />
                           Eliminar
                         </DropdownMenuItem>
-                        {
-                          table.isView && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleViewData(data)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Ver Evento
-                              </DropdownMenuItem>
-                            </>
-                          )
-                        }
-                        {
-                          table.isQR && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleQRClick(data, "inscriptions")}>
-                                <QrCode className="mr-2 h-4 w-4" />
-                                QR Inscripción
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleQRClick(data, "assists")}>
-                                <QrCode className="mr-2 h-4 w-4" />
-                                QR Asistencia
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-800" onClick={() => {
-                               router.push(`forms/assists/${data.id}`)
-                              }}>
-                                Prueba de Asistencia
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-800" onClick={() => {
-                               router.push(`forms/inscriptions/${data.id}`)
-                              }}>
-                                Prueba de Inscripcion
-                              </DropdownMenuItem>
-                            </>
-                          )
-                        }
+                        {table.isView && (
+                          <DropdownMenuItem onClick={() => handleViewData(data)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver Evento
+                          </DropdownMenuItem>
+                        )}
+                        {table.isQR && (
+                          <>
+                            <DropdownMenuItem onClick={() => handleQRClick(data, "inscriptions")}>
+                              <QrCode className="mr-2 h-4 w-4" />
+                              QR Inscripción
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleQRClick(data, "assists")}>
+                              <QrCode className="mr-2 h-4 w-4" />
+                              QR Asistencia
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-800" onClick={() => router.push(`forms/assists/${data.id}`)}>
+                              Prueba de Asistencia
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-800" onClick={() => router.push(`forms/inscriptions/${data.id}`)}>
+                              Prueba de Inscripcion
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

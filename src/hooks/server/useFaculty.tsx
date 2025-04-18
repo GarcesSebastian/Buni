@@ -1,13 +1,13 @@
-import { User } from "@/types/User";
+import { Faculty } from "@/types/Faculty";
 import { useState } from "react";
 import Cookies from "js-cookie";
 
-const useUsers = () => {
-    const [users, setUsers] = useState<User[]>([]);
+const useFaculty = () => {
+    const [faculty, setFaculty] = useState<Faculty[]>([]);
 
-    const getUsers = async () => {  
+    const getFaculty = async () => {  
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -17,72 +17,60 @@ const useUsers = () => {
             const data = await response.json();
 
             if (!data || !Array.isArray(data)) {
-                setUsers([]);
+                setFaculty([]);
                 return;
             }
 
-            const usersFiltered = data.map((user: { id: number, name: string, email: string, password: string, role_id: number, created_at: string }) => ({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                password: user.password,
-                roles: {
-                    id: user.role_id,
-                    key: "roles"
-                },
-                created_at: user.created_at
-            }));
-
-            setUsers(usersFiltered);
+            setFaculty(data);
         } catch (error) {
             console.error(error);
-            setUsers([]);
+            setFaculty([]);
         }
     }
 
-    const createUser = async (user: User) => {
+    const createFaculty = async (faculty: Faculty) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(user)
+                body: JSON.stringify(faculty)
             });
             const data = await response.json();
 
             if (response.ok) {  
-                setUsers(data);
+                setFaculty(data);
                 return data;
             }
 
-            throw new Error(data.error || 'Error al crear el usuario');
+            throw new Error(data.error || 'Error al crear el facultad');
         } catch (error) {
             throw error;
         }
     }
 
-    const updateUser = async (user: User) => {
+    const updateFaculty = async (faculty: Faculty) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty/${faculty.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(user)
+                body: JSON.stringify(faculty)
             });
             const data = await response.json();
-            setUsers(data);
+            setFaculty(data);
         } catch (error) {
             console.error(error);
         }
     }
 
-    const deleteUser = async (userId: number) => {
+    const deleteFaculty = async (facultyId: number) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty/${facultyId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -97,7 +85,7 @@ const useUsers = () => {
         }
     }
 
-    return { users, getUsers, createUser, updateUser, deleteUser };
+    return { faculty, getFaculty, createFaculty, updateFaculty, deleteFaculty };
 }
 
-export default useUsers;
+export default useFaculty;

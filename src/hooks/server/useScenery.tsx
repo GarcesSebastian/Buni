@@ -1,13 +1,13 @@
-import { User } from "@/types/User";
+import { Scenery } from "@/types/Events";
 import { useState } from "react";
 import Cookies from "js-cookie";
 
-const useUsers = () => {
-    const [users, setUsers] = useState<User[]>([]);
+const useScenery = () => {
+    const [scenery, setScenery] = useState<Scenery[]>([]);
 
-    const getUsers = async () => {  
+    const getScenery = async () => {  
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -17,72 +17,60 @@ const useUsers = () => {
             const data = await response.json();
 
             if (!data || !Array.isArray(data)) {
-                setUsers([]);
+                setScenery([]);
                 return;
             }
 
-            const usersFiltered = data.map((user: { id: number, name: string, email: string, password: string, role_id: number, created_at: string }) => ({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                password: user.password,
-                roles: {
-                    id: user.role_id,
-                    key: "roles"
-                },
-                created_at: user.created_at
-            }));
-
-            setUsers(usersFiltered);
+            setScenery(data);
         } catch (error) {
             console.error(error);
-            setUsers([]);
+            setScenery([]);
         }
     }
 
-    const createUser = async (user: User) => {
+    const createScenery = async (scenery: Scenery) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(user)
+                body: JSON.stringify(scenery)
             });
             const data = await response.json();
 
             if (response.ok) {  
-                setUsers(data);
+                setScenery(data);
                 return data;
             }
 
-            throw new Error(data.error || 'Error al crear el usuario');
+            throw new Error(data.error || 'Error al crear el escenario');
         } catch (error) {
             throw error;
         }
     }
 
-    const updateUser = async (user: User) => {
+    const updateScenery = async (scenery: Scenery) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery/${scenery.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(user)
+                body: JSON.stringify(scenery)
             });
             const data = await response.json();
-            setUsers(data);
+            setScenery(data);
         } catch (error) {
             console.error(error);
         }
     }
 
-    const deleteUser = async (userId: number) => {
+    const deleteScenery = async (sceneryId: number) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery/${sceneryId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -97,7 +85,7 @@ const useUsers = () => {
         }
     }
 
-    return { users, getUsers, createUser, updateUser, deleteUser };
+    return { scenery, getScenery, createScenery, updateScenery, deleteScenery };
 }
 
-export default useUsers;
+export default useScenery;

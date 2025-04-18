@@ -4,7 +4,7 @@ import Section from "@/components/ui/Section"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Plus, MoreVertical, Edit, Trash, Eye, Loader } from "lucide-react"
-import { useNotification } from "@/components/ui/Notification"
+import { useNotification } from "@/hooks/client/useNotification"
 import {
   Dialog,
   DialogContent,
@@ -33,7 +33,7 @@ export interface Role {
 
 export default function RolesPage() {
     const { user, setUser, isLoaded } = useUserData();
-    const { createRole, deleteRole } = useRoles();
+    const { createRole, deleteRole, updateRole } = useRoles();
     const { showNotification } = useNotification();
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -55,23 +55,23 @@ export default function RolesPage() {
             setIsCreating(true);
             setIsLoading(true);
             await createRole(newRole);
-        } catch (error) {
-            console.error(error);
-            showNotification({
-                title: "Error",
-                message: "Error al crear el rol",
-                type: "error"
-            });
-        } finally {
+
             showNotification({
                 title: "Rol creado",
                 message: "El rol ha sido creado correctamente",
                 type: "success"
             });
 
-            setIsLoading(false);
-            setIsCreating(false);
             setUser({ ...user, roles: [...user.roles, newRole] });
+            setIsCreating(false);
+        } catch (error) {
+            showNotification({
+                title: "Error",
+                message: error instanceof Error ? error.message : "Error al crear el rol",
+                type: "error"
+            });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -86,22 +86,25 @@ export default function RolesPage() {
         };
 
         try {
-            setUser({ ...user, roles: user.roles.map(r => r.id === roleToEdit.id ? updatedRole : r) });
-        } catch (error) {
-            console.error(error);
-            showNotification({
-                title: "Error",
-                message: "Error al editar el rol",
-                type: "error"
-            }); 
-        } finally {
-            setRoleToEdit(null);
+            setIsEditing(true);
+            await updateRole(updatedRole);
 
             showNotification({
                 title: "Rol editado",
                 message: "El rol ha sido editado correctamente",
                 type: "success"
             });
+
+            setUser({ ...user, roles: user.roles.map(r => r.id === roleToEdit.id ? updatedRole : r) });
+            setRoleToEdit(null);
+        } catch (error) {
+            showNotification({
+                title: "Error",
+                message: error instanceof Error ? error.message : "Error al editar el rol",
+                type: "error"
+            }); 
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -110,24 +113,25 @@ export default function RolesPage() {
 
         try {
             setIsDeleting(true);
+            setIsLoading(true);
             await deleteRole(roleToDelete.id);
-        } catch (error) {
-            console.error(error);
-            showNotification({
-                title: "Error",
-                message: "Error al eliminar el rol",
-                type: "error"
-            });
-        } finally {
-            setIsDeleting(false);
-            setRoleToDelete(null);
-            setUser({ ...user, roles: user.roles.filter(r => r.id !== roleToDelete.id) });
-            
+                        
             showNotification({
                 title: "Rol eliminado",
                 message: "El rol ha sido eliminado correctamente",
                 type: "success"
             });
+
+            setUser({ ...user, roles: user.roles.filter(r => r.id !== roleToDelete.id) });
+            setRoleToDelete(null);
+        } catch (error) {
+            showNotification({
+                title: "Error",
+                message: error instanceof Error ? error.message : "Error al eliminar el rol",
+                type: "error"
+            });
+        } finally {
+            setIsDeleting(false);
         }
     };
 

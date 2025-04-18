@@ -79,12 +79,12 @@ export const tableScenery: TableScenery = {
 
 export const configScenery: ConfigScenery[] = [
     { key: "id", value: "ID" },
-    { key: "nombre", value: "Nombre" },
+    { key: "name", value: "Nombre" },
     { key: "state", value: "Estados" },
 ]
 
 export const configFormScenery: ConfigFormScenery = {
-    nombre: {
+    name: {
         name: "Nombre",
         type: "text"
     },

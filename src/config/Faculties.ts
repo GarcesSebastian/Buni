@@ -7,12 +7,12 @@ export const tableFaculty: TableFaculty = {
 
 export const configFaculty: ConfigFaculty[] = [
     { key: "id", value: "ID" },
-    { key: "nombre", value: "Nombre" },
+    { key: "name", value: "Nombre" },
     { key: "state", value: "Estados" },
 ]
 
 export const configFormFaculty: ConfigFormFaculty = {
-    nombre: {
+    name: {
         name: "Nombre",
         type: "text"
     },

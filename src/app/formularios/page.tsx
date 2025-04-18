@@ -178,7 +178,7 @@ export default function FormulariosPage() {
     const nombreFormulario = "Nuevo Formulario " + (user.form.length + 1)
     
     const formExists = user.form.some(
-      form => normalizeString(form.nombre) === normalizeString(nombreFormulario)
+      form => normalizeString(form.name) === normalizeString(nombreFormulario)
     )
 
     if (formExists) {
@@ -186,9 +186,9 @@ export default function FormulariosPage() {
       return
     }
 
-    const nuevoFormulario = {
+    const nuevoFormulario: Form = {
       id: Date.now(),
-      nombre: nombreFormulario,
+      name: nombreFormulario,
       descripcion: "Descripción del formulario",
       campos: [],
       state: false,
@@ -228,7 +228,7 @@ export default function FormulariosPage() {
 
     const formExists = user.form.some(
       form => form.id !== currentForm.id && 
-      normalizeString(form.nombre) === normalizeString(currentForm.nombre)
+      normalizeString(form.name) === normalizeString(currentForm.name)
     )
 
     if (formExists) {
@@ -318,7 +318,7 @@ export default function FormulariosPage() {
                     <TableBody>
                       {user.form.map((formulario) => (
                         <TableRow key={formulario.id}>
-                          <TableCell>{formulario.nombre}</TableCell>
+                          <TableCell>{formulario.name}</TableCell>
                           <TableCell>
                             <span
                               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -402,7 +402,7 @@ export default function FormulariosPage() {
 
               <Card>
                 <CardHeader className="flex flex-col p-0">
-                  <CardTitle>{currentForm ? `Editar: ${currentForm.nombre}` : "Detalles del Formulario"}</CardTitle>
+                  <CardTitle>{currentForm ? `Editar: ${currentForm.name}` : "Detalles del Formulario"}</CardTitle>
                   <CardDescription>
                     {currentForm
                       ? "Modifique los detalles y campos del formulario"
@@ -416,9 +416,9 @@ export default function FormulariosPage() {
                         <Label htmlFor="nombre-formulario">Nombre del Formulario</Label>
                         <Input
                           id="nombre-formulario"
-                          value={currentForm.nombre}
+                          value={currentForm.name}
                           onChange={(e) => {
-                            setCurrentForm({ ...currentForm, nombre: e.target.value })
+                            setCurrentForm({ ...currentForm, name: e.target.value })
                             setError("")
                           }}
                         />

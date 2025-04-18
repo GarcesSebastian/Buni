@@ -5,7 +5,7 @@ export interface TableFaculty {
 
 export interface Faculty {
   id: number;
-  nombre: string;
+  name: string;
   state: string;
 }
 
@@ -15,7 +15,7 @@ export interface ConfigFaculty {
 }
 
 export interface ConfigFormFaculty {
-  nombre: {
+  name: {
     name: string;
     type: string;
   };

@@ -369,7 +369,7 @@ export default function EventDetailPage() {
                                                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
                                                         <p className="text-sm font-medium">Escenario</p>
-                                                        <p className="text-sm sm:text-base">{scenery?.nombre}</p>
+                                                        <p className="text-sm sm:text-base">{scenery?.name}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -388,7 +388,7 @@ export default function EventDetailPage() {
                                                     <div>
                                                         <p className="text-sm font-medium">Programa</p>
                                                         <Badge variant="outline" className="text-xs sm:text-sm">
-                                                            {faculty?.nombre}
+                                                            {faculty?.name}
                                                         </Badge>
                                                     </div>
                                                 </div>

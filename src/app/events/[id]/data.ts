@@ -129,7 +129,7 @@ export const eventosEjemplo: Event[] = [
         },
         assists: await generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,
-            nombre: "Formulario de Inscripcion",
+            name: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",
             campos: [
                 {
@@ -189,7 +189,7 @@ export const eventosEjemplo: Event[] = [
         }),
         inscriptions: await generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
             id: 1742291990002,
-            nombre: "Formulario de Inscripcion",
+            name: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",
             campos: [
                 {
@@ -274,7 +274,7 @@ export const eventosEjemplo: Event[] = [
         },
         assists: await generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,
-            nombre: "Formulario de Inscripcion",
+            name: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",
             campos: [
                 {
@@ -334,7 +334,7 @@ export const eventosEjemplo: Event[] = [
         }),
         inscriptions: await generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
             id: 1742291990002,
-            nombre: "Formulario de Inscripcion",
+            name: "Formulario de Inscripcion",
             descripcion: "Por favor ingrese los datos correctamente",
             campos: [
                 {

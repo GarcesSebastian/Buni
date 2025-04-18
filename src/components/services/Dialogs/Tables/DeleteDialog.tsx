@@ -1,5 +1,6 @@
 "use client"
 
+import Cookies from "js-cookie"
 import { Button } from "@/components/ui/Button"
 import {
   Dialog,
@@ -12,6 +13,8 @@ import {
 import { GeneralStructureForm } from "@/types/Table"
 import { User, useUserData } from "@/hooks/auth/useUserData"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
+import { useNotification } from "@/hooks/client/useNotification"
+import { useState } from "react"
 
 interface Props {
   data: {
@@ -30,10 +33,17 @@ interface Props {
 export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
   const { user, setUser } = useUserData()
   const { sendMessage } = useWebSocket()
+  const { showNotification } = useNotification()
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDelete = () => {
-    const key = data.table.key as keyof User;
-    if (Array.isArray(user[key])) {
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      const key = data.table.key as keyof User;
+      if (!Array.isArray(user[key])) {
+        throw new Error("Error al eliminar el registro: estructura de datos inválida")
+      }
+
       const updatedData = (user[key] as Array<{ id: number }>).filter((item) => item.id !== Number(initialData.id))
 
       const newData = {
@@ -41,26 +51,59 @@ export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
         [data.table.key]: updatedData,
       }
 
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}/${initialData.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`
+        }
+      })
+
+      const data_response = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data_response.error || "Error al eliminar el registro")
+      }
+
       setUser(newData)
       onOpenChange(false)
       sendMessage("UPDATE_DATA", {users: newData})
-    } 
 
+      showNotification({
+        title: "Registro eliminado",
+        message: "El registro ha sido eliminado correctamente",
+        type: "success"
+      })
+    } catch (error) {
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Error inesperado al eliminar el registro",
+        type: "error"
+      })
+    } finally {
+      setIsDeleting(false)
+    }
   }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Eliminar Evento</DialogTitle>
+          <DialogTitle>Eliminar {data.table.name}</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.
+            ¿Estás seguro de que deseas eliminar este {data.table.name}? Esta acción no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button className="bg-primary hover:bg-primary/90" onClick={handleDelete}>
+          <Button 
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90" 
+            onClick={handleDelete}
+            loading={isDeleting}
+            loadingText="Eliminando..."
+          >
             Eliminar
           </Button>
         </DialogFooter>
