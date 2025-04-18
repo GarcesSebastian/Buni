@@ -8,6 +8,7 @@ import { UserDataProvider } from "@/hooks/auth/useUserData"
 import { WebSocketProvider } from "@/hooks/server/useWebSocket"
 import { NotificationProvider } from "@/components/ui/Notification"
 import { Suspense } from "react"
+import { AuthProvider } from "@/hooks/auth/useAuth"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,18 +29,20 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <div className="h-screen overflow-hidden">
-          <TopNav/>
-          <div className="flex overflow-hidden">
-            <UserDataProvider>
-              <WebSocketProvider>
-                <NotificationProvider>
-                  <Suspense>
-                    <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
-                  </Suspense>
-                </NotificationProvider>
-              </WebSocketProvider>
-            </UserDataProvider>
-          </div>
+          <AuthProvider>
+            <TopNav/>
+            <div className="flex overflow-hidden">
+              <UserDataProvider>
+                <WebSocketProvider>
+                  <NotificationProvider>
+                    <Suspense>
+                      <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
+                    </Suspense>
+                  </NotificationProvider>
+                </WebSocketProvider>
+              </UserDataProvider>
+            </div>
+          </AuthProvider>
         </div>
       </body>
     </html>

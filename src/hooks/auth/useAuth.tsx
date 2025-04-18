@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+"use client";
+
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
@@ -24,7 +26,14 @@ interface AuthState {
     isLoading: boolean;
 }
 
-export function useAuth() {
+interface AuthContextType extends AuthState {
+    login: (email: string, password: string) => Promise<void>;
+    logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
     const [authState, setAuthState] = useState<AuthState>({
         user: null,
         isAuthenticated: false,
@@ -91,9 +100,17 @@ export function useAuth() {
         router.push('/');
     };
 
-    return {
-        ...authState,
-        login,
-        logout
-    };
+    return (
+        <AuthContext.Provider value={{ ...authState, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    }
+    return context;
 } 

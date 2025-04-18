@@ -37,7 +37,10 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  roles: string;
+  roles: {
+    id: number;
+    key: string;
+  };
   created_at: string;
 }
 
