@@ -8,6 +8,8 @@ import { Faculty } from "@/types/Faculty";
 import { Role, User as UserType } from "@/types/User";
 import useRoles from "../server/useRoles";
 import useUsers from "../server/useUsers";
+import usePermissions from "../server/usePermissions";
+
 export interface User {
     events: Event[];
     faculty: Faculty[];
@@ -323,6 +325,8 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     });
     const { roles, getRoles } = useRoles();
     const { users, getUsers } = useUsers();
+    const { permissions, isSuperAdmin, hasPermission } = usePermissions();
+
     const setUser = (data: User) => {
         setUserState(data);
     };
@@ -352,6 +356,22 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
 
         fetchRoles();
     }, []);
+
+    useEffect(() => {
+        if (isSuperAdmin) {
+            console.log("YOU ARE SUPER ADMIN");
+        }
+
+        console.log("permissions", permissions);
+
+        if (permissions) {
+            const canCreateEvents = hasPermission("events", "create");
+
+            if (canCreateEvents) {
+                console.log("YOU HAVE PERMISSION TO CREATE EVENTS");
+            }
+        }
+    }, [isSuperAdmin, permissions]);
 
     useEffect(() => {
         if (roles.length > 0) {

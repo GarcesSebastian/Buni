@@ -9,31 +9,31 @@ export interface PermissionModule {
 
 export const permissionModules: PermissionModule[] = [
     {
-        id: 'events',
+        id: 'event',
         name: 'Eventos',
         description: 'Gestión de eventos y actividades',
         actions: ['create', 'edit', 'delete', 'view']
     },
     {
-        id: 'users',
+        id: 'user',
         name: 'Usuarios',
         description: 'Gestión de usuarios del sistema',
         actions: ['create', 'edit', 'delete', 'view']
     },
     {
-        id: 'roles',
+        id: 'role',
         name: 'Roles',
         description: 'Gestión de roles y permisos',
         actions: ['create', 'edit', 'delete', 'view']
     },
     {
-        id: 'faculties',
+        id: 'faculty',
         name: 'Programas',
         description: 'Gestión de programas académicos',
         actions: ['create', 'edit', 'delete', 'view']
     },
     {
-        id: 'sceneries',
+        id: 'scenery',
         name: 'Escenarios',
         description: 'Gestión de escenarios y espacios',
         actions: ['create', 'edit', 'delete', 'view']
