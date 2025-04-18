@@ -75,7 +75,7 @@ const usePermissions = () => {
         }
 
         const userPermissions = user.permissions as Record<string, boolean>;
-        console.log("userPermissions", userPermissions);
+        // console.log("userPermissions", userPermissions);
         
         setPermissions({
             events: {

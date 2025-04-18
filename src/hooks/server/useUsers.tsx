@@ -16,6 +16,11 @@ const useUsers = () => {
             });
             const data = await response.json();
 
+            if (!data || !Array.isArray(data)) {
+                setUsers([]);
+                return;
+            }
+
             const usersFiltered = data.map((user: { id: number, name: string, email: string, password: string, role_id: number, created_at: string }) => ({
                 id: user.id,
                 name: user.name,
@@ -25,11 +30,13 @@ const useUsers = () => {
                     id: user.role_id,
                     key: "roles"
                 },
+                created_at: user.created_at
             }));
 
             setUsers(usersFiltered);
         } catch (error) {
             console.error(error);
+            setUsers([]);
         }
     }
 
