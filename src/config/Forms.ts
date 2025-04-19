@@ -1,22 +1,22 @@
 export const configField = [
-    { id: "texto", nombre: "Texto", key: "text" },
-    { id: "numero", nombre: "Número", key: "number" },
-    { id: "email", nombre: "Email", key: "email" },
-    { id: "fecha", nombre: "Fecha", key: "date" },
-    { id: "hora", nombre: "Hora", key: "time" },
-    { id: "seleccion", nombre: "Selección", key: "selection" },
-    { id: "checkbox", nombre: "Casilla de verificación", key: "checkbox" },
-    { id: "qualification", nombre: "Calificación", key: "qualification" },
-    { id: "checklist_unico", nombre: "Lista de selección única", key: "checklist_unique" },
-    { id: "checklist_multiple", nombre: "Lista de selección múltiple", key: "checklist_multiple" },
-    { id: "checklist_unico_grid", nombre: "Lista de selección única en cuadricula", key: "checklist_unique_grid" },
-    { id: "checklist_multiple_grid", nombre: "Lista de selección múltiple en cuadricula", key: "checklist_multiple_grid" },
+    { id: "text", name: "Texto", key: "text" },
+    { id: "number", name: "Número", key: "number" },
+    { id: "email", name: "Email", key: "email" },
+    { id: "date", name: "Fecha", key: "date" },
+    { id: "time", name: "Hora", key: "time" },
+    { id: "select", name: "Selección", key: "select" },
+    { id: "checkbox", name: "Casilla de verificación", key: "checkbox" },
+    { id: "qualification", name: "Calificación", key: "qualification" },
+    { id: "checklist_single", name: "Lista de selección única", key: "checklist_single" },
+    { id: "checklist_multiple", name: "Lista de selección múltiple", key: "checklist_multiple" },
+    { id: "checklist_single_grid", name: "Lista de selección única en cuadricula", key: "checklist_single_grid" },
+    { id: "checklist_multiple_grid", name: "Lista de selección múltiple en cuadricula", key: "checklist_multiple_grid" },
 ]
 
 export const configFieldSection = [
-    { id: "personal", nombre: "Personal", key: "personal" },
-    { id: "academica", nombre: "Academica", key: "academy" },
-    { id: "adicional", nombre: "Adicional", key: "additional" },
+    { id: "personal", name: "Personal", key: "personal" },
+    { id: "academic", name: "Academica", key: "academy" },
+    { id: "additional", name: "Adicional", key: "additional" },
 ]
 
 export const configQualification = {

@@ -18,7 +18,7 @@ export const configFormFaculty: ConfigFormFaculty = {
     },
     state: {
         name: "Estado",
-        type: "selection",
+        type: "select",
         options: [
             { value: "true", label: "Activo" },
             { value: "false", label: "Inactivo" }

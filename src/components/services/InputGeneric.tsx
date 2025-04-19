@@ -9,12 +9,12 @@ interface PropsInputBasic {
     data: {
         form: {
             name: string;
-            type: "text" | "number" | "date" | "time" | "selection" | "password" | "email";
+            type: "text" | "number" | "date" | "time" | "select" | "password" | "email";
             required?: boolean;
             options?: { value: string; label: string; id?: number }[];
         } & (
             | {
-                type: "selection";
+                type: "select";
                 options: { value: string; label: string; id?: number }[];
             }
             | {
@@ -51,8 +51,8 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     }
 
     if(user){
-        const keyFormatted = data.key == "formAssists" || data.key == "formInscriptions" ? "form" : data.key
-        const valueInit = formData[data.key]
+        const keyFormatted = data.key == "formAssists" || data.key == "formInscriptions" ? "forms" : data.key
+        const valueInit = formData[data.key] 
 
         valueFormatted = getValueFormatted(user, valueInit as string | {id: number, key: string}, keyFormatted)
     }
@@ -116,7 +116,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
                 }}
             />
         )
-    } else if(data.form.type == "selection"){
+    } else if(data.form.type == "select"){
         return(
             <>
                 <Label htmlFor="faculty">{data.form.name}</Label>
@@ -130,8 +130,8 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
                         <SelectValue placeholder={`Seleccione un/una ${data.form.name}`} />
                     </SelectTrigger>
                     <SelectContent>
-                        {data.form.options.length > 0 ? (
-                            data.form.options.map((option, index) => (
+                        {data.form.options?.length > 0 ? (
+                            data.form.options?.map((option, index) => (
                             <SelectItem key={index} value={`${option.value}${option.id ? '_' + option.id : ''}`}>
                                 {option.label}
                             </SelectItem>

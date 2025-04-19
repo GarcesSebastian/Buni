@@ -4,53 +4,53 @@ export const TemplateData: User = {
     events: [],
     faculty: [],
     scenery: [],
-    form: [{
+    forms: [{
         "id": 1742291990002,
         "name": "Formulario de Inscripcion",
-        "descripcion": "Por favor ingrese los datos correctamente",
-        "campos": [
+        "description": "Por favor ingrese los datos correctamente",
+        "fields": [
             {
                 "id": "nombre_1742294172313",
-                "nombre": "Nombre",
-                "tipo": "texto",
-                "requerido": true,
-                "seccion": "personal"
+                "name": "Nombre",
+                "type": "text",
+                "required": true,
+                "section": "personal"
             },
             {
                 "id": "correo_electronico_1742294180033",
-                "nombre": "Correo Electronico",
-                "tipo": "email",
-                "requerido": true,
-                "seccion": "personal"
+                "name": "Correo Electronico",
+                "type": "email",
+                "required": true,
+                "section": "personal"
             },
             {
                 "id": "numero_telefonico_1742294190390",
-                "nombre": "Numero Telefonico",
-                "tipo": "numero",
-                "requerido": true,
-                "seccion": "personal"
+                "name": "Numero Telefonico",
+                "type": "number",
+                "required": true,
+                "section": "personal"
             },
             {
                 "id": "fecha_nacimiento_1742294209768",
-                "nombre": "Fecha de Nacimiento",
-                "tipo": "fecha",
-                "requerido": true,
-                "seccion": "personal"
+                "name": "Fecha de Nacimiento",
+                "type": "date",
+                "required": true,
+                "section": "personal"
             },
             {
                 "id": "codigo_estudiantil_1742294260490",
-                "nombre": "Código Estudiantil",
-                "tipo": "numero",
-                "requerido": true,
-                "seccion": "academica"
+                "name": "Código Estudiantil",
+                "type": "number",
+                "required": true,
+                "section": "academic"
             },
             {
                 "id": "semestre_1742294281482",
-                "nombre": "Semestre",
-                "tipo": "seleccion",
-                "requerido": true,
-                "seccion": "academica",
-                "opciones": [
+                "name": "Semestre",
+                "type": "select",
+                "required": true,
+                "section": "academic",
+                "options": [
                     "I",
                     "II",
                     "III",
@@ -65,11 +65,11 @@ export const TemplateData: User = {
             },
             {
                 "id": "facultad_1742294297671",
-                "nombre": "Programa",
-                "tipo": "seleccion",
-                "requerido": true,
-                "seccion": "academica",
-                "opciones": [
+                "name": "Programa",
+                "type": "select",
+                "required": true,
+                "section": "academic",
+                "options": [
                     "Ingenieria",
                     "Gastronomia",
                     "Psicologia"
@@ -77,18 +77,18 @@ export const TemplateData: User = {
             },
             {
                 "id": "hora_clase_1742294300000",
-                "nombre": "Hora de Clase",
-                "tipo": "hora",
-                "requerido": true,
-                "seccion": "academica"
+                "name": "Hora de Clase",
+                "type": "time",
+                "required": true,
+                "section": "academic"
             },
             {
                 "id": "estrato_1742294310000",
-                "nombre": "Estrato",
-                "tipo": "seleccion",
-                "requerido": true,
-                "seccion": "adicional",
-                "opciones": [
+                "name": "Estrato",
+                "type": "select",
+                "required": true,
+                "section": "additional",
+                "options": [
                     "Bajo",
                     "Medio",
                     "Alto"
@@ -96,34 +96,34 @@ export const TemplateData: User = {
             },
             {
                 "id": "direccion_1742294320000",
-                "nombre": "Direccion",
-                "tipo": "texto",
-                "requerido": true,
-                "seccion": "adicional"
+                "name": "Direccion",
+                "type": "text",
+                "required": true,
+                "section": "additional"
             },
             {
                 "id": "acepta_terminos_1742294330000",
-                "nombre": "Acepta Términos y Condiciones",
-                "tipo": "checkbox",
-                "requerido": true,
-                "seccion": "adicional"
+                "name": "Acepta Términos y Condiciones",
+                "type": "checkbox",
+                "required": true,
+                "section": "additional"
             },
             {
                 "id": "valoracion_1742294340000",
-                "nombre": "Valoración del Evento",
-                "tipo": "qualification",
-                "requerido": true,
-                "seccion": "adicional",
+                "name": "Valoración del Evento",
+                "type": "qualification",
+                "required": true,
+                "section": "additional",
                 "maxQualification": 5,
                 "qualificationIcon": "star"
             },
             {
                 "id": "intereses_1742294350000",
-                "nombre": "Intereses",
-                "tipo": "checklist_multiple",
-                "requerido": true,
-                "seccion": "personal",
-                "opciones": [
+                "name": "Intereses",
+                "type": "checklist_multiple",
+                "required": true,
+                "section": "personal",
+                "options": [
                     "Deportes",
                     "Arte",
                     "Música",
@@ -133,11 +133,11 @@ export const TemplateData: User = {
             },
             {
                 "id": "idiomas_1742294360000",
-                "nombre": "Idiomas que habla",
-                "tipo": "checklist_unico",
-                "requerido": true,
-                "seccion": "personal",
-                "opciones": [
+                "name": "Idiomas que habla",
+                "type": "checklist_single",
+                "required": true,
+                "section": "personal",
+                "options": [
                     "Español",
                     "Inglés",
                     "Francés",
@@ -147,11 +147,11 @@ export const TemplateData: User = {
             },
             {
                 "id": "habilidades_1742294370000",
-                "nombre": "Habilidades",
-                "tipo": "checklist_unico_grid",
-                "requerido": true,
-                "seccion": "academica",
-                "opciones": [
+                "name": "Habilidades",
+                "type": "checklist_single_grid",
+                "required": true,
+                "section": "academic",
+                "options": [
                     {
                         "row": "Programación",
                         "data": ["Básico", "Intermedio", "Avanzado"]
@@ -168,11 +168,11 @@ export const TemplateData: User = {
             },
             {
                 "id": "cursos_1742294380000",
-                "nombre": "Cursos realizados",
-                "tipo": "checklist_multiple_grid",
-                "requerido": true,
-                "seccion": "academica",
-                "opciones": [
+                "name": "Cursos realizados",
+                "type": "checklist_multiple_grid",
+                "required": true,
+                "section": "academic",
+                "options": [
                     {
                         "row": "Programación",
                         "data": ["Python", "JavaScript", "Java", "C++"]
@@ -193,36 +193,36 @@ export const TemplateData: User = {
     {
         "id": 1743070732515,
         "name": "Formulario de Asistencia",
-        "descripcion": "Diligenciar este formulario para la asistencia al evento",
-        "campos": [
+        "description": "Diligenciar este formulario para la asistencia al evento",
+        "fields": [
             {
                 "id": "nombre_1743070756636",
-                "nombre": "Nombre",
-                "tipo": "texto",
-                "requerido": true,
-                "seccion": "personal"
+                "name": "Nombre",
+                "type": "text",
+                "required": true,
+                "section": "personal"
             },
             {
                 "id": "correo_electronico_1743070781306",
-                "nombre": "Correo Electronico",
-                "tipo": "email",
-                "requerido": true,
-                "seccion": "personal"
+                "name": "Correo Electronico",
+                "type": "email",
+                "required": true,
+                "section": "personal"
             },
             {
                 "id": "codigo_estudiantil_1743070800404",
-                "nombre": "Codigo Estudiantil",
-                "tipo": "numero",
-                "requerido": true,
-                "seccion": "academica"
+                "name": "Codigo Estudiantil",
+                "type": "number",
+                "required": true,
+                "section": "academic"
             },
             {
                 "id": "semestre_1743070812197",
-                "nombre": "Semestre",
-                "tipo": "seleccion",
-                "requerido": true,
-                "seccion": "academica",
-                "opciones": [
+                "name": "Semestre",
+                "type": "select",
+                "required": true,
+                "section": "academic",
+                "options": [
                     "I",
                     "II",
                     "III",
@@ -237,10 +237,10 @@ export const TemplateData: User = {
             },
             {
                 "id": "valoracion_del_evento_1743070837876",
-                "nombre": "Valoracion del Evento",
-                "tipo": "qualification",
-                "requerido": true,
-                "seccion": "adicional",
+                "name": "Valoracion del Evento",
+                "type": "qualification",
+                "required": true,
+                "section": "additional",
                 "maxQualification": 5,
                 "qualificationIcon": "star"
             }

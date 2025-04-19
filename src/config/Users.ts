@@ -31,7 +31,7 @@ export const configFormUser: ConfigFormUser = {
     },
     roles: {
         name: "Rol",
-        type: "selection",
+        type: "select",
         required: true,
         options: []
     }

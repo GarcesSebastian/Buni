@@ -37,19 +37,19 @@ export const getDataForCharts = (
     const assistsPorCampo = assistsFiltradas.reduce(
       (acc: Record<string, number>, asistencia) => {
         const valor = asistencia[assistsDistributionField]
-        const campo = formAssists?.campos.find(c => c.id.split("_")[0] === assistsDistributionField)
+        const campo = formAssists?.fields.find(c => c.id.split("_")[0] === assistsDistributionField)
         
-        if (campo?.tipo === "checkbox") {
+        if (campo?.type === "checkbox") {
           acc[valor === 1 ? "true" : "false"] = (acc[valor === 1 ? "true" : "false"] || 0) + 1
-        } else if (campo?.tipo === "qualification") {
+        } else if (campo?.type === "qualification") {
           const maxQualification = campo.maxQualification || 5
           if (typeof valor === "number" && valor >= 1 && valor <= maxQualification) {
             acc[valor.toString()] = (acc[valor.toString()] || 0) + 1
           }
-        } else if (campo?.tipo === "checklist_unico_grid" || campo?.tipo === "checklist_multiple_grid") {
+        } else if (campo?.type === "checklist_single_grid" || campo?.type === "checklist_multiple_grid") {
           if (typeof valor === "object") {
             Object.entries(valor).forEach(([key, value]) => {
-              if (campo.tipo === "checklist_unico_grid") {
+              if (campo.type === "checklist_single_grid") {
                 acc[`${key}: ${value}`] = (acc[`${key}: ${value}`] || 0) + 1
               } else if (Array.isArray(value)) {
                 value.forEach((v: string) => {
@@ -70,19 +70,19 @@ export const getDataForCharts = (
     const inscriptionsPorCampo = inscriptionsFiltradas.reduce(
       (acc: Record<string, number>, inscripcion) => {
         const valor = inscripcion[inscriptionsDistributionField]
-        const campo = formInscriptions?.campos.find(c => c.id.split("_")[0] === inscriptionsDistributionField)
+        const campo = formInscriptions?.fields.find(c => c.id.split("_")[0] === inscriptionsDistributionField)
         
-        if (campo?.tipo === "checkbox") {
+        if (campo?.type === "checkbox") {
           acc[valor === 1 ? "true" : "false"] = (acc[valor === 1 ? "true" : "false"] || 0) + 1
-        } else if (campo?.tipo === "qualification") {
+        } else if (campo?.type === "qualification") {
           const maxQualification = campo.maxQualification || 5
           if (typeof valor === "number" && valor >= 1 && valor <= maxQualification) {
             acc[valor.toString()] = (acc[valor.toString()] || 0) + 1
           }
-        } else if (campo?.tipo === "checklist_unico_grid" || campo?.tipo === "checklist_multiple_grid") {
+        } else if (campo?.type === "checklist_single_grid" || campo?.type === "checklist_multiple_grid") {
           if (typeof valor === "object") {
             Object.entries(valor).forEach(([key, value]) => {
-              if (campo.tipo === "checklist_unico_grid") {
+              if (campo.type === "checklist_single_grid") {
                 acc[`${key}: ${value}`] = (acc[`${key}: ${value}`] || 0) + 1
               } else if (Array.isArray(value)) {
                 value.forEach((v: string) => {

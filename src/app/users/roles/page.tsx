@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import Section from "@/components/ui/Section"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { Plus, MoreVertical, Edit, Trash, Eye, Loader } from "lucide-react"
+import { Plus, MoreVertical, Edit, Trash, Eye } from "lucide-react"
 import { useNotification } from "@/hooks/client/useNotification"
 import {
   Dialog,
@@ -22,7 +22,7 @@ import ShowPermissions from "@/components/services/Dialogs/Roles/ShowPermissions
 import CreateDialog from "@/components/services/Dialogs/Roles/CreateDialog";
 import { useUserData } from "@/hooks/auth/useUserData"
 import useRoles from "@/hooks/server/useRoles";
-
+import CustomLoader from "@/components/ui/CustomLoader";
 
 export interface Role {
     id: number;
@@ -159,7 +159,8 @@ export default function RolesPage() {
                         </Button>
                     </div>
 
-                    {isLoaded ? (
+                    {!isLoaded && <CustomLoader />}
+                    {isLoaded && (
                         <div className="rounded-md border">
                             <Table>
                                 <TableHeader>
@@ -215,11 +216,6 @@ export default function RolesPage() {
                                 ))}
                             </TableBody>
                             </Table>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-4 justify-center items-center h-full">
-                            <Loader className="h-10 w-10 animate-spin text-primary" />
-                            <p className="text-muted-foreground">Cargando roles...</p>
                         </div>
                     )}
                 </CardContent>

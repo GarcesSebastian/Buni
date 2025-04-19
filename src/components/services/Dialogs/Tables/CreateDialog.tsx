@@ -73,7 +73,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
           const dataSplit = updatedFormData[key].split("_")
           if (dataSplit.length <= 1) return;
 
-          const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
+          const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "forms" : key
           const dataId = dataSplit[dataSplit.length - 1]
           const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
           if(findDataUser){

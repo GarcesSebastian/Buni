@@ -83,7 +83,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
           const dataSplit = updatedFormData[key].split("_")
           if (dataSplit.length <= 1) return;
 
-          const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "form" : key
+          const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "forms" : key
           const dataId = dataSplit[dataSplit.length - 1]
           const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
           if(findDataUser){
@@ -102,8 +102,6 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
           item.id === Number(initialData.id) ? updatedFormData : item
         ),
       }
-
-      console.log("updatedFormData", updatedFormData);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}/${initialData.id}`, {
         method: "PUT",
@@ -145,8 +143,6 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
   };
 
   const handleChange = (value: string) => (e: string | React.ChangeEvent<HTMLInputElement>) => {
-    console.log("e", e)
-    console.log("value", value)
     setFormData({ ...formData, [value]: typeof e === 'string' ? e : e.target.value })
   }
 

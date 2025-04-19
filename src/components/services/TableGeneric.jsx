@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
-import { Edit, Filter, MoreVertical, Plus, QrCode, Trash, Eye, Loader } from "lucide-react"
+import { Edit, Filter, MoreVertical, Plus, QrCode, Trash, Eye } from "lucide-react"
 import { CreateEventDialog } from "./Dialogs/Tables/CreateDialog"
 import { QRDialog } from "./Dialogs/QRDialog"
 import { FilterDialog } from "./Dialogs/Tables/FilterDialog"
@@ -13,6 +13,7 @@ import { DeleteDialog } from "./Dialogs/Tables/DeleteDialog"
 import { useUserData } from "@/hooks/auth/useUserData"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/Input"
+import CustomLoader from "@/components/ui/CustomLoader"
 
 export function TableGeneric({structure, structureForm, table}) {
   const { user, isLoaded } = useUserData()
@@ -69,10 +70,9 @@ export function TableGeneric({structure, structureForm, table}) {
 
   useEffect(() => {
     if (!isLoaded) return;
-    
     Object.keys(structureForm).forEach(value => {
-      const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "form" : value
-      if(structureForm[value].type == "selection" && user[valueFormatted]){
+      const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "forms" : value
+      if(structureForm[value].type == "select" && user[valueFormatted]){
         const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {
           const name = s.name || s.nombre
           return {
@@ -88,10 +88,7 @@ export function TableGeneric({structure, structureForm, table}) {
 
   if(!isLoaded){
     return (
-      <div className="flex flex-col gap-4 justify-center items-center h-full">
-        <Loader className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-muted-foreground">Cargando datos...</p>
-      </div>
+      <CustomLoader />
     )
   }
 

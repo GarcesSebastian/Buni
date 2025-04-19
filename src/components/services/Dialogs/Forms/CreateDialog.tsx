@@ -34,10 +34,10 @@ export type ItemListGrid = {id: number, value: string, data: string[]}
 
 const DialogDefault: FormField = {
     id: "",
-    nombre: "",
-    tipo: "texto",
-    requerido: false,
-    seccion: "personal"
+    name: "",
+    type: "text",
+    required: false,
+    section: "personal"
 }
 
 const TypeOptionField = ({keyIcon}: {keyIcon: string}) => {
@@ -54,7 +54,7 @@ const TypeOptionField = ({keyIcon}: {keyIcon: string}) => {
             return <Calendar className={classIcon} />
         case "time":
             return <Clock className={classIcon} />
-        case "checklist_unique":
+        case "checklist_single":
             return <CircleCheck className={classIcon} />
         case "checklist_multiple":
             return <SquareCheck className={classIcon} />
@@ -66,7 +66,7 @@ const TypeOptionField = ({keyIcon}: {keyIcon: string}) => {
             return <SquareCheck className={classIcon} />
         case "qualification":
             return <StarIcon className={classIcon} />
-        case "selection":
+        case "select":
             return <CircleChevronDown className={classIcon} />
         default:
             return null
@@ -112,15 +112,15 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
     useEffect(() => {
         if (editingField) {
             setNewField(editingField)
-            setShowOptionsField(editingField.tipo === "seleccion" || editingField.tipo === "checklist_unico" || editingField.tipo === "checklist_multiple")
-            setIsQualification(editingField.tipo === "qualification")
-            setIsGrid(editingField.tipo === "checklist_unico_grid" || editingField.tipo === "checklist_multiple_grid")
+            setShowOptionsField(editingField.type === "select" || editingField.type === "checklist_single" || editingField.type === "checklist_multiple")
+            setIsQualification(editingField.type === "qualification")
+            setIsGrid(editingField.type === "checklist_single_grid" || editingField.type === "checklist_multiple_grid")
 
-            if (editingField.opciones) {
-                if (typeof editingField.opciones[0] === 'string') {
-                    setItemsList(editingField.opciones.map((opcion, index) => ({ id: index, value: opcion as string })))
+            if (editingField.options) {
+                if (typeof editingField.options[0] === 'string') {
+                    setItemsList(editingField.options.map((option, index) => ({ id: index, value: option as string })))
                 } else {
-                    const gridOptions = editingField.opciones as unknown as { row: string; data: string[] }[]
+                    const gridOptions = editingField.options as unknown as { row: string; data: string[] }[]
                     const uniqueRows = [...new Set(gridOptions.map(opt => opt.row))]
                     const uniqueCols = gridOptions[0]?.data || []
                     setGridRows(uniqueRows.map((row, index) => ({ id: index, value: row })))
@@ -150,14 +150,14 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
     const addField = () => {
         if (!currentForm) return
 
-        if (!newField.nombre.trim()) {
+        if (!newField.name.trim()) {
             setError("El nombre del campo no puede estar vacío")
             return
         }
 
-        const fieldExists = currentForm.campos.some(
-            campo => campo.id !== editingField?.id && 
-            normalizeString(campo.nombre) === normalizeString(newField.nombre)
+        const fieldExists = currentForm.fields.some(
+            field => field.id !== editingField?.id && 
+            normalizeString(field.name) === normalizeString(newField.name)
         )
 
         if (fieldExists) {
@@ -165,44 +165,44 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
             return
         }
 
-        const campoId = editingField?.id || newField.nombre.toLowerCase() + "_" + Date.now()
+        const fieldId = editingField?.id || newField.name.toLowerCase() + "_" + Date.now()
 
-        const campo: FormField = {
+        const field: FormField = {
             ...newField,
-            id: campoId,
+            id: fieldId,
         }
 
-        if (campo.tipo === "seleccion") {
-            campo.opciones = itemsList.map((item) => item.value)
+        if (field.type === "select") {
+            field.options = itemsList.map((item) => item.value)
         }
 
-        if (campo.tipo === "checklist_unico" || campo.tipo === "checklist_multiple") {
-            campo.opciones = itemsList.map((item) => item.value)
+        if (field.type === "checklist_single" || field.type === "checklist_multiple") {
+            field.options = itemsList.map((item) => item.value)
         }
 
-        if (campo.tipo === "checklist_unico_grid" || campo.tipo === "checklist_multiple_grid") {
+        if (field.type === "checklist_single_grid" || field.type === "checklist_multiple_grid") {
             const rows = gridRows.map((item) => item.value)
             const options = gridCols.map((item) => item.value)
-            campo.opciones = rows.map(row => ({
+            field.options = rows.map(row => ({
                 row,
                 data: options
             }))
         }
 
-        if (campo.tipo === "qualification") {
-            campo.maxQualification = maxQualification
-            campo.qualificationIcon = qualificationIcon
+        if (field.type === "qualification") {
+            field.maxQualification = maxQualification
+            field.qualificationIcon = qualificationIcon
         }
 
         if (editingField) {
             setCurrentForm({
                 ...currentForm,
-                campos: currentForm.campos.map((c) => c.id === editingField.id ? campo : c),
+                fields: currentForm.fields.map((c) => c.id === editingField.id ? field : c),
             })
         } else {
             setCurrentForm({
                 ...currentForm,
-                campos: [...currentForm.campos, campo],
+                fields: [...currentForm.fields, field],
             })
         }
 
@@ -215,10 +215,10 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
     }
 
     const handleChangeSelect = (value: typeFieldForm) => {
-        setNewField({ ...newField, tipo: value })
-        setShowOptionsField(value === "seleccion" || value === "checklist_unico" || value === "checklist_multiple")
+        setNewField({ ...newField, type: value })
+        setShowOptionsField(value === "select" || value === "checklist_single" || value === "checklist_multiple")
         setIsQualification(value === "qualification")
-        setIsGrid(value === "checklist_unico_grid" || value === "checklist_multiple_grid")
+        setIsGrid(value === "checklist_single_grid" || value === "checklist_multiple_grid")
     }
     
     return(
@@ -234,9 +234,9 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                         <Label htmlFor="nombre-campo">Nombre del Campo</Label>
                         <Input
                             id="nombre-campo"
-                            value={newField.nombre}
+                            value={newField.name}
                             onChange={(e) => {
-                                setNewField({ ...newField, nombre: e.target.value })
+                                setNewField({ ...newField, name: e.target.value })
                                 setError("")
                             }}
                         />
@@ -246,7 +246,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                     <div className="grid gap-2">
                         <Label htmlFor="tipo-campo">Tipo de Campo</Label>
                         <Select
-                            value={newField.tipo}
+                            value={newField.type}
                             onValueChange={handleChangeSelect}
                         >
                             <SelectTrigger id="tipo-campo">
@@ -259,7 +259,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                                             <TypeOptionField keyIcon={tipo.key} />
 
                                             <span className="text-md">
-                                                {tipo.nombre}
+                                                {tipo.name}
                                             </span>
                                         </div>
                                     </SelectItem>
@@ -271,9 +271,9 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                     <div className="grid gap-2">
                         <Label htmlFor="tipo-campo">Seccion del campo</Label>
                         <Select
-                            value={newField.seccion}
-                            onValueChange={(valor: sectionFieldForm) => {
-                                setNewField({ ...newField, seccion: valor })
+                            value={newField.section}
+                            onValueChange={(value: sectionFieldForm) => {
+                                setNewField({ ...newField, section: value })
                             }}
                         >
                             <SelectTrigger id="seccion-campo">
@@ -286,7 +286,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                                         <SectionOptionField keyIcon={tipo.key} />
 
                                         <span className="text-md">
-                                            {tipo.nombre}
+                                            {tipo.name}
                                         </span>
                                     </div>
                                 </SelectItem>
@@ -373,8 +373,8 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                         <Checkbox
                             id="campo-requerido"
                             variant="square"
-                            checked={newField.requerido}
-                            onCheckedChange={(checked: boolean) => setNewField({ ...newField, requerido: checked })}
+                            checked={newField.required}
+                            onCheckedChange={(checked: boolean) => setNewField({ ...newField, required: checked })}
                         />
                         
                         <div className="grid gap-1.5 leading-none">

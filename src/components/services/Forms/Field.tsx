@@ -50,23 +50,23 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
     const [columnsGrid, setColumnsGrid] = useState<string[]>([])
 
     useEffect(() => {
-        if (field.tipo === "checklist_unico_grid" || field.tipo === "checklist_multiple_grid") {
-            const firstOption = field.opciones?.[0]
+        if (field.type === "checklist_single_grid" || field.type === "checklist_multiple_grid") {
+            const firstOption = field.options?.[0]
             setColumnsGrid(typeof firstOption === 'string' ? [] : firstOption?.data || [])
         }
     }, [field])
 
-    switch (field.tipo) {
-        case "texto":
+    switch (field.type) {
+        case "text":
         case "email":
         return (
             <div className="grid gap-2" key={field.id}>
             <Label htmlFor={field.id} className="font-medium">
-                {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                {field.name} {field.required && <span className="text-red-500">*</span>}
             </Label>
             <Input
                 id={field.id}
-                type={field.tipo === "email" ? "email" : "text"}
+                type={field.type === "email" ? "email" : "text"}
                 value={formValues[field.id] as string || ""}
                 onChange={(e) => handleChange(field.id, e.target.value)}
                 className={errors[field.id] ? "border-red-500" : ""}
@@ -75,11 +75,11 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             </div>
         )
 
-        case "numero":
+        case "number":
         return (
             <div className="grid gap-2" key={field.id}>
             <Label htmlFor={field.id} className="font-medium">
-                {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                {field.name} {field.required && <span className="text-red-500">*</span>}
             </Label>
             <Input
                 id={field.id}
@@ -92,11 +92,11 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             </div>
         )
 
-        case "fecha":
+        case "date":
         return (
             <div className="grid gap-2" key={field.id}>
             <Label htmlFor={field.id} className="font-medium">
-                {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                {field.name} {field.required && <span className="text-red-500">*</span>}
             </Label>
             <Input
                 id={field.id}
@@ -109,11 +109,11 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             </div>
         )
 
-        case "hora":
+        case "time":
         return (
             <div className="grid gap-2" key={field.id}>
                 <Label htmlFor={field.id} className="font-medium">
-                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                    {field.name} {field.required && <span className="text-red-500">*</span>}
                 </Label>
                 <Input
                     id={field.id}
@@ -126,20 +126,20 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             </div>
         )
 
-        case "seleccion":
+        case "select":
         return (
             <div className="grid gap-2" key={field.id}>
             <Label htmlFor={field.id} className="font-medium">
-                {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                {field.name} {field.required && <span className="text-red-500">*</span>}
             </Label>
             <Select value={formValues[field.id] as string || ""} onValueChange={(value) => handleChange(field.id, value)}>
                 <SelectTrigger className={errors[field.id] ? "border-red-500" : ""}>
                 <SelectValue placeholder="Seleccione una opción" />
                 </SelectTrigger>
                 <SelectContent>
-                {field.opciones?.map((opcion) => (
-                    <SelectItem key={typeof opcion === 'string' ? opcion : opcion.row} value={typeof opcion === 'string' ? opcion : opcion.row}>
-                        {typeof opcion === 'string' ? opcion : opcion.row}
+                {field.options?.map((option) => (
+                    <SelectItem key={typeof option === 'string' ? option : option.row} value={typeof option === 'string' ? option : option.row}>
+                        {typeof option === 'string' ? option : option.row}
                     </SelectItem>
                 ))}
                 </SelectContent>
@@ -159,33 +159,33 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
 
                 <div className="grid gap-1.5 leading-none">
                     <Label htmlFor={field.id} className="font-medium">
-                        {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                        {field.name} {field.required && <span className="text-red-500">*</span>}
                     </Label>
                     {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
                 </div>
             </div>
         )
 
-        case "checklist_unico":
+        case "checklist_single":
         return (
             <div className="grid gap-2" key={field.id}>
                 <Label className="font-medium">
-                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                    {field.name} {field.required && <span className="text-red-500">*</span>}
                 </Label>
                 <div className="flex flex-col space-y-2 py-3">
-                    {field.opciones?.map((opcion) => (
-                        <div key={typeof opcion === 'string' ? opcion : opcion.row} className="flex items-center">
+                    {field.options?.map((option) => (
+                        <div key={typeof option === 'string' ? option : option.row} className="flex items-center">
                             <Checkbox
-                                id={`${field.id}-${typeof opcion === 'string' ? opcion : opcion.row}`}
-                                checked={formValues[field.id] === (typeof opcion === 'string' ? opcion : opcion.row)}
+                                id={`${field.id}-${typeof option === 'string' ? option : option.row}`}
+                                checked={formValues[field.id] === (typeof option === 'string' ? option : option.row)}
                                 onCheckedChange={(checked) => {
                                     if (checked) {
-                                        handleChange(field.id, typeof opcion === 'string' ? opcion : opcion.row);
+                                        handleChange(field.id, typeof option === 'string' ? option : option.row);
                                     }
                                 }}
                             />
-                            <Label htmlFor={`${field.id}-${typeof opcion === 'string' ? opcion : opcion.row}`} className="ml-2">
-                                {typeof opcion === 'string' ? opcion : opcion.row}
+                            <Label htmlFor={`${field.id}-${typeof option === 'string' ? option : option.row}`} className="ml-2">
+                                {typeof option === 'string' ? option : option.row}
                             </Label>
                         </div>
                     ))}
@@ -198,27 +198,27 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
         return (
             <div className="grid gap-2" key={field.id}>
                 <Label className="font-medium">
-                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                    {field.name} {field.required && <span className="text-red-500">*</span>}
                 </Label>
                 <div className="flex flex-col space-y-2 py-3">
-                    {field.opciones?.map((opcion) => {
+                    {field.options?.map((option) => {
                         const currentValues = formValues[field.id] as string[] || [];
                         return (
-                            <div key={typeof opcion === 'string' ? opcion : opcion.row} className="flex items-center">
+                            <div key={typeof option === 'string' ? option : option.row} className="flex items-center">
                                 <Checkbox
-                                    id={`${field.id}-${typeof opcion === 'string' ? opcion : opcion.row}`}
-                                    checked={currentValues.includes(typeof opcion === 'string' ? opcion : opcion.row)}
+                                    id={`${field.id}-${typeof option === 'string' ? option : option.row}`}
+                                    checked={currentValues.includes(typeof option === 'string' ? option : option.row)}
                                     onCheckedChange={(checked) => {
                                         if (checked) {
-                                            handleChange(field.id, [...currentValues, typeof opcion === 'string' ? opcion : opcion.row]);
+                                            handleChange(field.id, [...currentValues, typeof option === 'string' ? option : option.row]);
                                         } else {
-                                            handleChange(field.id, currentValues.filter(v => v !== (typeof opcion === 'string' ? opcion : opcion.row)));
+                                            handleChange(field.id, currentValues.filter(v => v !== (typeof option === 'string' ? option : option.row)));
                                         }
                                     }}
                                     variant="square"
                                 />
-                                <Label htmlFor={`${field.id}-${typeof opcion === 'string' ? opcion : opcion.row}`} className="ml-2">
-                                    {typeof opcion === 'string' ? opcion : opcion.row}
+                                <Label htmlFor={`${field.id}-${typeof option === 'string' ? option : option.row}`} className="ml-2">
+                                    {typeof option === 'string' ? option : option.row}
                                 </Label>
                             </div>
                         )
@@ -228,11 +228,11 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
             </div>
         )
 
-        case "checklist_unico_grid":
+        case "checklist_single_grid":
         return (
             <div className="grid gap-2" key={field.id}>
                 <Label className="font-medium">
-                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                    {field.name} {field.required && <span className="text-red-500">*</span>}
                 </Label>
 
                 <div className="overflow-x-auto">
@@ -248,7 +248,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                             </tr>
                         </thead>
                         <tbody>
-                            {field.opciones?.map((row, index) => (
+                            {field.options?.map((row, index) => (
                                 typeof row === 'object' && (
                                     <tr key={index} className="border-t">
                                         <td className="p-2">{row.row}</td>
@@ -274,7 +274,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
         return (
             <div className="grid gap-2" key={field.id}>
                 <Label className="font-medium">
-                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                    {field.name} {field.required && <span className="text-red-500">*</span>}
                 </Label>
 
                 <div className="overflow-x-auto">
@@ -290,7 +290,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                             </tr>
                         </thead>
                         <tbody>
-                            {field.opciones?.map((row, index) => (
+                            {field.options?.map((row, index) => (
                                 typeof row === 'object' && (
                                     <tr key={index} className="border-t">
                                         <td className="p-2">{row.row}</td>
@@ -326,7 +326,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
         return (
             <div className="grid gap-2" key={field.id}>
                 <Label className="font-medium">
-                    {field.nombre} {field.requerido && <span className="text-red-500">*</span>}
+                    {field.name} {field.required && <span className="text-red-500">*</span>}
                 </Label>
                 <div className="flex flex-col justify-start items-star">
                     <div className="flex gap-2">

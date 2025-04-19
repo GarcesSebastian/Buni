@@ -27,7 +27,7 @@ export interface ConfigFormUser {
   };
   roles: {
     name: string;
-    type: "selection";
+    type: "select";
     required?: boolean;
     options: { value: string; label: string; id?: number }[];
   };

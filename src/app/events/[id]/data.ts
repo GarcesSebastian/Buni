@@ -7,13 +7,13 @@ export const SAMPLE_DATA_COUNT = {
     ASSISTS: 60
 };
 
-interface Campo {
+interface Field {
     id: string;
-    nombre: string;
-    tipo: typeFieldForm;
-    requerido: boolean;
-    seccion?: string;
-    opciones?: string[] | { row: string; data: string[] }[];
+    name: string;
+    type: typeFieldForm;
+    required: boolean;
+    section?: string;
+    options?: string[] | { row: string; data: string[] }[];
     maxQualification?: number;
     qualificationIcon?: string;
 }
@@ -26,25 +26,25 @@ export async function generateSampleData(count: number, form: Form | undefined, 
     if (!form) return [];
 
     const data: Registro[] = [];
-    const campos = form.campos;
+    const fields = form.fields;
 
-    const getRandomValue = (campo: Campo): string | number | Record<string, string | string[]> => {
-        switch (campo.tipo) {
-            case "seleccion":
-                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || ""
-            case "checklist_unico":
-                return campo.opciones?.[Math.floor(Math.random() * (campo.opciones?.length || 0))] || ""
+    const getRandomValue = (field: Field): string | number | Record<string, string | string[]> => {
+        switch (field.type) {
+            case "select":
+                return field.options?.[Math.floor(Math.random() * (field.options?.length || 0))] || ""
+            case "checklist_single":
+                return field.options?.[Math.floor(Math.random() * (field.options?.length || 0))] || ""
             case "checklist_multiple":
-                const numSelections = Math.min(3, Math.floor(Math.random() * (campo.opciones?.length || 0)) + 1)
-                return (campo.opciones?.slice(0, numSelections) || []).join(", ")
-            case "checklist_unico_grid":
+                const numSelections = Math.min(3, Math.floor(Math.random() * (field.options?.length || 0)) + 1)
+                return (field.options?.slice(0, numSelections) || []).join(", ")
+            case "checklist_single_grid":
             case "checklist_multiple_grid":
-                if (!Array.isArray(campo.opciones)) return {}
+                if (!Array.isArray(field.options)) return {}
                 const gridValue: Record<string, string | string[]> = {}
-                campo.opciones.forEach(opt => {
+                field.options.forEach(opt => {
                     if (typeof opt === 'object' && 'row' in opt && 'data' in opt) {
-                        const rowKey = `${campo.id}-${opt.row}`
-                        if (campo.tipo === "checklist_unico_grid") {
+                        const rowKey = `${field.id}-${opt.row}`
+                        if (field.type === "checklist_single_grid") {
                             gridValue[rowKey] = opt.data[Math.floor(Math.random() * opt.data.length)]
                         } else {
                             const numSelections = Math.min(3, Math.floor(Math.random() * opt.data.length) + 1)
@@ -55,20 +55,20 @@ export async function generateSampleData(count: number, form: Form | undefined, 
                 return gridValue
             case "email":
                 return `estudiante${Math.floor(Math.random() * 1000)}@universidad.edu.co`;
-            case "numero":
+            case "number":
                 return Math.floor(Math.random() * 1000000);
-            case "texto":
+            case "text":
                 return `Estudiante ${Math.floor(Math.random() * 1000)}`;
-            case "fecha":
+            case "date":
                 const date = new Date();
                 date.setDate(date.getDate() - Math.floor(Math.random() * 365));
                 return date.toISOString().split('T')[0];
-            case "hora":
+            case "time":
                 return `${Math.floor(Math.random() * 24).toString().padStart(2, '0')}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
             case "checkbox":
                 return Math.random() > 0.5 ? 1 : 0;
             case "qualification":
-                return Math.floor(Math.random() * (campo.maxQualification || 5) + 1);
+                return Math.floor(Math.random() * (field.maxQualification || 5) + 1);
             default:
                 return "";
         }
@@ -83,9 +83,9 @@ export async function generateSampleData(count: number, form: Form | undefined, 
 
         for (let i = 0; i < batchSize; i++) {
             const registro: Registro = {};
-            campos.forEach((campo) => {
-                const key = campo.id.split("_")[0];
-                registro[key] = getRandomValue(campo as Campo);
+            fields.forEach((field) => {
+                const key = field.id.split("_")[0];
+                registro[key] = getRandomValue(field as Field);
             });
             batchData.push(registro);
         }
@@ -121,68 +121,68 @@ export const eventosEjemplo: Event[] = [
         },
         formAssists: {
             id: 1,
-            key: "form"
+            key: "forms"
         },
         formInscriptions: {
             id: 1,
-            key: "form"
+            key: "forms"
         },
         assists: await generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,
             name: "Formulario de Inscripcion",
-            descripcion: "Por favor ingrese los datos correctamente",
-            campos: [
+            description: "Por favor ingrese los datos correctamente",
+            fields: [
                 {
                     id: "nombre_1742294172313",
-                    nombre: "Nombre",
-                    tipo: "texto",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Nombre",
+                    type: "text",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "correo_electronico_1742294180033",
-                    nombre: "Correo Electronico",
-                    tipo: "email",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Correo Electronico",
+                    type: "email",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "numero_telefonico_1742294190390",
-                    nombre: "Numero Telefonico",
-                    tipo: "numero",
-                    requerido: false,
-                    seccion: "personal",
+                    name: "Numero Telefonico",
+                    type: "number",
+                    required: false,
+                    section: "personal",
                 },
                 {
                     id: "semestre_1742294209768",
-                    nombre: "Semestre",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
+                    name: "Semestre",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Programa",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
+                    name: "Programa",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["Ingenieria", "Gastronomia", "Psicologia"],
                 },
                 {
                     id: "estrato_1742294281482",
-                    nombre: "Estrato",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "adicional",
-                    opciones: ["Bajo", "Medio", "Alto"],
+                    name: "Estrato",
+                    type: "select",
+                    required: true,
+                    section: "additional",
+                    options: ["Bajo", "Medio", "Alto"],
                 },
                 {
                     id: "direccion_1742294297671",
-                    nombre: "Direccion",
-                    tipo: "texto",
-                    requerido: false,
-                    seccion: "adicional",
+                    name: "Direccion",
+                    type: "text",
+                    required: false,
+                    section: "additional",
                 },
             ],
             state: true,
@@ -190,59 +190,59 @@ export const eventosEjemplo: Event[] = [
         inscriptions: await generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
             id: 1742291990002,
             name: "Formulario de Inscripcion",
-            descripcion: "Por favor ingrese los datos correctamente",
-            campos: [
+            description: "Por favor ingrese los datos correctamente",
+            fields: [
                 {
                     id: "nombre_1742294172313",
-                    nombre: "Nombre",
-                    tipo: "texto",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Nombre",
+                    type: "text",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "correo_electronico_1742294180033",
-                    nombre: "Correo Electronico",
-                    tipo: "email",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Correo Electronico",
+                    type: "email",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "numero_telefonico_1742294190390",
-                    nombre: "Numero Telefonico",
-                    tipo: "numero",
-                    requerido: false,
-                    seccion: "personal",
+                    name: "Numero Telefonico",
+                    type: "number",
+                    required: false,
+                    section: "personal",
                 },
                 {
                     id: "semestre_1742294209768",
-                    nombre: "Semestre",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
+                    name: "Semestre",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Programa",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
+                    name: "Programa",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["Ingenieria", "Gastronomia", "Psicologia"],
                 },
                 {
                     id: "estrato_1742294281482",
-                    nombre: "Estrato",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "adicional",
-                    opciones: ["Bajo", "Medio", "Alto"],
+                    name: "Estrato",
+                    type: "select",
+                    required: true,
+                    section: "additional",
+                    options: ["Bajo", "Medio", "Alto"],
                 },
                 {
                     id: "direccion_1742294297671",
-                    nombre: "Direccion",
-                    tipo: "texto",
-                    requerido: false,
-                    seccion: "adicional",
+                    name: "Direccion",
+                    type: "text",
+                    required: false,
+                    section: "additional",
                 },
             ],
             state: true,
@@ -266,68 +266,68 @@ export const eventosEjemplo: Event[] = [
         },
         formAssists: {
             id: 1742291990002,
-            key: "form",
+            key: "forms",
         },
         formInscriptions: {
             id: 1742291990002,
-            key: "form"
+            key: "forms"
         },
         assists: await generateSampleData(SAMPLE_DATA_COUNT.ASSISTS, {
             id: 1742291990002,
             name: "Formulario de Inscripcion",
-            descripcion: "Por favor ingrese los datos correctamente",
-            campos: [
+            description: "Por favor ingrese los datos correctamente",
+            fields: [
                 {
                     id: "nombre_1742294172313",
-                    nombre: "Nombre",
-                    tipo: "texto",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Nombre",
+                    type: "text",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "correo_electronico_1742294180033",
-                    nombre: "Correo Electronico",
-                    tipo: "email",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Correo Electronico",
+                    type: "email",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "numero_telefonico_1742294190390",
-                    nombre: "Numero Telefonico",
-                    tipo: "numero",
-                    requerido: false,
-                    seccion: "personal",
+                    name: "Numero Telefonico",
+                    type: "number",
+                    required: false,
+                    section: "personal",
                 },
                 {
                     id: "semestre_1742294209768",
-                    nombre: "Semestre",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
+                    name: "Semestre",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Programa",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
+                    name: "Programa",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["Ingenieria", "Gastronomia", "Psicologia"],
                 },
                 {
                     id: "estrato_1742294281482",
-                    nombre: "Estrato",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "adicional",
-                    opciones: ["Bajo", "Medio", "Alto"],
+                    name: "Estrato",
+                    type: "select",
+                    required: true,
+                    section: "additional",
+                    options: ["Bajo", "Medio", "Alto"],
                 },
                 {
                     id: "direccion_1742294297671",
-                    nombre: "Direccion",
-                    tipo: "texto",
-                    requerido: false,
-                    seccion: "adicional",
+                    name: "Direccion",
+                    type: "text",
+                    required: false,
+                    section: "additional",
                 },
             ],
             state: true,
@@ -335,59 +335,59 @@ export const eventosEjemplo: Event[] = [
         inscriptions: await generateSampleData(SAMPLE_DATA_COUNT.INSCRIPTIONS, {
             id: 1742291990002,
             name: "Formulario de Inscripcion",
-            descripcion: "Por favor ingrese los datos correctamente",
-            campos: [
+            description: "Por favor ingrese los datos correctamente",
+            fields: [
                 {
                     id: "nombre_1742294172313",
-                    nombre: "Nombre",
-                    tipo: "texto",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Nombre",
+                    type: "text",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "correo_electronico_1742294180033",
-                    nombre: "Correo Electronico",
-                    tipo: "email",
-                    requerido: true,
-                    seccion: "personal",
+                    name: "Correo Electronico",
+                    type: "email",
+                    required: true,
+                    section: "personal",
                 },
                 {
                     id: "numero_telefonico_1742294190390",
-                    nombre: "Numero Telefonico",
-                    tipo: "numero",
-                    requerido: false,
-                    seccion: "personal",
+                    name: "Numero Telefonico",
+                    type: "number",
+                    required: false,
+                    section: "personal",
                 },
                 {
                     id: "semestre_1742294209768",
-                    nombre: "Semestre",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
+                    name: "Semestre",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
                     id: "facultad_1742294260490",
-                    nombre: "Programa",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "personal",
-                    opciones: ["Ingenieria", "Gastronomia", "Psicologia"],
+                    name: "Programa",
+                    type: "select",
+                    required: true,
+                    section: "personal",
+                    options: ["Ingenieria", "Gastronomia", "Psicologia"],
                 },
                 {
                     id: "estrato_1742294281482",
-                    nombre: "Estrato",
-                    tipo: "seleccion",
-                    requerido: true,
-                    seccion: "adicional",
-                    opciones: ["Bajo", "Medio", "Alto"],
+                    name: "Estrato",
+                    type: "select",
+                    required: true,
+                    section: "additional",
+                    options: ["Bajo", "Medio", "Alto"],
                 },
                 {
                     id: "direccion_1742294297671",
-                    nombre: "Direccion",
-                    tipo: "texto",
-                    requerido: false,
-                    seccion: "adicional",
+                    name: "Direccion",
+                    type: "text",
+                    required: false,
+                    section: "additional",
                 },
             ],
             state: true,

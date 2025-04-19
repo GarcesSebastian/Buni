@@ -20,6 +20,7 @@ import {
   ChevronRight,
   ArrowLeft,
   Loader2,
+  AlertCircle,
 } from "lucide-react"
 import { Event, Scenery } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
@@ -29,6 +30,9 @@ import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { ErrorMessage } from "@/components/ui/ErrorMessage"
 import { ERROR_MESSAGES } from "@/constants/errorMessages"
 import { getEvent as getEventFromBackend, getScenery as getSceneryFromBackend } from "@/lib/DataSync"
+import { useNotification } from "@/hooks/client/useNotification"
+
+
 export type formOptionsType = string | boolean | string[] | number
 
 const getEvent = async (user: User, eventId: number): Promise<Event | undefined> => {
@@ -45,6 +49,7 @@ export default function FormsPage() {
   const params = useParams();
   const { user } = useUserData()
   const { sendMessage } = useWebSocket()
+  const { showNotification } = useNotification()
   const { params: dynamicParams } = params || {}; 
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
@@ -59,6 +64,8 @@ export default function FormsPage() {
   const [showPreview, setShowPreview] = useState(false)
   const [isActive, setIsActive] = useState<boolean>(true)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
   useEffect(() => {
     const fetchEvent = async () => {
@@ -77,26 +84,26 @@ export default function FormsPage() {
 
   useEffect(() => {
     if (event && keyForm) {
-      const form = user.form.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
+      const form = user.forms.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
       if (form) {
         const initialValues: Record<string, (string | boolean)> = {}
-        form.campos.forEach((campo) => {
-          initialValues[campo.id] = campo.tipo === "checkbox" ? false : ""
+        form.fields.forEach((campo) => {
+          initialValues[campo.id] = campo.type === "checkbox" ? false : ""
         })
         setFormValues(initialValues)
       }
     }
-  }, [event, keyForm, user.form])
+  }, [event, keyForm, user.forms])
 
   useEffect(() => {
     if (event && keyForm) {
-      const form = user.form.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
+      const form = user.forms.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
       if (form) {
-        const totalFields = form.campos.filter((campo) => campo.requerido).length
-        const completedFields = form.campos
-          .filter((campo) => campo.requerido)
+        const totalFields = form.fields.filter((campo) => campo.required).length
+        const completedFields = form.fields
+          .filter((campo) => campo.required)
           .filter((campo) => {
-            if (campo.tipo === "checkbox") return formValues[campo.id] === true
+            if (campo.type === "checkbox") return formValues[campo.id] === true
             return formValues[campo.id] && formValues[campo.id].toString().trim() !== ""
           }).length
 
@@ -104,7 +111,7 @@ export default function FormsPage() {
         setProgress(calculatedProgress)
       }
     }
-  }, [formValues, event, keyForm, user.form])
+  }, [formValues, event, keyForm, user.forms])
 
   useEffect(() => {
     if (event && keyForm) {
@@ -132,7 +139,7 @@ export default function FormsPage() {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
 
-  const form = user.form.find((f) => f.id === Number(formId))
+  const form = user.forms.find((f) => f.id === Number(formId))
   if (!form) {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
@@ -143,28 +150,28 @@ export default function FormsPage() {
   }
 
   const secciones = {
-      personal: form.campos.filter((campo) => campo.seccion === "personal") || [],
-      academica: form.campos.filter((campo) => campo.seccion === "academica") || [],
-      adicional: form.campos.filter((campo) => campo.seccion === "adicional") || [],
+      personal: form.fields.filter((campo) => campo.section === "personal") || [],
+      academic: form.fields.filter((campo) => campo.section === "academic") || [],
+      additional: form.fields.filter((campo) => campo.section === "additional") || [],
   }
 
   const validateForm = (sectionToValidate?: string) => {
     const newErrors: Record<string, string> = {}
 
     const camposAValidar = sectionToValidate
-      ? form.campos.filter((campo) => campo.seccion === sectionToValidate)
-      : form.campos
+      ? form.fields.filter((campo) => campo.section === sectionToValidate)
+      : form.fields
 
     camposAValidar.forEach((campo) => {
-      if (campo.requerido) {
-        if (campo.tipo === "checkbox" && !formValues[campo.id]) {
+      if (campo.required) {
+        if (campo.type === "checkbox" && !formValues[campo.id]) {
           newErrors[campo.id] = "Este campo es obligatorio"
-        } else if (campo.tipo === "checklist_unico_grid" || campo.tipo === "checklist_multiple_grid") {
+        } else if (campo.type === "checklist_single_grid" || campo.type === "checklist_multiple_grid") {
           const gridValues = formValues[campo.id] as Record<string, string | string[]> || {}
-          const hasAllRowsSelected = campo.opciones?.every((opcion) => {
+          const hasAllRowsSelected = campo.options?.every((opcion) => {
             if (typeof opcion === 'object') {
               const rowKey = `${campo.id}-${opcion.row}`
-              if (campo.tipo === "checklist_unico_grid") {
+              if (campo.type === "checklist_single_grid") {
                 return gridValues[rowKey] !== undefined && gridValues[rowKey] !== ""
               } else {
                 return Array.isArray(gridValues[rowKey]) && (gridValues[rowKey] as string[]).length > 0
@@ -177,14 +184,14 @@ export default function FormsPage() {
             newErrors[campo.id] = "Debe seleccionar al menos una opción en cada fila"
           }
         } else if (
-          campo.tipo !== "checkbox" &&
+          campo.type !== "checkbox" &&
           (!formValues[campo.id] || formValues[campo.id].toString().trim() === "")
         ) {
           newErrors[campo.id] = "Este campo es obligatorio"
         }
       }
 
-      if (campo.tipo === "email" && formValues[campo.id] && !/\S+@\S+\.\S+/.test(formValues[campo.id] as string)) {
+      if (campo.type === "email" && formValues[campo.id] && !/\S+@\S+\.\S+/.test(formValues[campo.id] as string)) {
         newErrors[campo.id] = "Ingrese un correo electrónico válido"
       }
     })
@@ -193,62 +200,98 @@ export default function FormsPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
-    if (validateForm()) {
-      const newFormValues: Record<string, formOptionsType> = {}
-      Object.keys(formValues).forEach((key) => {
-        const value = formValues[key]
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          newFormValues[key.split("_")[0]] = JSON.stringify(value)
-        } else {
-          newFormValues[key.split("_")[0]] = value as formOptionsType
+    try {
+      if (validateForm()) {
+        const newFormValues: Record<string, formOptionsType> = {}
+        Object.keys(formValues).forEach((key) => {
+          const value = formValues[key]
+          if (value && typeof value === 'object' && !Array.isArray(value)) {
+            newFormValues[key.split("_")[0]] = JSON.stringify(value)
+          } else {
+            newFormValues[key.split("_")[0]] = value as formOptionsType
+          }
+        })
+        
+        const event = user.events.find((evt) => evt.id == Number(idEvent))
+        const sanitizedFormValues: Record<string, string | number> = {};
+        Object.keys(newFormValues).forEach((key) => {
+          const value = newFormValues[key]
+          if (typeof value === "boolean") {
+            sanitizedFormValues[key] = value ? 1 : 0
+          } else if (Array.isArray(value)) {
+            sanitizedFormValues[key] = value.join(", ")
+          } else {
+            sanitizedFormValues[key] = value as string
+          }
+        })
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${idEvent}/forms`, {
+          method: "PUT",
+          body: JSON.stringify({
+            ...sanitizedFormValues,
+            typeForm: typeForm,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        const data = await response.json()
+
+        if (response.ok) {
+          if (typeForm === "inscriptions") event?.inscriptions?.push(sanitizedFormValues)
+          if (typeForm === "assists") event?.assists?.push(sanitizedFormValues)
+
+          setSubmitted(true)
+          sendMessage("UPDATE_DATA", {users: user})
+          showNotification({
+            title: "Éxito",
+            message: "Formulario enviado con éxito",
+            type: "success"
+          })
+          return;
         }
-      })
-      
-      const event = user.events.find((evt) => evt.id == Number(idEvent))
-      const sanitizedFormValues: Record<string, string | number> = {};
-      Object.keys(newFormValues).forEach((key) => {
-        const value = newFormValues[key]
-        if (typeof value === "boolean") {
-          sanitizedFormValues[key] = value ? 1 : 0
-        } else if (Array.isArray(value)) {
-          sanitizedFormValues[key] = value.join(", ")
-        } else {
-          sanitizedFormValues[key] = value as string
-        }
-      })
 
-      if (typeForm === "inscriptions") event?.inscriptions?.push(sanitizedFormValues)
-      if (typeForm === "assists") event?.assists?.push(sanitizedFormValues)
-
-      setSubmitted(true)
-      sendMessage("UPDATE_DATA", {users: user})
+        throw new Error(data.error || "Error al enviar el formulario")
+      }
+    } catch (error) {
+      console.error("Error al enviar el formulario:", error)
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Error al enviar el formulario",
+        type: "error"
+      })
+      setError(error instanceof Error ? error.message : "Error al enviar el formulario")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleNextSection = () => {
     if (currentSection === "personal") {
       if (validateForm("personal")) {
-        setCurrentSection("academica")
+        setCurrentSection("academic")
       }
-    } else if (currentSection === "academica") {
-      if (validateForm("academica")) {
-        setCurrentSection("adicional")
+    } else if (currentSection === "academic") {
+      if (validateForm("academic")) {
+        setCurrentSection("additional")
       }
-    } else if (currentSection === "adicional") {
-      if (validateForm("adicional")) {
+    } else if (currentSection === "additional") {
+      if (validateForm("additional")) {
         setShowPreview(true)
       }
     }
   }
 
   const handlePrevSection = () => {
-    if (currentSection === "academica") {
+    if (currentSection === "academic") {
       setCurrentSection("personal")
-    } else if (currentSection === "adicional") {
-      setCurrentSection("academica")
+    } else if (currentSection === "additional") {
+      setCurrentSection("academic")
     } else if (showPreview) {
       setShowPreview(false)
     }
@@ -267,7 +310,7 @@ export default function FormsPage() {
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
                 <h1 className="text-2xl font-bold">{form.name}</h1>
-                <p className="text-muted-foreground">{form.descripcion}</p>
+                <p className="text-muted-foreground">{form.description}</p>
               </div>
             </div>
 
@@ -283,7 +326,7 @@ export default function FormsPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-xl">{event?.nombre}</CardTitle>
-                  <CardDescription>{form.descripcion}</CardDescription>
+                  <CardDescription>{form.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div className="flex items-center">
@@ -325,14 +368,14 @@ export default function FormsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Información Académica</span>
-                        <Badge variant={currentSection === "academica" ? "default" : "outline"} className="text-xs">
-                          {currentSection === "academica" ? "Actual" : "Espera"}
+                        <Badge variant={currentSection === "academic" ? "default" : "outline"} className="text-xs">
+                          {currentSection === "academic" ? "Actual" : "Espera"}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Información Adicional</span>
-                        <Badge variant={currentSection === "adicional" ? "default" : "outline"} className="text-xs">
-                          {currentSection === "adicional" ? "Actual" : "Espera"}
+                        <Badge variant={currentSection === "additional" ? "default" : "outline"} className="text-xs">
+                          {currentSection === "additional" ? "Actual" : "Espera"}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
@@ -350,10 +393,49 @@ export default function FormsPage() {
             <Card className="mb-8 print:shadow-none">
               <CardHeader className="flex flex-col">
                 <CardTitle>{event.nombre}</CardTitle>
-                <CardDescription>{form.descripcion}</CardDescription>
+                <CardDescription>{form.description}</CardDescription>
               </CardHeader>
 
-              {submitted ? (
+              {isSubmitting && (
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="rounded-full bg-blue-100 p-3 mb-4">
+                      <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Procesando formulario</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Por favor, espere mientras se procesa su información...
+                    </p>
+                  </div>
+                </CardContent>
+              )}
+
+              {error && (
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="rounded-full bg-red-100 p-3 mb-4">
+                      <AlertCircle className="h-8 w-8 text-red-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">¡Ha ocurrido un error!</h3>
+                    <p className="text-muted-foreground mb-6">
+                      {error}
+                    </p>
+                    <Button type="button" onClick={() => {
+                      setError(null)
+                      setIsSubmitting(false)
+                      setSubmitted(false)
+                      setFormValues({})
+                      setErrors({})
+                      setCurrentSection("personal")
+                      setShowPreview(false)
+                    }} className="bg-primary hover:bg-primary/90">
+                      Reintentar
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
+
+              {submitted && (
                 <CardContent className="pt-6">
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <div className="rounded-full bg-green-100 p-3 mb-4">
@@ -371,64 +453,66 @@ export default function FormsPage() {
                     </div>
                   </div>
                 </CardContent>
-              ) : (
+              )}
+
+              {!submitted && (
                 <form onSubmit={handleSubmit}>
-                  <CardContent>
                     {!showPreview && isActive && (
-                      <Tabs value={currentSection} className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 mb-8">
-                          <TabsTrigger
-                            value="personal"
-                            onClick={() => setCurrentSection("personal")}
-                            disabled={currentSection === "adicional"}
-                          >
-                            Personal
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="academica"
-                            onClick={() => setCurrentSection("academica")}
-                            disabled={currentSection === "personal" || currentSection === "adicional"}
-                          >
-                            Académica
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="adicional"
-                            onClick={() => setCurrentSection("adicional")}
-                            disabled={currentSection === "personal" || currentSection === "academica"}
-                          >
-                            Adicional
-                          </TabsTrigger>
-                        </TabsList>
+                      <CardContent>
+                          <Tabs value={currentSection} className="w-full">
+                            <TabsList className="grid w-full grid-cols-3 mb-8">
+                              <TabsTrigger
+                                value="personal"
+                                onClick={() => setCurrentSection("personal")}
+                                disabled={currentSection === "additional"}
+                              >
+                                Personal
+                              </TabsTrigger>
+                              <TabsTrigger
+                                value="academic"
+                                onClick={() => setCurrentSection("academic")}
+                                disabled={currentSection === "personal" || currentSection === "additional"}
+                              >
+                                Académica
+                              </TabsTrigger>
+                              <TabsTrigger
+                                value="additional"
+                                onClick={() => setCurrentSection("additional")}
+                                disabled={currentSection === "personal" || currentSection === "academic"}
+                              >
+                                Adicional
+                              </TabsTrigger>
+                            </TabsList>
 
-                        <TabsContent value="personal" className="space-y-4">
-                          {secciones.personal.map((campo) => (
-                            <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
-                          ))}
-                        </TabsContent>
+                            <TabsContent value="personal" className="space-y-4">
+                              {secciones.personal.map((campo) => (
+                                <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
+                              ))}
+                            </TabsContent>
 
-                        <TabsContent value="academica" className="space-y-4">
-                          {secciones.academica.map((campo) => (
-                            <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
-                          ))}
-                        </TabsContent>
+                            <TabsContent value="academic" className="space-y-4">
+                              {secciones.academic.map((campo) => (
+                                <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
+                              ))}
+                            </TabsContent>
 
-                        <TabsContent value="adicional" className="space-y-4">
-                          {secciones.adicional.map((campo) => (
-                            <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
-                          ))}
-                        </TabsContent>
-                      </Tabs>
+                            <TabsContent value="additional" className="space-y-4">
+                              {secciones.additional.map((campo) => (
+                                <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
+                              ))}
+                            </TabsContent>
+                          </Tabs>
+
+                        {!isActive && (
+                          <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <h3 className="text-xl font-semibold mb-2">¡Formulario cerrado!</h3>
+                            <p className="text-muted-foreground mb-6">
+                              El registro para este evento ha sido cerrado.
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
                     )}
-
-                    {!isActive && (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <h3 className="text-xl font-semibold mb-2">¡Formulario cerrado!</h3>
-                        <p className="text-muted-foreground mb-6">
-                          El registro para este evento ha sido cerrado.
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
 
                   {isActive && (
                     <CardFooter className="flex justify-between border-t px-6 py-4">
@@ -436,21 +520,21 @@ export default function FormsPage() {
                         type="button"
                         variant="outline"
                         onClick={handlePrevSection}
-                        disabled={currentSection === "personal"}
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      Anterior
-                    </Button>
+                        disabled={currentSection === "personal" || isSubmitting}
+                      >
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronLeft className="mr-2 h-4 w-4" />}
+                        Anterior
+                      </Button>
 
                     {showPreview ? (
-                      <Button type="submit" className="bg-primary hover:bg-primary/90">
-                        <Save className="mr-2 h-4 w-4" />
+                      <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                         Enviar formulario
                       </Button>
                     ) : (
-                      <Button type="button" onClick={handleNextSection} className="bg-primary hover:bg-primary/90">
+                      <Button type="button" onClick={handleNextSection} className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="ml-2 h-4 w-4" />}
                         Siguiente
-                        <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     )}
                   </CardFooter>

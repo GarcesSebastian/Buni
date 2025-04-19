@@ -21,13 +21,13 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
 
   const handleApplyFilter = () => {
     if (column) {
-      if (fieldInfo?.tipo === "seleccion" || 
-          fieldInfo?.tipo === "checklist_unico" || 
-          fieldInfo?.tipo === "checklist_multiple") {
+      if (fieldInfo?.type === "select" || 
+          fieldInfo?.type === "checklist_single" || 
+          fieldInfo?.type === "checklist_multiple") {
         onFilter(selectedOptions)
-      } else if (fieldInfo?.tipo === "qualification") {
+      } else if (fieldInfo?.type === "qualification") {
         onFilter(selectedOptions.length > 0 ? selectedOptions : ["0"])
-      } else if (fieldInfo?.tipo === "checkbox") {
+      } else if (fieldInfo?.type === "checkbox") {
         onFilter(filterValue)
       } else {
         onFilter(filterValue)
@@ -39,10 +39,10 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
   }
 
   const handleOptionToggle = (option: string) => {
-    if (fieldInfo?.tipo === "checklist_multiple" || 
-        fieldInfo?.tipo === "seleccion" || 
-        fieldInfo?.tipo === "checklist_unico" ||
-        fieldInfo?.tipo === "qualification") {
+    if (fieldInfo?.type === "checklist_multiple" || 
+        fieldInfo?.type === "select" || 
+        fieldInfo?.type === "checklist_single" ||
+        fieldInfo?.type === "qualification") {
       setSelectedOptions(prev => 
         prev.includes(option) 
           ? prev.filter(opt => opt !== option)
@@ -57,7 +57,7 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
     if (!column || !form) return null
 
     const fieldKey = column.split("_")[0]
-    return form.campos.find(campo => campo.id.split("_")[0] === fieldKey)
+    return form.fields.find(field => field.id.split("_")[0] === fieldKey)
   }
 
   const fieldInfo = getFieldInfo()
@@ -66,18 +66,18 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-auto max-w-[90vw] sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Filtrar por {fieldInfo?.nombre || column}</DialogTitle>
+          <DialogTitle>Filtrar por {fieldInfo?.name || column}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {fieldInfo?.tipo === "seleccion" || 
-           fieldInfo?.tipo === "checklist_unico" || 
-           fieldInfo?.tipo === "checklist_multiple" || 
-           fieldInfo?.tipo === "qualification" ? (
+          {fieldInfo?.type === "select" || 
+           fieldInfo?.type === "checklist_single" || 
+           fieldInfo?.type === "checklist_multiple" || 
+           fieldInfo?.type === "qualification" ? (
             <div className="grid gap-2">
               <Label>Seleccionar opciones</Label>
               <div className="border rounded-md p-3">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {fieldInfo.tipo === "qualification" ? (
+                  {fieldInfo.type === "qualification" ? (
                     <>
                       {Array.from({ length: fieldInfo.maxQualification || 5 }).map((_, index) => {
                         const value = (index + 1).toString()
@@ -107,7 +107,7 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
                       </button>
                     </>
                   ) : (
-                    fieldInfo.opciones?.map((option) => (
+                    fieldInfo.options?.map((option) => (
                       <button
                         key={typeof option === 'string' ? option : option.row}
                         onClick={() => handleOptionToggle(typeof option === 'string' ? option : option.row)}
@@ -124,7 +124,7 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
                 </div>
               </div>
             </div>
-          ) : fieldInfo?.tipo === "checkbox" ? (
+          ) : fieldInfo?.type === "checkbox" ? (
             <div className="grid gap-2">
               <Label>Estado</Label>
               <div className="flex gap-2">
@@ -151,10 +151,10 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
               <Label htmlFor="filterValue">Valor</Label>
               <Input
                 id="filterValue"
-                type={fieldInfo?.tipo === "numero" ? "number" : "text"}
+                type={fieldInfo?.type === "number" ? "number" : "text"}
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                placeholder={`Buscar por ${fieldInfo?.nombre || column}`}
+                placeholder={`Buscar por ${fieldInfo?.name || column}`}
                 autoFocus
                 className="focus-visible:ring-muted"
               />
@@ -168,10 +168,10 @@ export function FilterDialog({ column, onFilter, onClose, open, form }: FilterDi
           <Button 
             onClick={handleApplyFilter}
             disabled={
-              (fieldInfo?.tipo === "seleccion" || 
-               fieldInfo?.tipo === "checklist_unico" || 
-               fieldInfo?.tipo === "checklist_multiple" ||
-               fieldInfo?.tipo === "qualification") && 
+              (fieldInfo?.type === "select" || 
+               fieldInfo?.type === "checklist_single" || 
+               fieldInfo?.type === "checklist_multiple" ||
+               fieldInfo?.type === "qualification") && 
               selectedOptions.length === 0
             }
             className="bg-foreground text-background hover:bg-foreground/90"

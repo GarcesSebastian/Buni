@@ -1,12 +1,12 @@
 export interface GeneralStructureForm {
     [key: string]: {
       name: string;
-      type: "text" | "number" | "date" | "time" | "selection" | "email" | "password";
+      type: "text" | "number" | "date" | "time" | "select" | "email" | "password";
       required?: boolean;
       options?: { value: string; label: string; id?: number }[];
     } & (
       | {
-          type: "selection";
+          type: "select";
           options: { value: string; label: string; id?: number }[];
       }
       | {

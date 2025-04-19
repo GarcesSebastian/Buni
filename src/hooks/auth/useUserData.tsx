@@ -15,7 +15,7 @@ export interface User {
     events: Event[];
     faculty: Faculty[];
     scenery: Scenery[];
-    form: Form[];
+    forms: Form[];
     users: UserType[];
     roles: Role[];
 }

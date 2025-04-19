@@ -73,31 +73,31 @@ export function DataTable({
     return Object.entries(filters).every(([key, value]) => {
       if (!value) return true
       
-      const fieldInfo = form?.campos.find(campo => campo.id.split("_")[0] === key)
+      const fieldInfo = form?.fields.find(field => field.id.split("_")[0] === key)
       const itemValue = item[key]
 
-      if (fieldInfo?.tipo === "seleccion" || 
-          fieldInfo?.tipo === "checklist_unico" || 
-          fieldInfo?.tipo === "checklist_multiple") {
+      if (fieldInfo?.type === "select" || 
+          fieldInfo?.type === "checklist_single" || 
+          fieldInfo?.type === "checklist_multiple") {
         return Array.isArray(value) ? 
           (value as string[]).includes(itemValue as string) : 
           itemValue === value
-      } else if (fieldInfo?.tipo === "qualification") {
+      } else if (fieldInfo?.type === "qualification") {
         return Array.isArray(value) ? 
           (value as string[]).includes(itemValue?.toString() || "0") : 
           itemValue?.toString() === value
-      } else if (fieldInfo?.tipo === "checkbox") {
+      } else if (fieldInfo?.type === "checkbox") {
         const itemValueStr = itemValue?.toString() === "1" ? "true" : "false"
         return itemValueStr === value
-      } else if (fieldInfo?.tipo === "numero") {
+      } else if (fieldInfo?.type === "number") {
         return Number(itemValue) === Number(value)
-      } else if (fieldInfo?.tipo === "checklist_unico_grid" || fieldInfo?.tipo === "checklist_multiple_grid") {
+      } else if (fieldInfo?.type === "checklist_single_grid" || fieldInfo?.type === "checklist_multiple_grid") {
         if (!itemValue || typeof itemValue !== "object") return false
 
         const rowKey = `${fieldInfo.id}-${value}`
         const gridValue = itemValue as Record<string, string | string[]>
         
-        if (fieldInfo.tipo === "checklist_unico_grid") {
+        if (fieldInfo.type === "checklist_single_grid") {
           return gridValue[rowKey] === value
         } else {
           return Array.isArray(gridValue[rowKey]) && gridValue[rowKey].includes(value as string)
@@ -138,18 +138,18 @@ export function DataTable({
 
   const renderCellValue = (
     value: string | number | Record<string, string | string[]> | undefined,
-    fieldInfo?: { id: string; tipo: string; opciones?: (string | { row: string; data: string[] })[] }
+    fieldInfo?: { id: string; type: string; options?: (string | { row: string; data: string[] })[] }
   ): React.ReactNode => {
     if (!fieldInfo) return typeof value === "object" ? JSON.stringify(value) : value?.toString() || "-"
     
-    if (fieldInfo?.tipo === "checkbox") {
+    if (fieldInfo?.type === "checkbox") {
       const isChecked = value?.toString() === "1"
       return (
         <Badge variant={isChecked ? "default" : "secondary"}>
           {isChecked ? "Sí" : "No"}
         </Badge>
       )
-    } else if (fieldInfo?.tipo === "checklist_unico_grid" || fieldInfo?.tipo === "checklist_multiple_grid") {
+    } else if (fieldInfo?.type === "checklist_single_grid" || fieldInfo?.type === "checklist_multiple_grid") {
       if (!value) return "-"
 
       let valueParsed = value
@@ -159,8 +159,8 @@ export function DataTable({
       }
       
       const gridData = {
-        type: fieldInfo.tipo,
-        data: fieldInfo.opciones?.map((row: string | { row: string; data: string[] }) => {
+        type: fieldInfo.type,
+        data: fieldInfo.options?.map((row: string | { row: string; data: string[] }) => {
           if (typeof row === 'object') {
             const rowValue = (valueParsed as Record<string, string | string[]>)[`${fieldInfo.id}-${row.row}`]
             if (!rowValue) return null
@@ -218,7 +218,7 @@ export function DataTable({
               paginatedData.map((item, index) => (
                 <TableRow key={`row-${item.id || index}`}>
                   {columns.map((column) => {
-                    const fieldInfo = form?.campos.find(campo => campo.id.split("_")[0] === column.key)
+                    const fieldInfo = form?.fields.find(field => field.id.split("_")[0] === column.key)
                     return (
                       <TableCell key={`cell-${item.id || index}-${column.key}`}>
                         {renderCellValue(item[column.key as string], fieldInfo)}

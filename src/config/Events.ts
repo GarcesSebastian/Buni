@@ -44,27 +44,27 @@ export const configFormEvent: ConfigEventForm = {
     },
     faculty: {
         name: "Programa",
-        type: "selection",
+        type: "select",
         options: []
     },
     scenery: {
         name: "Escenario",
-        type: "selection",
+        type: "select",
         options: []
     },
     formAssists: {
         name: "Formulario de Asistencia",
-        type: "selection",
+        type: "select",
         options: []
     },
     formInscriptions: {
         name: "Formulario de Inscripcion",
-        type: "selection",
+        type: "select",
         options: []
     },
     state: {
         name: "Estado",
-        type: "selection",
+        type: "select",
         options: [
             { value: "true", label: "Activo" },
             { value: "false", label: "Inactivo" }
@@ -90,7 +90,7 @@ export const configFormScenery: ConfigFormScenery = {
     },
     state: {
         name: "Estado",
-        type: "selection",
+        type: "select",
         options: [
             { value: "true", label: "Activo" },
             { value: "false", label: "Inactivo" }

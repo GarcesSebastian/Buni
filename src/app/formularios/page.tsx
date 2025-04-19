@@ -15,13 +15,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/AlertDialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import Section from "@/components/ui/Section"
 import CreateDialog from "@/components/services/Dialogs/Forms/CreateDialog"
 
-import { Plus, MoreVertical, Save, Edit, Check, X, Trash2, GripVertical } from "lucide-react"
+import { Plus, MoreVertical, Edit, Check, X, Trash2, GripVertical, Loader2 } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -43,6 +42,10 @@ import { useUserData } from "@/hooks/auth/useUserData"
 import { configField } from "@/config/Forms"
 import type { Form, FormField } from "@/types/Forms"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
+import Cookies from "js-cookie"
+import { useNotification } from "@/hooks/client/useNotification"
+import { generateUniqueName } from "@/lib/utils"
+import CustomLoader from "@/components/ui/CustomLoader"
 
 interface SorteableFieldProps {
   campo: FormField,
@@ -73,13 +76,13 @@ function SortableCampo({ campo, onDelete, onEdit }: SorteableFieldProps) {
           <GripVertical className="h-5 w-5" />
         </div>
         <div>
-          <p className="font-medium max-sm:text-sm">{campo.nombre}</p>
+          <p className="font-medium max-sm:text-sm">{campo.name}</p>
           <p className="text-sm text-muted-foreground max-sm:text-xs">
-            Tipo: {configField.find((t) => t.id === campo.tipo)?.nombre || campo.tipo}
-            {campo.requerido && " (Requerido)"}
+            Tipo: {configField.find((t) => t.id === campo.type)?.name || campo.type}
+            {campo.required && " (Requerido)"}
           </p>
           <span className="flex items-center gap-2 max-[350px]:hidden">
-            {campo.opciones && <p className="text-xs text-muted-foreground max-sm:text-xs">Opciones: {campo.opciones.join(", ")}</p>}
+            {campo.options && <p className="text-xs text-muted-foreground max-sm:text-xs">Opciones: {campo.options.join(", ")}</p>}
           </span>
         </div>
       </div>
@@ -128,15 +131,20 @@ function SortableCampo({ campo, onDelete, onEdit }: SorteableFieldProps) {
 }
 
 export default function FormulariosPage() {
-  const {user, setUser} = useUserData();
+  const { user, setUser, isLoaded } = useUserData();
   const { sendMessage } = useWebSocket()
+  const { showNotification } = useNotification()
   const [currentForm, setCurrentForm] = useState<Form | null>(null)
+  const [formToDelete, setFormToDelete] = useState<Form | null>(null)
   const [dialogAddField, setDialogAddField] = useState<boolean>(false)
   const [editingField, setEditingField] = useState<FormField | undefined>(undefined)
   const [personalSection, setPersonalSection] = useState<FormField[]>([])
   const [academySection, setAcademySection] = useState<FormField[]>([])
   const [aditionalSection, setAditionalSection] = useState<FormField[]>([])
-  const [error, setError] = useState<string>("")
+  const [isCreating, setIsCreating] = useState<boolean>(false)
+  const [isUpdating, setIsUpdating] = useState<boolean>(false)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -153,14 +161,14 @@ export default function FormulariosPage() {
     const { active, over } = event
 
     if (over && active.id !== over.id && currentForm) {
-      const oldIndex = currentForm.campos.findIndex((campo) => campo.id === active.id)
-      const newIndex = currentForm.campos.findIndex((campo) => campo.id === over.id)
+      const oldIndex = currentForm.fields.findIndex((campo) => campo.id === active.id)
+      const newIndex = currentForm.fields.findIndex((campo) => campo.id === over.id)
 
-      const newCampos = arrayMove(currentForm.campos, oldIndex, newIndex)
+      const newFields = arrayMove(currentForm.fields, oldIndex, newIndex)
 
       setCurrentForm({
         ...currentForm,
-        campos: newCampos,
+        fields: newFields,
       })
     }
   }
@@ -174,77 +182,188 @@ export default function FormulariosPage() {
       .replace(/[^a-z0-9]/g, "")
   }
 
-  const createForm = () => {
-    const nombreFormulario = "Nuevo Formulario " + (user.form.length + 1)
-    
-    const formExists = user.form.some(
-      form => normalizeString(form.name) === normalizeString(nombreFormulario)
-    )
+  const createForm = async () => {
+    setIsCreating(true)
 
-    if (formExists) {
-      setError("Ya existe un formulario con este nombre")
-      return
-    }
+    try {
+      const nombreFormulario = generateUniqueName(user, "Nuevo Formulario")
+      
+      const formExists = user.forms.some(
+        form => normalizeString(form.name) === normalizeString(nombreFormulario)
+      )
 
-    const nuevoFormulario: Form = {
-      id: Date.now(),
-      name: nombreFormulario,
-      descripcion: "Descripción del formulario",
-      campos: [],
-      state: false,
-    }
+      if (formExists) {
+        showNotification({
+          title: "Error",
+          message: "Ya existe un formulario con este nombre",
+          type: "error"
+        })
+        return
+      }
 
-    const newData = {
-      ...user,
-      form: [...user.form, nuevoFormulario]
+      const nuevoFormulario = {
+        name: nombreFormulario,
+        description: "Descripción del formulario",
+        fields: [],
+        state: true,
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms`, {
+        method: "POST",
+        body: JSON.stringify(nuevoFormulario),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const newData = {
+          ...user,
+          forms: [...user.forms, { ...nuevoFormulario, id: data.id }]
+        }
+        
+        setUser(newData)
+        setCurrentForm({ ...nuevoFormulario, id: data.id })
+        sendMessage("UPDATE_DATA", {users: newData})
+        showNotification({
+          title: "Éxito",
+          message: "Formulario creado correctamente",
+          type: "success"
+        })
+        return;
+      }
+      
+      showNotification({
+        title: "Error",
+        message: data.error || "Error al crear el formulario",
+        type: "error"
+      })
+    } catch (error) {
+      console.error("Error al crear el formulario:", error)
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Error al crear el formulario",
+        type: "error"
+      })
+    } finally {
+      setIsCreating(false)
     }
-    
-    setUser(newData)
-    setCurrentForm({ ...nuevoFormulario })
-    sendMessage("UPDATE_DATA", {users: newData})
-    setError("")
   }
 
   const editForm = (formulario: Form) => {
     setCurrentForm({ ...formulario })
   }
 
-  const deleteForm = (id: number) => {
-    const newData = {
-      ...user,
-      form: user.form.filter((f) => f.id !== id)
-    }
-    setUser(newData)
+  const deleteForm = async (id: number) => {
+    setIsDeleting(true)
 
-    if (currentForm?.id === id) {
-      setCurrentForm(null)
-    }
+    try {
+      const newData = {
+        ...user,
+        forms: user.forms.filter((f) => f.id !== id)
+      }
 
-    sendMessage("UPDATE_DATA", {users: newData})
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+          setUser(newData)
+      
+          if (currentForm?.id === id) {
+            setCurrentForm(null)
+          }
+      
+          sendMessage("UPDATE_DATA", {users: newData})
+          setShowDeleteDialog(false)
+          setFormToDelete(null)
+          showNotification({
+            title: "Éxito",
+            message: "Formulario eliminado correctamente",
+            type: "success"
+          })
+          return;
+      }
+
+      throw new Error(data.error || "Error al eliminar el formulario")
+    } catch (error) {
+      console.error("Error al eliminar el formulario:", error)
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Error al eliminar el formulario",
+        type: "error"
+      })
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
-  const updateForm = () => {
+  const updateForm = async () => {
     if (!currentForm) return
+    setIsUpdating(true)
 
-    const formExists = user.form.some(
-      form => form.id !== currentForm.id && 
-      normalizeString(form.name) === normalizeString(currentForm.name)
-    )
+    try {
+      const formExists = user.forms.some(
+          form => form.id !== currentForm.id && 
+          normalizeString(form.name) === normalizeString(currentForm.name)
+      )
 
-    if (formExists) {
-      setError("Ya existe un formulario con este nombre")
-      return
+      if (formExists) {
+        showNotification({
+          title: "Error",
+          message: "Ya existe un formulario con este nombre",
+          type: "error"
+        })
+        return
+      }
+
+      const newData = {
+        ...user,
+        forms: user.forms.map((f) => (f.id === currentForm.id ? currentForm : f))
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${currentForm.id}`, {
+        method: "PUT",
+        body: JSON.stringify(currentForm),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setUser(newData)
+        setCurrentForm(null)
+        sendMessage("UPDATE_DATA", {users: newData})
+        showNotification({
+          title: "Éxito",
+          message: "Formulario actualizado correctamente",
+          type: "success"
+        })
+        return;
+      }
+
+      throw new Error(data.error || "Error al actualizar el formulario")
+    } catch (error) {
+      console.error("Error al actualizar el formulario:", error)
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Error al actualizar el formulario",
+        type: "error"
+      })
+    } finally {
+      setIsUpdating(false)
     }
-
-    const newData = {
-      ...user,
-      form: user.form.map((f) => (f.id === currentForm.id ? currentForm : f))
-    }
-
-    setUser(newData)
-    setCurrentForm(null)
-    sendMessage("UPDATE_DATA", {users: newData})
-    setError("")
   }
 
   const deleteField = (campoId: string) => {
@@ -252,35 +371,80 @@ export default function FormulariosPage() {
 
     setCurrentForm({
       ...currentForm,
-      campos: currentForm.campos.filter((c) => c.id !== campoId),
+      fields: currentForm.fields.filter((c) => c.id !== campoId),
     })
   }
 
   const editField = (campoId: string) => {
     if (!currentForm) return
 
-    const campo = currentForm.campos.find((c) => c.id === campoId)
-    if (!campo) return
+    const field = currentForm.fields.find((c) => c.id === campoId)
+    if (!field) return
 
-    setEditingField(campo)
+    setEditingField(field)
     setDialogAddField(true)
   }
 
-  const toggleStateForm = (id: number) => {
-    const newData = {
-      ...user,
-      form: user.form.map((f) => (f.id === id ? { ...f, state: !f.state } : f))
-    }
+  const toggleStateForm = async (id: number) => {
+    setIsUpdating(true)
 
-    setUser(newData)
-    sendMessage("UPDATE_DATA", {users: newData})
+    try {
+      const form = user.forms.find((f) => f.id === id)
+
+      if (!form) {
+        throw new Error("Formulario no encontrado")
+      }
+
+      const newForm = {
+        ...form,
+        state: !form.state
+      }
+
+      const newData = {
+        ...user,
+        forms: user.forms.map((f) => (f.id === id ? newForm : f))
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(newForm),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setUser(newData)  
+        sendMessage("UPDATE_DATA", {users: newData})
+        showNotification({
+          title: "Éxito",
+          message: "Estado del formulario actualizado correctamente",
+          type: "success"
+        })
+        return;
+      }
+
+      throw new Error(data.error || "Error al actualizar el estado del formulario")
+    } catch (error) {
+      console.error("Error al actualizar el estado del formulario:", error)
+      showNotification({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Error al actualizar el estado del formulario",
+        type: "error"
+      })
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   useEffect(() => {
     if (currentForm) {
-      setPersonalSection(currentForm.campos.filter((c) => c.seccion === "personal"))
-      setAcademySection(currentForm.campos.filter((c) => c.seccion === "academica"))
-      setAditionalSection(currentForm.campos.filter((c) => c.seccion === "adicional"))
+      setPersonalSection(currentForm.fields.filter((c) => c.section === "personal"))
+      setAcademySection(currentForm.fields.filter((c) => c.section === "academic"))
+      setAditionalSection(currentForm.fields.filter((c) => c.section === "additional"))
     }
   }, [currentForm])
 
@@ -291,237 +455,222 @@ export default function FormulariosPage() {
             <div className="flex justify-between items-center max-md:flex-col max-md:items-start max-md:gap-2">
               <h1 className="text-2xl font-bold">Formularios</h1>
               <div className="flex flex-col items-end gap-2">
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button onClick={createForm} className="bg-primary hover:bg-primary/90">
-                  <Plus className="mr-2 h-4 w-4" />
+                <Button onClick={createForm} className="bg-primary" disabled={isCreating || isUpdating}>
+                  {isCreating || isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
                   Nuevo Formulario
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-              <Card>
-                <CardHeader className="flex flex-col">
-                  <CardTitle>Formularios Disponibles</CardTitle>
-                  <CardDescription>Formularios que pueden ser utilizados en eventos</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Campos</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {user.form.map((formulario) => (
-                        <TableRow key={formulario.id}>
-                          <TableCell>{formulario.name}</TableCell>
-                          <TableCell>
-                            <span
-                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                formulario.state ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {formulario.state ? "Activo" : "Inactivo"}
-                            </span>
-                          </TableCell>
-                          <TableCell>{formulario.campos.length}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 flex justify-center items-center hover:bg-muted">
-                                    <span className="sr-only">Abrir menú</span>
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => editForm(formulario)}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Editar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => toggleStateForm(formulario.id)}>
-                                    {formulario.state ? (
-                                      <>
-                                        <X className="mr-2 h-4 w-4" />
-                                        Desactivar
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Check className="mr-2 h-4 w-4" />
-                                        Activar
-                                      </>
-                                    )}
-                                  </DropdownMenuItem>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Eliminar
-                                      </DropdownMenuItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Esta acción no se puede deshacer. Esto eliminará permanentemente el formulario y
-                                          todos sus campos asociados.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() => deleteForm(formulario.id)}
-                                          className="bg-primary hover:bg-primary/90"
-                                        >
-                                          Eliminar
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {user.form.length === 0 && (
+            {!isLoaded && <CustomLoader />}
+
+            {isLoaded && (
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                <Card>
+                  <CardHeader className="flex flex-col">
+                    <CardTitle>Formularios Disponibles</CardTitle>
+                    <CardDescription>Formularios que pueden ser utilizados en eventos</CardDescription>
+                  </CardHeader>
+                    
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-4">
-                            No hay formularios disponibles
-                          </TableCell>
+                          <TableHead>Nombre</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead>Campos</TableHead>
+                          <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+                      </TableHeader>
 
-              <Card>
-                <CardHeader className="flex flex-col p-0">
-                  <CardTitle>{currentForm ? `Editar: ${currentForm.name}` : "Detalles del Formulario"}</CardTitle>
-                  <CardDescription>
-                    {currentForm
-                      ? "Modifique los detalles y campos del formulario"
-                      : "Seleccione un formulario para editar o cree uno nuevo"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {currentForm ? (
-                    <div className="space-y-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="nombre-formulario">Nombre del Formulario</Label>
-                        <Input
-                          id="nombre-formulario"
-                          value={currentForm.name}
-                          onChange={(e) => {
-                            setCurrentForm({ ...currentForm, name: e.target.value })
-                            setError("")
-                          }}
-                        />
-                        {error && <p className="text-sm text-red-500">{error}</p>}
-                      </div>
+                      <TableBody>
+                        {user.forms && user.forms.length > 0 && user.forms.map((form) => (
+                          <TableRow key={form.id}>
+                            <TableCell>{form.name}</TableCell>
+                            <TableCell>
+                              <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                  form.state ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {form.state ? "Activo" : "Inactivo"}
+                              </span>
+                            </TableCell>
+                            <TableCell>{form.fields.length}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 flex justify-center items-center hover:bg-muted">
+                                      <span className="sr-only">Abrir menú</span>
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => editForm(form)}>
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => toggleStateForm(form.id)}>
+                                      {form.state ? (
+                                        <>
+                                          <X className="mr-2 h-4 w-4" />
+                                          Desactivar
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Check className="mr-2 h-4 w-4" />
+                                          Activar
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => {
+                                      setShowDeleteDialog(true)
+                                      setFormToDelete(form)
+                                    }}>
+                                          <Trash2 className="mr-2 h-4 w-4" />
+                                          Eliminar
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        {user.forms && user.forms.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center py-4">
+                              No hay formularios disponibles
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                      
+                      </Table>
+                  </CardContent>
+                </Card>
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="descripcion-formulario">Descripción</Label>
-                        <Input
-                          id="descripcion-formulario"
-                          value={currentForm.descripcion}
-                          onChange={(e) => setCurrentForm({ ...currentForm, descripcion: e.target.value })}
-                        />
-                      </div>
+                <Card>
+                  <CardHeader className="flex flex-col p-0">
+                    <CardTitle>{currentForm ? `Editar: ${currentForm.name}` : "Detalles del Formulario"}</CardTitle>
+                    <CardDescription>
+                      {currentForm
+                        ? "Modifique los detalles y campos del formulario"
+                        : "Seleccione un formulario para editar o cree uno nuevo"}
+                    </CardDescription>
+                  </CardHeader>
 
-                      <div className="border rounded-md p-4">
-                        <div className="flex justify-between items-center mb-4 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-                          <h3 className="font-medium">Campos del Formulario</h3>
-                          <Button variant="outline" size="sm" className="max-sm:w-full max-sm:text-xs" onClick={() => setDialogAddField(true)}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Agregar Campo
-                          </Button>
+                  <CardContent>
+                    {currentForm ? (
+                      <div className="space-y-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="nombre-formulario">Nombre del Formulario</Label>
+                          <Input
+                            id="nombre-formulario"
+                            value={currentForm.name}
+                            onChange={(e) => {
+                              setCurrentForm({ ...currentForm, name: e.target.value })
+                            }}
+                          />
                         </div>
 
-                        {currentForm.campos.length > 0 ? (
-                          <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground mb-3">
-                              Arrastra y suelta los campos para reordenarlos. El orden aquí determinará cómo se mostrarán en
-                              el formulario.
-                            </p>
-                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                              <SortableContext
-                                items={currentForm.campos.map((campo) => campo.id)}
-                                strategy={verticalListSortingStrategy}
-                              >
-                                <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
-                                  <Label className="font-medium">Datos Personales</Label>
-                                  {personalSection.length > 0 ? (
-                                    personalSection.map((campo) => (
-                                      <div key={campo.id} className="w-full">
-                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <p className="text-sm text-muted-foreground">No hay campos personales</p>
-                                  )}
-                                </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="descripcion-formulario">Descripción</Label>
+                          <Input
+                            id="descripcion-formulario"
+                            value={currentForm.description}
+                            onChange={(e) => setCurrentForm({ ...currentForm, description: e.target.value })}
+                          />
+                        </div>
 
-                                <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
-                                  <Label className="font-medium">Datos Académicos</Label>
-                                  {academySection.length > 0 ? (
-                                    academySection.map((campo) => (
-                                      <div key={campo.id} className="w-full">
-                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
-                                    </div>
-                                  ))
-                                  ) : (
-                                    <p className="text-sm text-muted-foreground">No hay campos académicos</p>
-                                  )}
-                                </div>
-
-                                <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
-                                  <Label className="font-medium">Datos Adicionales</Label>
-                                  {aditionalSection.length > 0 ? (
-                                    aditionalSection.map((campo) => (
-                                      <div key={campo.id} className="w-full">
-                                        <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <p className="text-sm text-muted-foreground">No hay campos adicionales</p>
-                                  )}
-                                </div>
-
-                              </SortableContext>
-                            </DndContext>
+                        <div className="border rounded-md p-4">
+                          <div className="flex justify-between items-center mb-4 max-sm:flex-col max-sm:items-start max-sm:gap-2">
+                            <h3 className="font-medium">Campos del Formulario</h3>
+                            <Button variant="outline" size="sm" className="max-sm:w-full max-sm:text-xs" onClick={() => setDialogAddField(true)}>
+                              <Plus className="mr-2 h-4 w-4" />
+                              Agregar Campo
+                            </Button>
                           </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">No hay campos definidos</p>
-                        )}
+
+                          {currentForm.fields.length > 0 ? (
+                            <div className="space-y-2">
+                              <p className="text-sm text-muted-foreground mb-3">
+                                Arrastra y suelta los campos para reordenarlos. El orden aquí determinará cómo se mostrarán en
+                                el formulario.
+                              </p>
+                              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                <SortableContext
+                                  items={currentForm.fields.map((field) => field.id)}
+                                  strategy={verticalListSortingStrategy}
+                                >
+                                  <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
+                                    <Label className="font-medium">Datos Personales</Label>
+                                    {personalSection.length > 0 ? (
+                                      personalSection.map((campo) => (
+                                        <div key={campo.id} className="w-full">
+                                          <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">No hay campos personales</p>
+                                    )}
+                                  </div>
+
+                                  <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
+                                    <Label className="font-medium">Datos Académicos</Label>
+                                    {academySection.length > 0 ? (
+                                      academySection.map((campo) => (
+                                        <div key={campo.id} className="w-full">
+                                          <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
+                                      </div>
+                                    ))
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">No hay campos académicos</p>
+                                    )}
+                                  </div>
+
+                                  <div className="space-y-2 flex flex-col items-start justify-between border p-3 rounded-md bg-white">
+                                    <Label className="font-medium">Datos Adicionales</Label>
+                                    {aditionalSection.length > 0 ? (
+                                      aditionalSection.map((campo) => (
+                                        <div key={campo.id} className="w-full">
+                                          <SortableCampo campo={campo} onDelete={deleteField} onEdit={editField} />
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">No hay campos adicionales</p>
+                                    )}
+                                  </div>
+
+                                </SortableContext>
+                              </DndContext>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">No hay campos definidos</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-40">
-                      <p className="text-muted-foreground">Seleccione un formulario para ver sus detalles</p>
-                    </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-40">
+                        <p className="text-muted-foreground">Seleccione un formulario para ver sus detalles</p>
+                      </div>
+                    )}
+                  </CardContent>
+
+                  {currentForm && (
+                    <CardFooter className="flex justify-end space-x-2 p-6 pt-0">
+                      <Button variant="outline" onClick={() => setCurrentForm(null)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={updateForm} className="bg-primary hover:bg-primary/90 max-md:text-xs" disabled={isUpdating}>
+                        {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Guardar Formulario
+                      </Button>
+                    </CardFooter>
                   )}
-                </CardContent>
-
-                {currentForm && (
-                  <CardFooter className="flex justify-end space-x-2 p-6 pt-0">
-                    <Button variant="outline" onClick={() => setCurrentForm(null)}>
-                      Cancelar
-                    </Button>
-                    <Button onClick={updateForm} className="bg-primary hover:bg-primary/90 max-md:text-xs">
-                      <Save className="mr-2 h-4 w-4" />
-                      Guardar Formulario
-                    </Button>
-                  </CardFooter>
-                )}
-
-              </Card>
-            </div>
+                </Card>
+              </div>
+            )}
 
             <Card>
               <CardHeader className="flex flex-col">
@@ -569,9 +718,31 @@ export default function FormulariosPage() {
               editingField={editingField}
               setEditingField={setEditingField}
             />
+
+            <AlertDialog open={showDeleteDialog}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta acción no se puede deshacer. Esto eliminará permanentemente el formulario y
+                      todos sus campos asociados.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteForm(formToDelete?.id || 0)}
+                      className="bg-primary hover:bg-primary/90"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Eliminar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
           </div>
         </Section>
     </div>
   )
 }
-

@@ -73,18 +73,18 @@ export default function EventDetailPage() {
             const idFaculty = foundEvent?.faculty?.id
             const idScenery = foundEvent?.scenery?.id
 
-            setFormAssists(user.form.find((f) => f.id == Number(idFormAssists)) ?? undefined)
-            setFormInscriptions(user.form.find((f) => f.id == Number(idFormInscriptions)) ?? undefined)
+            setFormAssists(user.forms.find((f) => f.id == Number(idFormAssists)) ?? undefined)
+            setFormInscriptions(user.forms.find((f) => f.id == Number(idFormInscriptions)) ?? undefined)
             setFaculty(user.faculty.find((f) => f.id == Number(idFaculty)) ?? undefined)
             setScenery(user.scenery.find((s) => s.id == Number(idScenery)) ?? undefined)
             
-            const assistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-            const inscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+            const assistsField = formAssists?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
+            const inscriptionsField = formInscriptions?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
             setSelectedAssistsDistribution(assistsField)
             setSelectedInscriptionsDistribution(inscriptionsField)
 
-            const defaultAssistsField = formAssists?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
-            const defaultInscriptionsField = formInscriptions?.campos.find(campo => campo.tipo === "seleccion")?.id.split("_")[0] || "carrera"
+            const defaultAssistsField = formAssists?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
+            const defaultInscriptionsField = formInscriptions?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
 
             setSelectedAssistsDistribution(defaultAssistsField)
             setSelectedInscriptionsDistribution(defaultInscriptionsField)
@@ -94,7 +94,7 @@ export default function EventDetailPage() {
         }
 
         setLoading(false)
-    }, [eventId, router, user.events, formAssists, formInscriptions, faculty, scenery, user.form, user.faculty, user.scenery])
+    }, [eventId, router, user.events, formAssists, formInscriptions, faculty, scenery, user.forms, user.faculty, user.scenery])
 
     useEffect(() => {
         if (lastMessage?.type === "UPDATE_DATA" && (lastMessage.payload as { users: User })?.users) {
@@ -208,10 +208,10 @@ export default function EventDetailPage() {
 
         const structure: {[key: string]: string | number | boolean}[] = []
 
-        formUse.campos.forEach((campo) => {
+        formUse.fields.forEach((field) => {
             structure.push({
-                key: campo.id.split("_")[0],
-                label: campo.nombre,
+                key: field.id.split("_")[0],
+                label: field.name,
                 filterable: true,
             })
         })
@@ -222,24 +222,24 @@ export default function EventDetailPage() {
     const getDistributionOptions = (form: Form | undefined) => {
         if (!form) return []
 
-        return form.campos.filter(campo => {
-            const hasOptions = campo.opciones && campo.opciones.length > 0
+        return form.fields.filter(field => {
+            const hasOptions = field.options && field.options.length > 0
             const isSelectableType = [
-                "seleccion",
-                "checklist_unico",
+                "select",
+                "checklist_single",
                 "checklist_multiple",
                 "qualification",
                 "checkbox"
-            ].includes(campo.tipo)
+            ].includes(field.type)
 
-            if (campo.tipo === "checkbox" || campo.tipo === "qualification") {
+            if (field.type === "checkbox" || field.type === "qualification") {
                 return true
             }
 
             return hasOptions && isSelectableType
-        }).map(campo => ({
-            value: campo.id.split("_")[0],
-            label: campo.nombre
+        }).map(field => ({
+            value: field.id.split("_")[0],
+            label: field.name
         }))
     }
 

@@ -121,7 +121,7 @@ function NotificationItem({
   const getVerticalOffset = () => {
     const baseOffset = 24
     const itemHeight = 88
-    const gap = 32
+    const gap = 10
 
     return baseOffset + index * (itemHeight + gap)
   }
@@ -139,7 +139,7 @@ function NotificationItem({
   }
 
   const baseClasses =
-    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md z-[50] transition-all duration-300 ease-in-out bg-white"
+    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md z-[999] transition-all duration-300 ease-in-out bg-white"
   const variantClasses = getVariantClasses(type)
   const positionClasses = getPositionClasses(position)
   const visibilityClasses = isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"

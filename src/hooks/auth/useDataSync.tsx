@@ -13,7 +13,7 @@ export interface User {
     events: Event[];
     faculty: Faculty[];
     scenery: Scenery[];
-    form: Form[];
+    forms: Form[];
     users: UserType[];
     roles: Role[];
 }
@@ -55,7 +55,20 @@ export const useDataSync = () => {
             }
 
             const data = await response.json();
-            data.form = TemplateData.form;
+
+            data.users = data.users.map((user: { id: number, name: string, email: string, password: string, role_id: number, created_at: string }) => ({
+                ...user,
+                roles: {
+                    id: user.role_id,
+                    key: "roles"
+                }
+            }));
+
+            data.roles = data.roles.map((role: { id: number, name: string, permissions: Record<string, boolean>, state: string }) => ({
+                ...role,
+                state: "true"
+            }));
+
             setUserState(data);
         } catch (error) {
             console.error('Error fetching data:', error);
