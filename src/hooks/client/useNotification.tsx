@@ -139,7 +139,7 @@ function NotificationItem({
   }
 
   const baseClasses =
-    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md z-[9999] transition-all duration-300 ease-in-out"
+    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md z-[50] transition-all duration-300 ease-in-out bg-white"
   const variantClasses = getVariantClasses(type)
   const positionClasses = getPositionClasses(position)
   const visibilityClasses = isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -149,7 +149,7 @@ function NotificationItem({
 
   return (
     <div className={combinedClasses} role="alert" style={getPositionStyle()}>
-      <div className="flex w-full items-start">
+      <div className="flex gap-2 w-full items-start">
         {getIcon() && <div className="mr-3 flex-shrink-0">{getIcon()}</div>}
         <div className="flex-1">
           <h3 className="font-medium">{title}</h3>

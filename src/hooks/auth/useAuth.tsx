@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
@@ -42,18 +42,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        const userCookie = Cookies.get('user');
-        if (userCookie) {
-            try {
-                const user = JSON.parse(userCookie) as User;
-                setAuthState({ user, isAuthenticated: true, isLoading: false });
-            } catch (error) {
-                console.error('Error parsing user cookie:', error);
+        const verifyToken = async () => {
+            const token = Cookies.get('token');
+            
+            if (!token) {
+                setAuthState({
+                    user: null,
+                    isAuthenticated: false,
+                    isLoading: false
+                });
+
+                return;
+            }
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
                 logout();
             }
-        } else {
-            setAuthState(prev => ({ ...prev, isLoading: false }));
-        }
+
+            setAuthState({
+                user: data.user as User,
+                isAuthenticated: true,
+                isLoading: false
+            });
+        };
+
+        verifyToken();
     }, []);
 
     const login = async (email: string, password: string) => {
@@ -74,7 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             Cookies.set('token', data.token, { expires: 1 });
-            Cookies.set('user', JSON.stringify(data.user), { expires: 1 });
 
             setAuthState({
                 user: data.user as User,
@@ -91,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = () => {
         Cookies.remove('token');
-        Cookies.remove('user');
+        Cookies.remove('events');
         setAuthState({
             user: null,
             isAuthenticated: false,

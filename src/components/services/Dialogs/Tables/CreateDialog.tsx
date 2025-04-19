@@ -100,7 +100,6 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       }
 
       const body_response = JSON.parse(JSON.stringify(updatedFormData))
-      console.log("body_response", body_response);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}`, {
         method: "POST",
@@ -112,7 +111,6 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       })
 
       const data_response = await response.json();
-      console.log("data_response", data_response);
 
       if (!response.ok) {
         throw new Error(data_response.error || 'Error al crear el registro'); 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { Event } from '@/types/Events';
+import redirectToForms from './lib/MiddlewareEvents';
 
 const publicPaths = [
     '/',
@@ -22,7 +22,7 @@ const isPublicPath = (path: string): boolean => {
 
 async function verifyTokenWithBackend(token: string): Promise<boolean> {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-session`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,6 +48,10 @@ export async function middleware(req: NextRequest) {
     }
 
     if (isPublicPath(path)) {
+        if (params[0] === 'forms') {
+            return redirectToForms(params, req);
+        }
+
         return NextResponse.next();
     }
 
@@ -56,49 +60,15 @@ export async function middleware(req: NextRequest) {
     }
 
     const isValidToken = await verifyTokenWithBackend(token);
-    
     if (!isValidToken) {
         const response = NextResponse.redirect(new URL('/', req.url));
         response.cookies.delete('token');
         return response;
     }
 
-    if (params[0] === 'forms') {
-        const formType = params[1];
-        const eventId = params[2];
-
-        if (!eventId || !formType) {
-            return NextResponse.redirect(new URL('/', req.url));
-        }
-
-        try {
-            const eventsCookie = req.cookies.get('events')?.value;
-            if (!eventsCookie) {
-                return NextResponse.redirect(new URL('/', req.url));
-            }
-
-            const events = JSON.parse(eventsCookie) as Event[];
-            const event = events.find((e: Event) => e.id === Number(eventId));
-
-            if (!event) {
-                return NextResponse.redirect(new URL('/', req.url));
-            }
-
-            const formKey = `form${formType.charAt(0).toUpperCase() + formType.slice(1)}`;
-            if (!event[formKey as keyof Event]) {
-                return NextResponse.redirect(new URL('/', req.url));
-            }
-
-            return NextResponse.next();
-        } catch (error) {
-            console.error('Error en middleware:', error);
-            return NextResponse.redirect(new URL('/', req.url));
-        }
-    }
-
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)', '/dashboard', "/forms/:path*"],
 };

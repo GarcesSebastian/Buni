@@ -19,33 +19,38 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
+  Loader2,
 } from "lucide-react"
-import { Event } from "@/types/Events"
+import { Event, Scenery } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
 import { User, useUserData } from "@/hooks/auth/useUserData"
 import Link from "next/link"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { ErrorMessage } from "@/components/ui/ErrorMessage"
 import { ERROR_MESSAGES } from "@/constants/errorMessages"
-
+import { getEvent as getEventFromBackend, getScenery as getSceneryFromBackend } from "@/lib/DataSync"
 export type formOptionsType = string | boolean | string[] | number
 
-const getEvent = (user: User, eventId: number): Event | undefined => {
-  const eventFind = (user.events as Event[]).find((evt:{id: number | string}) => evt.id == eventId)
-  return eventFind
+const getEvent = async (user: User, eventId: number): Promise<Event | undefined> => {
+  const event = await getEventFromBackend(eventId)
+  return event
+}
+
+const getScenery = async (sceneryId: number): Promise<Scenery | undefined> => {
+  const scenery = await getSceneryFromBackend(sceneryId)
+  return scenery
 }
 
 export default function FormsPage() {
   const params = useParams();
-  const {user} = useUserData()
+  const { user } = useUserData()
   const { sendMessage } = useWebSocket()
   const { params: dynamicParams } = params || {}; 
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
   const keyForm = typeForm ? `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}` : '';
-
   const [event, setEvent] = useState<Event | undefined>(undefined)
-
+  const [scenery, setScenery] = useState<Scenery | undefined>(undefined)
   const [formValues, setFormValues] = useState<Record<string, formOptionsType | Record<string, formOptionsType>>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -53,17 +58,26 @@ export default function FormsPage() {
   const [progress, setProgress] = useState(0)
   const [showPreview, setShowPreview] = useState(false)
   const [isActive, setIsActive] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState(true)
   
   useEffect(() => {
-    if (user && idEvent) {
-      const eventFound = getEvent(user, Number(idEvent))
-      setEvent(eventFound)
-      setIsActive(eventFound?.state === "true")
+    const fetchEvent = async () => {
+      if (user && idEvent) {
+        const eventFound = await getEvent(user, Number(idEvent))
+        if (eventFound?.scenery?.id) {
+          const sceneryFound = await getScenery(eventFound.scenery.id)
+          setScenery(sceneryFound)
+        }
+        setEvent(eventFound)
+        setIsActive(eventFound?.state === "true")
+      }
     }
+    fetchEvent()
   }, [user, idEvent])
 
   useEffect(() => {
     if (event && keyForm) {
+      const form = user.form.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
       if (form) {
         const initialValues: Record<string, (string | boolean)> = {}
         form.campos.forEach((campo) => {
@@ -72,10 +86,11 @@ export default function FormsPage() {
         setFormValues(initialValues)
       }
     }
-  }, [event, keyForm])
+  }, [event, keyForm, user.form])
 
   useEffect(() => {
     if (event && keyForm) {
+      const form = user.form.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
       if (form) {
         const totalFields = form.campos.filter((campo) => campo.requerido).length
         const completedFields = form.campos
@@ -89,8 +104,20 @@ export default function FormsPage() {
         setProgress(calculatedProgress)
       }
     }
-  }, [formValues, event, keyForm])
+  }, [formValues, event, keyForm, user.form])
 
+  useEffect(() => {
+    if (event && keyForm) {
+      setIsLoading(false)
+    }
+  }, [event, keyForm])
+
+  if (isLoading) {
+    return <div className="flex flex-col gap-4 justify-center items-center h-full">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-muted-foreground">Cargando...</p>
+    </div>
+  }
 
   if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
     return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
@@ -100,17 +127,18 @@ export default function FormsPage() {
     return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
   }
 
-  const idForm = (event[keyForm as keyof Event] as { id: number, key: string }).id
-  const form = user.form.find((f) => f.id == Number(idForm))
+  const formId = (event[keyForm as keyof Event] as { id: number, key: string })?.id
+  if (!formId) {
+    return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
+  }
 
+  const form = user.form.find((f) => f.id === Number(formId))
   if (!form) {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
 
-  const idScenery = (event.scenery as { id: number, key: string }).id
-  const scenery = user.scenery.find((s) => s.id == Number(idScenery))
-
-  if (!scenery) {
+  const sceneryId = (event.scenery as { id: number, key: string })?.id
+  if (!sceneryId) {
     return <ErrorMessage {...ERROR_MESSAGES.SCENERY_NOT_FOUND} />
   }
 
@@ -268,7 +296,7 @@ export default function FormsPage() {
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{scenery.name}</span>
+                    <span className="text-sm">{scenery?.name}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-muted-foreground" />

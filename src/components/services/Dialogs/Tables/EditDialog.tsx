@@ -103,6 +103,8 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
         ),
       }
 
+      console.log("updatedFormData", updatedFormData);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}/${initialData.id}`, {
         method: "PUT",
         headers: {
@@ -142,6 +144,12 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
     }
   };
 
+  const handleChange = (value: string) => (e: string | React.ChangeEvent<HTMLInputElement>) => {
+    console.log("e", e)
+    console.log("value", value)
+    setFormData({ ...formData, [value]: typeof e === 'string' ? e : e.target.value })
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
@@ -157,7 +165,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
                   formData={formData}
                   data={{
                     form: data.structureForm[value],
-                    onChange: (e) => setFormData({ ...formData, [value]: typeof e === 'string' ? e : e.target.value }),
+                    onChange: handleChange(value),
                     key: value,
                     index: index
                   }}

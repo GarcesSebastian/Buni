@@ -83,7 +83,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
                             style={isUnlimited ? { backgroundColor: "var(--primary)", color: "white" } : { backgroundColor: "var(--secondary)", color: "var(--secondary-foreground)" }}
                             onClick={() => {
                                 setIsUnlimited(!isUnlimited);
-                                data.onChange(isUnlimited ? "-1" : valueFormatted as string);
+                                data.onChange(!isUnlimited ? "-1" : valueFormatted as string);
                             }}
                         >
                             Ilimitado

@@ -1,13 +1,12 @@
 "use client"
 
 import { UserNav } from "./UserNav"
-import { usePathname } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
+import { useAuth } from "@/hooks/auth/useAuth"
 
 export function TopNav() {
-  const pathname = usePathname()
-  const isAuthenticated = pathname !== "/"
+  const { isAuthenticated } = useAuth()
 
   return (
     <header className="border-b max-sm:hidden">
