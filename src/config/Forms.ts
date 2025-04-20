@@ -1,3 +1,11 @@
+export const fieldsDistribution = [
+    "select",
+    "checklist_single",
+    "checklist_multiple",
+    "checklist_single_grid",
+    "checklist_multiple_grid",
+]
+
 export const configField = [
     { id: "text", name: "Texto", key: "text" },
     { id: "number", name: "Número", key: "number" },

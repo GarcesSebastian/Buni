@@ -58,7 +58,7 @@ const TypeOptionField = ({keyIcon}: {keyIcon: string}) => {
             return <CircleCheck className={classIcon} />
         case "checklist_multiple":
             return <SquareCheck className={classIcon} />
-        case "checklist_unique_grid":
+        case "checklist_single_grid":
             return <Grid className={classIcon} />
         case "checklist_multiple_grid":
             return <Grid className={classIcon} />

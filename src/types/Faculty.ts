@@ -12,6 +12,7 @@ export interface Faculty {
 export interface ConfigFaculty {
   key: string;
   value: string;
+  filter?: boolean;
 }
 
 export interface ConfigFormFaculty {

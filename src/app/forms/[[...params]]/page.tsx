@@ -24,30 +24,25 @@ import {
 } from "lucide-react"
 import { Event, Scenery } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
-import { User, useUserData } from "@/hooks/auth/useUserData"
+import { useUserData } from "@/hooks/auth/useUserData"
 import Link from "next/link"
 import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { ErrorMessage } from "@/components/ui/ErrorMessage"
 import { ERROR_MESSAGES } from "@/constants/errorMessages"
-import { getEvent as getEventFromBackend, getScenery as getSceneryFromBackend } from "@/lib/DataSync"
+import { getDataForm as getDataFormFromBackend } from "@/lib/DataSync"
 import { useNotification } from "@/hooks/client/useNotification"
-
+import { Form } from "@/types/Forms"
 
 export type formOptionsType = string | boolean | string[] | number
 
-const getEvent = async (user: User, eventId: number): Promise<Event | undefined> => {
-  const event = await getEventFromBackend(eventId)
-  return event
-}
-
-const getScenery = async (sceneryId: number): Promise<Scenery | undefined> => {
-  const scenery = await getSceneryFromBackend(sceneryId)
-  return scenery
+const getDataForm = async (eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery} | undefined> => {
+  const form = await getDataFormFromBackend(eventId, typeForm)
+  return form
 }
 
 export default function FormsPage() {
   const params = useParams();
-  const { user } = useUserData()
+  const { user, setUser } = useUserData()
   const { sendMessage } = useWebSocket()
   const { showNotification } = useNotification()
   const { params: dynamicParams } = params || {}; 
@@ -56,6 +51,7 @@ export default function FormsPage() {
   const keyForm = typeForm ? `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}` : '';
   const [event, setEvent] = useState<Event | undefined>(undefined)
   const [scenery, setScenery] = useState<Scenery | undefined>(undefined)
+  const [currentForm, setCurrentForm] = useState<Form | undefined>(undefined)
   const [formValues, setFormValues] = useState<Record<string, formOptionsType | Record<string, formOptionsType>>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -70,13 +66,14 @@ export default function FormsPage() {
   useEffect(() => {
     const fetchEvent = async () => {
       if (user && idEvent) {
-        const eventFound = await getEvent(user, Number(idEvent))
-        if (eventFound?.scenery?.id) {
-          const sceneryFound = await getScenery(eventFound.scenery.id)
-          setScenery(sceneryFound)
+        const data = await getDataForm(Number(idEvent), keyForm)
+        if (data) {
+          setEvent(data.event)
+          setCurrentForm(data.form)
+          setScenery(data.scenery)
+
+          setIsActive(data.event.state === "true")
         }
-        setEvent(eventFound)
-        setIsActive(eventFound?.state === "true")
       }
     }
     fetchEvent()
@@ -134,13 +131,7 @@ export default function FormsPage() {
     return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
   }
 
-  const formId = (event[keyForm as keyof Event] as { id: number, key: string })?.id
-  if (!formId) {
-    return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
-  }
-
-  const form = user.forms.find((f) => f.id === Number(formId))
-  if (!form) {
+  if (!currentForm) {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
 
@@ -150,17 +141,17 @@ export default function FormsPage() {
   }
 
   const secciones = {
-      personal: form.fields.filter((campo) => campo.section === "personal") || [],
-      academic: form.fields.filter((campo) => campo.section === "academic") || [],
-      additional: form.fields.filter((campo) => campo.section === "additional") || [],
+      personal: currentForm.fields.filter((campo) => campo.section === "personal") || [],
+      academic: currentForm.fields.filter((campo) => campo.section === "academic") || [],
+      additional: currentForm.fields.filter((campo) => campo.section === "additional") || [],
   }
 
   const validateForm = (sectionToValidate?: string) => {
     const newErrors: Record<string, string> = {}
 
     const camposAValidar = sectionToValidate
-      ? form.fields.filter((campo) => campo.section === sectionToValidate)
-      : form.fields
+      ? currentForm.fields.filter((campo) => campo.section === sectionToValidate)
+      : currentForm.fields
 
     camposAValidar.forEach((campo) => {
       if (campo.required) {
@@ -215,8 +206,11 @@ export default function FormsPage() {
             newFormValues[key.split("_")[0]] = value as formOptionsType
           }
         })
-        
-        const event = user.events.find((evt) => evt.id == Number(idEvent))
+
+        if (!event) {
+          throw new Error("Evento no encontrado")
+        }
+
         const sanitizedFormValues: Record<string, string | number> = {};
         Object.keys(newFormValues).forEach((key) => {
           const value = newFormValues[key]
@@ -247,12 +241,24 @@ export default function FormsPage() {
           if (typeForm === "assists") event?.assists?.push(sanitizedFormValues)
 
           setSubmitted(true)
-          sendMessage("UPDATE_DATA", {users: user})
-          showNotification({
-            title: "Éxito",
-            message: "Formulario enviado con éxito",
-            type: "success"
+
+          const payload = {
+            idEvent: Number(idEvent),
+            typeForm: typeForm,
+            data: sanitizedFormValues
+          }
+
+          const newUser = { ...user }
+          newUser.events = newUser.events.map((eventUser) => {
+            if (eventUser.id === Number(idEvent)) {
+              const formKey = typeForm as 'assists' | 'inscriptions'
+              return { ...eventUser, [formKey]: [...eventUser[formKey], sanitizedFormValues] };
+            }
+            return eventUser
           })
+
+          setUser(newUser)
+          sendMessage("UPDATE_EVENT_FORMS", payload)
           return;
         }
 
@@ -309,8 +315,8 @@ export default function FormsPage() {
                   </Button>
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
-                <h1 className="text-2xl font-bold">{form.name}</h1>
-                <p className="text-muted-foreground">{form.description}</p>
+                <h1 className="text-2xl font-bold">{currentForm.name}</h1>
+                <p className="text-muted-foreground">{currentForm.description}</p>
               </div>
             </div>
 
@@ -326,7 +332,7 @@ export default function FormsPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-xl">{event?.nombre}</CardTitle>
-                  <CardDescription>{form.description}</CardDescription>
+                  <CardDescription>{currentForm.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div className="flex items-center">
@@ -393,7 +399,7 @@ export default function FormsPage() {
             <Card className="mb-8 print:shadow-none">
               <CardHeader className="flex flex-col">
                 <CardTitle>{event.nombre}</CardTitle>
-                <CardDescription>{form.description}</CardDescription>
+                <CardDescription>{currentForm.description}</CardDescription>
               </CardHeader>
 
               {isSubmitting && (

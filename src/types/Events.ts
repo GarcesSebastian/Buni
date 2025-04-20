@@ -40,6 +40,7 @@ export interface Event {
 export interface ConfigEvent {
   key: string;
   value: string;
+  filter?: boolean;
 }
 
 export interface ConfigEventForm {
@@ -104,6 +105,7 @@ export interface Scenery {
 export interface ConfigScenery {
   key: string;
   value: string;
+  filter?: boolean;
 }
 
 export interface ConfigFormScenery {

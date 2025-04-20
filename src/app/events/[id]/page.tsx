@@ -24,7 +24,7 @@ import { Form } from "@/types/Forms"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { generateSampleData } from "./data"
 import { Faculty } from "@/types/Faculty"
-
+import { fieldsDistribution } from "@/config/Forms"
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 
 export default function EventDetailPage() {
@@ -40,6 +40,8 @@ export default function EventDetailPage() {
     const [faculty, setFaculty] = useState<Faculty | undefined>()
     const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
+    const [hasDistributionAssists, setHasDistributionAssists] = useState(false)
+    const [hasDistributionInscriptions, setHasDistributionInscriptions] = useState(false)
     
     const [selectedAssistsDistribution, setSelectedAssistsDistribution] = useState<string | undefined>()
     const [selectedInscriptionsDistribution, setSelectedInscriptionsDistribution] = useState<string | undefined>()
@@ -107,6 +109,22 @@ export default function EventDetailPage() {
             }
         }
     }, [lastMessage, eventId, updateEvent, event]);
+
+    useEffect(() => {
+        if (event?.formAssists?.id && event?.formInscriptions?.id) {
+            formAssists?.fields.forEach((field) => {
+                if (fieldsDistribution.includes(field.type)) {
+                    setHasDistributionAssists(true)
+                }
+            })
+
+            formInscriptions?.fields.forEach((field) => {
+                if (fieldsDistribution.includes(field.type)) {
+                    setHasDistributionInscriptions(true)
+                }
+            })
+        }
+    }, [event])
 
     const filteredAssists = event?.assists?.filter((assists) => {
         return Object.entries(assistsFilters).every(([key, value]) => {
@@ -554,7 +572,7 @@ export default function EventDetailPage() {
                                     </CardContent>
                                 </Card>
 
-                                {filteredAssists.length > 0 && (
+                                {filteredAssists.length > 0 && hasDistributionAssists && (
                                     <div className="space-y-4">
                                         <div className="flex justify-end">
                                             <div className="w-[200px]">
@@ -621,7 +639,7 @@ export default function EventDetailPage() {
                                     </CardContent>
                                 </Card>
 
-                                {filteredInscriptions.length > 0 && (
+                                {filteredInscriptions.length > 0 && hasDistributionInscriptions && (
                                     <div className="space-y-4">
                                         <div className="flex justify-end">
                                             <div className="w-[200px]">

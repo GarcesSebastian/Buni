@@ -84,6 +84,7 @@ export function TableGeneric({structure, structureForm, table}) {
         structureForm[value].options = rest
       }
     })
+
   }, [isLoaded, structureForm, user]);
 
   if(!isLoaded){

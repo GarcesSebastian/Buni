@@ -34,4 +34,8 @@ const redirectToForms = async (params: string[], req: NextRequest) => {
     }
 }
 
-export default redirectToForms;
+const redirectToDevTools = async () => {
+    return NextResponse.next();
+}
+
+export { redirectToForms, redirectToDevTools };

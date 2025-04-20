@@ -1,5 +1,6 @@
 import type { Event, Scenery } from '@/types/Events';
 import { Faculty } from '@/types/Faculty';
+import { Form } from '@/types/Forms';
 
 export async function getEvents(): Promise<Event[]> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, {
@@ -47,4 +48,31 @@ export async function getFaculty(id: number): Promise<Faculty> {
 
     const data = await response.json();
     return data;
+}
+
+export async function getForm(id: number): Promise<Form> {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const data = await response.json();
+    return data;
+}
+
+export async function getDataForm(eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery}> {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${typeForm}/${eventId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al obtener los datos del formulario');
+    }
+
+    return response.json();
 }

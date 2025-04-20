@@ -6,9 +6,9 @@ export const tableFaculty: TableFaculty = {
 }
 
 export const configFaculty: ConfigFaculty[] = [
-    { key: "id", value: "ID" },
-    { key: "name", value: "Nombre" },
-    { key: "state", value: "Estados" },
+    { key: "id", value: "ID", filter: true },
+    { key: "name", value: "Nombre", filter: true },
+    { key: "state", value: "Estados", filter: true },
 ]
 
 export const configFormFaculty: ConfigFormFaculty = {

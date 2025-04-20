@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useContext, createContext, ReactNode } from "react";
-import { handleUpdateUserData } from "@/controllers/WebSocketController";
+import { handleUpdateUserData, handleUpdateEventForm } from "@/controllers/WebSocketController";
 import { type User, useUserData } from "../auth/useUserData";
-
 const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
 
 let globalSocket: WebSocket | null = null;
@@ -13,8 +12,14 @@ interface WebSocketMessage<T> {
   payload: T;
 }
 
-interface UpdateUserDataPayLoad {
+export interface UpdateUserDataPayLoad {
   users: User;
+}
+
+export interface UpdateEventFormPayLoad {
+  idEvent: number;
+  typeForm: string;
+  data: Record<string, string | number>;
 }
 
 interface WebSocketContextType {
@@ -25,7 +30,7 @@ interface WebSocketContextType {
 export const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
 export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
-  const { setUser } = useUserData();
+  const { setUser } = useUserData() as { setUser: (user: User | ((prevUser: User) => User)) => void };
   const [lastMessage, setLastMessage] = useState<WebSocketMessage<unknown> | null>(null);
 
   if (!WEBSOCKET_URL) {
@@ -47,6 +52,9 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
         switch (data.type) {
           case "UPDATE_DATA":
             handleUpdateUserData(data.payload as UpdateUserDataPayLoad, setUser);
+            break;
+          case "UPDATE_EVENT_FORMS":
+            handleUpdateEventForm(data.payload as UpdateEventFormPayLoad, setUser);
             break;
           default:
             console.warn("Tipo de mensaje desconocido:", data);

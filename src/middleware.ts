@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import redirectToForms from './lib/MiddlewareEvents';
+import { redirectToForms, redirectToDevTools } from './lib/MiddlewareEvents';
 
 const publicPaths = [
     '/',
@@ -64,6 +64,10 @@ export async function middleware(req: NextRequest) {
         const response = NextResponse.redirect(new URL('/', req.url));
         response.cookies.delete('token');
         return response;
+    }
+
+    if (params[0] === 'dev-tools') {
+        return redirectToDevTools();
     }
 
     return NextResponse.next();

@@ -8,17 +8,17 @@ export const tableEvent: TableEvent = {
 }
 
 export const configEvent: ConfigEvent[] = [
-    { key: "id", value: "ID" },
-    { key: "nombre", value: "Nombre" },
-    { key: "organizador", value: "Organizador" },
-    { key: "cupos", value: "Cupos" },
-    { key: "hora", value: "Hora" },
-    { key: "fecha", value: "Fecha" },
-    { key: "faculty", value: "Programas" },
-    { key: "scenery", value: "Escenario" },
-    { key: "formAssists", value: "Formulario de Asistencias" },
-    { key: "formInscriptions", value: "Formulario de Inscripciones" },
-    { key: "state", value: "Estados" },
+    { key: "id", value: "ID", filter: true },
+    { key: "nombre", value: "Nombre", filter: true },
+    { key: "organizador", value: "Organizador", filter: true },
+    { key: "cupos", value: "Cupos", filter: true },
+    { key: "hora", value: "Hora", filter: true },
+    { key: "fecha", value: "Fecha", filter: true },
+    { key: "faculty", value: "Programas", filter: true },
+    { key: "scenery", value: "Escenario", filter: true },
+    { key: "formAssists", value: "Formulario de Asistencias", filter: true },
+    { key: "formInscriptions", value: "Formulario de Inscripciones", filter: true },
+    { key: "state", value: "Estados", filter: true },
 ]
 
 export const configFormEvent: ConfigEventForm = {
@@ -78,9 +78,9 @@ export const tableScenery: TableScenery = {
 }
 
 export const configScenery: ConfigScenery[] = [
-    { key: "id", value: "ID" },
-    { key: "name", value: "Nombre" },
-    { key: "state", value: "Estados" },
+    { key: "id", value: "ID", filter: true },
+    { key: "name", value: "Nombre", filter: true },
+    { key: "state", value: "Estados", filter: true },
 ]
 
 export const configFormScenery: ConfigFormScenery = {
