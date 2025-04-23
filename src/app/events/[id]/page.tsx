@@ -16,7 +16,6 @@ import { DataImportExport } from "@/components/services/Events/ManageExcel"
 import { ChartSection } from "@/components/services/Events/CharSection"
 
 import { useUserData } from "@/hooks/auth/useUserData"
-import { useWebSocket } from "@/hooks/server/useWebSocket"
 
 import { getDataForCharts, COLORS } from "@/lib/ManageEvents"
 import { Alert, AlertTitle } from "@/components/ui/Alert"
@@ -25,6 +24,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { generateSampleData } from "./data"
 import { Faculty } from "@/types/Faculty"
 import { fieldsDistribution } from "@/config/Forms"
+import { useSocket } from "@/hooks/server/useSocket"
+
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 
 export default function EventDetailPage() {
@@ -32,7 +33,7 @@ export default function EventDetailPage() {
     const router = useRouter()
     const eventId = params.id as string
     const {user, updateEvent} = useUserData()
-    const { lastMessage } = useWebSocket()
+    const { socket } = useSocket()
     const [event, setEvent] = useState<Event | undefined>()
     const [formAssists, setFormAssists] = useState<Form | undefined>()
     const [formInscriptions, setFormInscriptions] = useState<Form | undefined>()
@@ -99,16 +100,20 @@ export default function EventDetailPage() {
     }, [eventId, router, user.events, formAssists, formInscriptions, faculty, scenery, user.forms, user.faculty, user.scenery])
 
     useEffect(() => {
-        if (lastMessage?.type === "UPDATE_DATA" && (lastMessage.payload as { users: User })?.users) {
-            const updatedUser = (lastMessage.payload as { users: User }).users;
+        socket?.on("UPDATE_DATA", (data: { users: User }) => {
+            const updatedUser = data.users;
             const updatedEvent = updatedUser.events.find((e: Event) => e.id === Number(eventId));
             
             if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
                 setEvent(updatedEvent);
                 updateEvent(Number(eventId), updatedEvent);
             }
-        }
-    }, [lastMessage, eventId, updateEvent, event]);
+        });
+
+        return () => {
+            socket?.off("UPDATE_DATA");
+        };
+    }, [socket, eventId, updateEvent, event]);
 
     useEffect(() => {
         if (event?.formAssists?.id && event?.formInscriptions?.id) {

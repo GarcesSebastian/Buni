@@ -1,11 +1,10 @@
 import { User } from "@/hooks/auth/useUserData";
-import { UpdateUserDataPayLoad, UpdateEventFormPayLoad } from "@/hooks/server/useWebSocket";
 
-export function handleUpdateUserData(data: UpdateUserDataPayLoad, setUser: (users: User) => void) {
-    setUser(data.users)
+export function handleUpdateUserData(data: User, setUser: (users: User) => void) {
+    setUser(data)
 }
 
-export function handleUpdateEventForm(data: UpdateEventFormPayLoad, setUser: (user: User | ((prevUser: User) => User)) => void) {
+export function handleUpdateEventForm(data: { idEvent: number, typeForm: string, data: Record<string, string | number> }, setUser: (user: User | ((prevUser: User) => User)) => void) {
   setUser((prevUser: User) => {
     const updatedUser = { ...prevUser }
     const updatedEvents = [...updatedUser.events]

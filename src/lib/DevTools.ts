@@ -2,6 +2,7 @@ import { generateSampleData } from "@/app/events/[id]/data"
 import { User } from "@/hooks/auth/useUserData"
 import { Event } from "@/types/Events"
 import { Form } from "@/types/Forms"
+import { Socket } from "socket.io-client"
 
 export interface TestConfig {
     id: string
@@ -18,18 +19,18 @@ export interface TestConfig {
 
 export class DevToolsService {
     private static instance: DevToolsService
-    private sendMessage: <T,>(type: string, payload: T) => void = () => {}
+    private socket: Socket | null = null
     private tests: Map<string, TestConfig> = new Map()
     private isCancelled: boolean = false
 
     private constructor() {}
 
-    public static getInstance(sendMessage?: <T,>(type: string, payload: T) => void): DevToolsService {
+    public static getInstance(socket?: Socket): DevToolsService {
         if (!DevToolsService.instance) {
             DevToolsService.instance = new DevToolsService()
         }
-        if (sendMessage) {
-            DevToolsService.instance.sendMessage = sendMessage
+        if (socket) {
+            DevToolsService.instance.socket = socket
         }
         return DevToolsService.instance
     }
@@ -162,7 +163,7 @@ export class DevToolsService {
                 typeForm: "assists",
                 data: data
             }
-            this.sendMessage("UPDATE_EVENT_FORMS", payload)
+            this.socket?.emit("UPDATE_EVENT_FORMS", payload)
         }
 
         if (!this.isCancelled) {
@@ -200,7 +201,7 @@ export class DevToolsService {
                 typeForm: "inscriptions",
                 data: data
             }
-            this.sendMessage("UPDATE_EVENT_FORMS", payload)
+            this.socket?.emit("UPDATE_EVENT_FORMS", payload)
         }
 
         if (!this.isCancelled) {

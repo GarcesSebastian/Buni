@@ -15,9 +15,9 @@ import { Form } from "@/types/Forms"
 import { GeneralStructureForm } from "@/types/Table"
 import { InputBasic } from "../../InputGeneric"
 import { type User, useUserData } from "@/hooks/auth/useUserData"
-import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { useNotification } from "@/hooks/client/useNotification"
 import { dataExtra } from "@/config/Data"
+import { useSocket } from "@/hooks/server/useSocket"
 
 type DataExtraValue = string | number | boolean | null | DataExtraValue[] | { [key: string]: DataExtraValue }
 
@@ -42,8 +42,8 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
-  const { sendMessage } = useWebSocket();
   const { showNotification } = useNotification();
+  const { socket } = useSocket();
 
   const RestartFormData = () => {
     const rest: Record<string, string> = {};
@@ -119,7 +119,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       setUser(newData);
       RestartFormData();
       onOpenChange(false);
-      sendMessage("UPDATE_DATA", {users: newData})
+      socket?.emit("UPDATE_DATA", newData);
 
       showNotification({
         title: "Registro creado",

@@ -26,12 +26,12 @@ import { Event, Scenery } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
 import { useUserData } from "@/hooks/auth/useUserData"
 import Link from "next/link"
-import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { ErrorMessage } from "@/components/ui/ErrorMessage"
 import { ERROR_MESSAGES } from "@/constants/errorMessages"
 import { getDataForm as getDataFormFromBackend } from "@/lib/DataSync"
 import { useNotification } from "@/hooks/client/useNotification"
 import { Form } from "@/types/Forms"
+import { useSocket } from "@/hooks/server/useSocket"
 
 export type formOptionsType = string | boolean | string[] | number
 
@@ -43,8 +43,8 @@ const getDataForm = async (eventId: number, typeForm: string): Promise<{event: E
 export default function FormsPage() {
   const params = useParams();
   const { user, setUser } = useUserData()
-  const { sendMessage } = useWebSocket()
   const { showNotification } = useNotification()
+  const { socket } = useSocket()
   const { params: dynamicParams } = params || {}; 
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
@@ -258,7 +258,7 @@ export default function FormsPage() {
           })
 
           setUser(newUser)
-          sendMessage("UPDATE_EVENT_FORMS", payload)
+          socket?.emit("UPDATE_EVENT_FORMS", payload)
           return;
         }
 
