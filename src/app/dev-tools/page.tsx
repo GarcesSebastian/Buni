@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/Badge"
 import { Play, Pause, RefreshCw, Settings2, X, Trash2 } from "lucide-react"
 import { DevToolsService, TestConfig } from "@/lib/DevTools"
 import { useUserData } from "@/hooks/auth/useUserData"
-import { useWebSocket } from "@/hooks/server/useWebSocket"
+import { useSocket } from "@/hooks/server/useSocket"
 
 interface TestFormConfig {
     iterations: number
@@ -38,7 +38,7 @@ const typesData = [
 export default function DevToolsPage() {
     const { user } = useUserData()
     const { showNotification } = useNotification()
-    const { sendMessage } = useWebSocket()
+    const { socket } = useSocket()
     const [tests, setTests] = useState<TestConfig[]>([])
     const [config, setConfig] = useState<TestFormConfig>({
         iterations: 1,
@@ -49,12 +49,12 @@ export default function DevToolsPage() {
     })
 
     useEffect(() => {
-        const devTools = DevToolsService.getInstance(sendMessage)
+        const devTools = DevToolsService.getInstance(socket || undefined)
         const interval = setInterval(() => {
             setTests(devTools.getTests())
         }, 100)
         return () => clearInterval(interval)
-    }, [sendMessage])
+    }, [socket])
 
     const handleConfigChange = (field: keyof TestFormConfig, value: string | number) => {
         setConfig(prev => ({
@@ -88,7 +88,7 @@ export default function DevToolsPage() {
     const createTest = () => {
         if (!validateConfig()) return
 
-        const devTools = DevToolsService.getInstance(sendMessage)
+        const devTools = DevToolsService.getInstance(socket || undefined)
         const testId = devTools.createTest(config)
         
         showNotification({
@@ -101,7 +101,7 @@ export default function DevToolsPage() {
     }
 
     const startTest = async (testId: string) => {
-        const devTools = DevToolsService.getInstance(sendMessage)
+        const devTools = DevToolsService.getInstance(socket || undefined)
         devTools.runTest(testId, user)
     }
 

@@ -5,10 +5,10 @@ import "../styles/globals.css"
 
 import { TopNav } from "@/components/ui/TopNav"
 import { UserDataProvider } from "@/hooks/auth/useUserData"
-import { WebSocketProvider } from "@/hooks/server/useWebSocket"
 import { NotificationProvider } from "@/hooks/client/useNotification"
 import { Suspense } from "react"
 import { AuthProvider } from "@/hooks/auth/useAuth"
+import { SocketProvider } from "@/hooks/server/useSocket"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -32,14 +32,14 @@ export default function RootLayout({
           <AuthProvider>
             <TopNav/>
             <div className="flex overflow-hidden">
-              <UserDataProvider>
-                <WebSocketProvider>
-                  <NotificationProvider>
-                    <Suspense>
-                      <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
+                <UserDataProvider>
+                  <SocketProvider>
+                    <NotificationProvider>
+                      <Suspense>
+                        <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
                     </Suspense>
                   </NotificationProvider>
-                </WebSocketProvider>
+                </SocketProvider>
               </UserDataProvider>
             </div>
           </AuthProvider>

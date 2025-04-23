@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/Dialog"
 import { GeneralStructureForm } from "@/types/Table"
 import { User, useUserData } from "@/hooks/auth/useUserData"
-import { useWebSocket } from "@/hooks/server/useWebSocket"
 import { useNotification } from "@/hooks/client/useNotification"
 import { useState } from "react"
+import { useSocket } from "@/hooks/server/useSocket"
 
 interface Props {
   data: {
@@ -32,9 +32,9 @@ interface Props {
 
 export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
   const { user, setUser } = useUserData()
-  const { sendMessage } = useWebSocket()
   const { showNotification } = useNotification()
   const [isDeleting, setIsDeleting] = useState(false)
+  const { socket } = useSocket()
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -67,7 +67,7 @@ export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
 
       setUser(newData)
       onOpenChange(false)
-      sendMessage("UPDATE_DATA", {users: newData})
+      socket?.emit("UPDATE_DATA", newData)
 
       showNotification({
         title: "Registro eliminado",

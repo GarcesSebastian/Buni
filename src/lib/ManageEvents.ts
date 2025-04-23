@@ -17,12 +17,12 @@ export const COLORS = [
 export const getDataForCharts = (
     event: Event, 
     selectedFacultad: string, 
-    assistsDistributionField: string = "carrera",
-    inscriptionsDistributionField: string = "carrera",
+    assistsDistributionField: string | undefined,
+    inscriptionsDistributionField: string | undefined,
     formAssists?: Form,
     formInscriptions?: Form
 ) => {
-    if (!event?.assists || !event?.inscriptions) return { assistData: [], inscriptionData: [] }
+    if (!event?.assists || !event?.inscriptions || !assistsDistributionField || !inscriptionsDistributionField) return { assistData: [], inscriptionData: [] }
 
     const assistsFiltradas =
       selectedFacultad === "todas"
@@ -34,10 +34,13 @@ export const getDataForCharts = (
         ? event.inscriptions
         : event.inscriptions.filter((i) => i.facultad === selectedFacultad)
 
+    console.log(assistsFiltradas)
+    console.log(assistsDistributionField)
     const assistsPorCampo = assistsFiltradas.reduce(
       (acc: Record<string, number>, asistencia) => {
         const valor = asistencia[assistsDistributionField]
         const campo = formAssists?.fields.find(c => c.id.split("_")[0] === assistsDistributionField)
+        if (!valor) return acc
         
         if (campo?.type === "checkbox") {
           acc[valor === 1 ? "true" : "false"] = (acc[valor === 1 ? "true" : "false"] || 0) + 1

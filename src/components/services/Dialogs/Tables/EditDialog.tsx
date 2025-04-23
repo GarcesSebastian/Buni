@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/Dialog"
 import { User, useUserData } from "@/hooks/auth/useUserData"
 import { GeneralStructureForm } from "@/types/Table"
-import { useWebSocket } from "@/hooks/server/useWebSocket";
 import { Form } from "@/types/Forms"
 import { InputBasic } from "../../InputGeneric"
 import { useNotification } from "@/hooks/client/useNotification"
+import { useSocket } from "@/hooks/server/useSocket"
 
 interface Props {
   data: {
@@ -47,9 +47,9 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isEditing, setIsEditing] = useState(false);
   const { user, setUser }: { user: User; setUser: (user: User) => void } = useUserData();
-  const { sendMessage } = useWebSocket()
   const { showNotification } = useNotification()
-  
+  const { socket } = useSocket()
+
   const RestartFormData = () => {
     const rest: Record<string, string> = {};
     Object.keys(data.structureForm).forEach((key) => {
@@ -124,7 +124,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
 
       RestartFormData();
       onOpenChange(false);
-      sendMessage("UPDATE_DATA", {users: newData});
+      socket?.emit("UPDATE_DATA", newData);
 
       showNotification({
         title: "Registro editado",

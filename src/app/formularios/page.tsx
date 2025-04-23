@@ -41,11 +41,11 @@ import { CSS } from "@dnd-kit/utilities"
 import { useUserData } from "@/hooks/auth/useUserData"
 import { configField } from "@/config/Forms"
 import type { Form, FormField } from "@/types/Forms"
-import { useWebSocket } from "@/hooks/server/useWebSocket"
 import Cookies from "js-cookie"
 import { useNotification } from "@/hooks/client/useNotification"
 import { generateUniqueName } from "@/lib/utils"
 import CustomLoader from "@/components/ui/CustomLoader"
+import { useSocket } from "@/hooks/server/useSocket"
 
 interface SorteableFieldProps {
   campo: FormField,
@@ -132,8 +132,8 @@ function SortableCampo({ campo, onDelete, onEdit }: SorteableFieldProps) {
 
 export default function FormulariosPage() {
   const { user, setUser, isLoaded } = useUserData();
-  const { sendMessage } = useWebSocket()
   const { showNotification } = useNotification()
+  const { socket } = useSocket()
   const [currentForm, setCurrentForm] = useState<Form | null>(null)
   const [formToDelete, setFormToDelete] = useState<Form | null>(null)
   const [dialogAddField, setDialogAddField] = useState<boolean>(false)
@@ -227,7 +227,7 @@ export default function FormulariosPage() {
         
         setUser(newData)
         setCurrentForm({ ...nuevoFormulario, id: data.id })
-        sendMessage("UPDATE_DATA", {users: newData})
+        socket?.emit("UPDATE_DATA", newData)
         showNotification({
           title: "Éxito",
           message: "Formulario creado correctamente",
@@ -282,7 +282,7 @@ export default function FormulariosPage() {
             setCurrentForm(null)
           }
       
-          sendMessage("UPDATE_DATA", {users: newData})
+          socket?.emit("UPDATE_DATA", newData)
           setShowDeleteDialog(false)
           setFormToDelete(null)
           showNotification({
@@ -344,7 +344,7 @@ export default function FormulariosPage() {
       if (response.ok) {
         setUser(newData)
         setCurrentForm(null)
-        sendMessage("UPDATE_DATA", {users: newData})
+        socket?.emit("UPDATE_DATA", newData)
         showNotification({
           title: "Éxito",
           message: "Formulario actualizado correctamente",
@@ -418,7 +418,7 @@ export default function FormulariosPage() {
 
       if (response.ok) {
         setUser(newData)  
-        sendMessage("UPDATE_DATA", {users: newData})
+        socket?.emit("UPDATE_DATA", newData)
         showNotification({
           title: "Éxito",
           message: "Estado del formulario actualizado correctamente",
