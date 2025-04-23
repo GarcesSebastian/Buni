@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 
 export default function UsersPage() {
   return (
-      <Section>
-        <Card className="shadow-lg">
-          <CardHeader className="flex flex-col">
-            <CardTitle>{tableUser.name}</CardTitle>
-            <p className="text-muted-foreground">Listado de {tableUser.name}</p>
-          </CardHeader>
-          <CardContent>
-            <TableGeneric structure={configUser} structureForm={configFormUser} table={tableUser} />
-          </CardContent>
-        </Card>
-      </Section>
+    <Section>
+      <Card className="shadow-lg">
+        <CardHeader className="flex flex-col">
+          <CardTitle>{tableUser.name}</CardTitle>
+          <p className="text-muted-foreground">Listado de {tableUser.name}</p>
+        </CardHeader>
+        <CardContent>
+          <TableGeneric structure={configUser} structureForm={configFormUser} table={tableUser} />
+        </CardContent>
+      </Card>
+    </Section>
   )
 }

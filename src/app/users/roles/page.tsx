@@ -15,21 +15,13 @@ import {
 } from "@/components/ui/Dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
-import { 
-    PermissionKey, 
-} from "@/config/Permissions";
+import { Role } from "@/types/User"
+import { Permissions } from "@/types/Permissions"
 import ShowPermissions from "@/components/services/Dialogs/Roles/ShowPermissions";
 import CreateDialog from "@/components/services/Dialogs/Roles/CreateDialog";
 import { useUserData } from "@/hooks/auth/useUserData"
 import useRoles from "@/hooks/server/useRoles";
 import CustomLoader from "@/components/ui/CustomLoader";
-
-export interface Role {
-    id: number;
-    name: string;
-    permissions: Record<PermissionKey, boolean>;
-    state: string;
-}
 
 export default function RolesPage() {
     const { user, setUser, isLoaded } = useUserData();
@@ -43,9 +35,9 @@ export default function RolesPage() {
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleCreateRole = async (role: { name: string; permissions: Record<PermissionKey, boolean> }) => {
+    const handleCreateRole = async (role: { name: string; permissions: Permissions }) => {
         const newRole = {
-            id: user.roles.length + 1,
+            id: -1,
             name: role.name,
             permissions: role.permissions,
             state: "true"
@@ -54,7 +46,7 @@ export default function RolesPage() {
         try {
             setIsCreating(true);
             setIsLoading(true);
-            await createRole(newRole);
+            const createdRole = await createRole(newRole as unknown as Role);
 
             showNotification({
                 title: "Rol creado",
@@ -62,7 +54,7 @@ export default function RolesPage() {
                 type: "success"
             });
 
-            setUser({ ...user, roles: [...user.roles, newRole] });
+            setUser({ ...user, roles: [...user.roles, createdRole] });
             setIsCreating(false);
         } catch (error) {
             showNotification({
@@ -70,12 +62,13 @@ export default function RolesPage() {
                 message: error instanceof Error ? error.message : "Error al crear el rol",
                 type: "error"
             });
+            setIsCreating(false);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleEditRole = async (role: { name: string; permissions: Record<PermissionKey, boolean> }) => {
+    const handleEditRole = async (role: { name: string; permissions: Permissions }) => {
         if (!roleToEdit) return;
 
         const updatedRole = {
@@ -87,7 +80,8 @@ export default function RolesPage() {
 
         try {
             setIsEditing(true);
-            await updateRole(updatedRole);
+            setIsLoading(true);
+            await updateRole(updatedRole as unknown as Role);
 
             showNotification({
                 title: "Rol editado",
@@ -95,16 +89,18 @@ export default function RolesPage() {
                 type: "success"
             });
 
-            setUser({ ...user, roles: user.roles.map(r => r.id === roleToEdit.id ? updatedRole : r) });
+            setUser({ ...user, roles: user.roles.map(r => r.id === roleToEdit.id ? updatedRole as unknown as Role : r) });
             setRoleToEdit(null);
+            setIsEditing(false);
         } catch (error) {
             showNotification({
                 title: "Error",
                 message: error instanceof Error ? error.message : "Error al editar el rol",
                 type: "error"
-            }); 
-        } finally {
+            });
             setIsEditing(false);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -115,7 +111,7 @@ export default function RolesPage() {
             setIsDeleting(true);
             setIsLoading(true);
             await deleteRole(roleToDelete.id);
-                        
+                    
             showNotification({
                 title: "Rol eliminado",
                 message: "El rol ha sido eliminado correctamente",
@@ -124,14 +120,16 @@ export default function RolesPage() {
 
             setUser({ ...user, roles: user.roles.filter(r => r.id !== roleToDelete.id) });
             setRoleToDelete(null);
+            setIsDeleting(false);
         } catch (error) {
             showNotification({
                 title: "Error",
                 message: error instanceof Error ? error.message : "Error al eliminar el rol",
                 type: "error"
             });
-        } finally {
             setIsDeleting(false);
+        } finally {
+            setIsLoading(false);
         }
     };
 

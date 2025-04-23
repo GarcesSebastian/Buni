@@ -1,14 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Role } from "@/app/users/roles/page"
-import { PermissionKey } from "@/config/Permissions"
+import { Role } from "@/types/User"
+import { permissionsDefault } from "@/config/Permissions"
+import { Permissions, PermissionType } from "@/types/Permissions"
 import { RoleDialog } from "@/components/services/Dialogs/Roles/RoleDialog"
 
 interface CreateDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onRoleCreate: (role: { name: string; permissions: Record<PermissionKey, boolean> }) => void
+    onRoleCreate: (role: { name: string; permissions: Permissions }) => void
     isEditing?: boolean
     roleToEdit?: Role | null
     isLoading?: boolean
@@ -16,36 +17,19 @@ interface CreateDialogProps {
 
 const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit, isLoading }: CreateDialogProps) => {
     const [roleName, setRoleName] = useState(roleToEdit?.name || "")
-    const [selectedPermissions, setSelectedPermissions] = useState<string[]>(
-        roleToEdit 
-            ? Object.entries(roleToEdit.permissions)
-                .filter(([, value]) => value)
-                .map(([key]) => key)
-            : []
-    )
+    const [selectedPermissions, setSelectedPermissions] = useState<Permissions>(permissionsDefault)
 
     useEffect(() => {
         if (open) {
             setRoleName(roleToEdit?.name || "")
-            setSelectedPermissions(
-                roleToEdit 
-                    ? Object.entries(roleToEdit.permissions)
-                        .filter(([, value]) => value)
-                        .map(([key]) => key)
-                    : []
-            )
+            setSelectedPermissions((roleToEdit?.permissions || permissionsDefault) as Permissions)
         }
     }, [open, roleToEdit])
 
     const handleCreateRole = () => {
-        const permissions: Record<PermissionKey, boolean> = {}
-        selectedPermissions.forEach(permission => {
-            permissions[permission as PermissionKey] = true
-        })
-        
         onRoleCreate({
             name: roleName,
-            permissions
+            permissions: selectedPermissions as Permissions
         })
     }
 
@@ -55,14 +39,14 @@ const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit,
             onOpenChange={(open) => {
                 if (!open && !isLoading) {
                     setRoleName("")
-                    setSelectedPermissions([])
+                    setSelectedPermissions(permissionsDefault)
                     onOpenChange(open)
                 }
             }}
             roleName={roleName}
             setRoleName={setRoleName}
-            selectedPermissions={selectedPermissions}
-            setSelectedPermissions={setSelectedPermissions}
+            selectedPermissions={selectedPermissions as Record<string, PermissionType>}
+            setSelectedPermissions={setSelectedPermissions as React.Dispatch<React.SetStateAction<Record<string, PermissionType>>>}
             onSubmit={handleCreateRole}
             isEditing={isEditing}
             isLoading={isLoading}

@@ -9,6 +9,7 @@ import { NotificationProvider } from "@/hooks/client/useNotification"
 import { Suspense } from "react"
 import { AuthProvider } from "@/hooks/auth/useAuth"
 import { SocketProvider } from "@/hooks/server/useSocket"
+import { RouteProtection } from "@/components/services/RouteProtection"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,22 +29,24 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/logo-buni.png" type="image/x-icon" />
       </head>
       <body className={inter.className}>
-        <div className="h-screen overflow-hidden">
-          <AuthProvider>
-            <TopNav/>
-            <div className="flex overflow-hidden">
+          <NotificationProvider>
+            <div className="h-screen overflow-hidden">
+              <AuthProvider>
+              <TopNav/>
+              <div className="flex overflow-hidden">
                 <UserDataProvider>
-                  <SocketProvider>
-                    <NotificationProvider>
+                  <RouteProtection>
+                    <SocketProvider>
                       <Suspense>
                         <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
-                    </Suspense>
-                  </NotificationProvider>
-                </SocketProvider>
-              </UserDataProvider>
+                      </Suspense>
+                    </SocketProvider>
+                  </RouteProtection>
+                </UserDataProvider>
+              </div>
+            </AuthProvider>
             </div>
-          </AuthProvider>
-        </div>
+          </NotificationProvider>
       </body>
     </html>
   )

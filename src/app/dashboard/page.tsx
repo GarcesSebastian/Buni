@@ -101,7 +101,7 @@ export default function DashboardPage() {
       )
 
       const actividades = [
-        ...user.events.map(event => ({
+        ...(user.events?.length > 0 ? user.events.map(event => ({
           tipo: 'creacion' as const,
           entidad: 'evento' as const,
           nombre: event.nombre,
@@ -109,8 +109,8 @@ export default function DashboardPage() {
           usuario: event.organizador,
           id: event.id,
           ruta: `/events/${event.id}`
-        })),
-        ...user.scenery.map(scenery => ({
+        })) : []),
+        ...(user.scenery?.length > 0 ? user.scenery.map(scenery => ({
           tipo: 'creacion' as const,
           entidad: 'escenario' as const,
           nombre: scenery.name,
@@ -118,8 +118,8 @@ export default function DashboardPage() {
           usuario: user.events.find(e => e.scenery?.id === scenery.id)?.organizador || 'Sistema',
           id: scenery.id,
           ruta: '/events/scenerys'
-        })),
-        ...user.forms.map(form => ({
+        })) : []),
+        ...(user.forms?.length > 0 ? user.forms.map(form => ({
           tipo: 'creacion' as const,
           entidad: 'formulario' as const,
           nombre: form.name,
@@ -127,8 +127,8 @@ export default function DashboardPage() {
           usuario: user.events.find(e => e.formAssists?.id === form.id || e.formInscriptions?.id === form.id)?.organizador || 'Sistema',
           id: form.id,
           ruta: '/forms'
-        })),
-        ...user.faculty.map(faculty => ({
+        })) : []),
+        ...(user.faculty?.length > 0 ? user.faculty.map(faculty => ({
           tipo: 'creacion' as const,
           entidad: 'programa' as const,
           nombre: faculty.name,
@@ -136,7 +136,7 @@ export default function DashboardPage() {
           usuario: user.events.find(e => e.faculty?.id === faculty.id)?.organizador || 'Sistema',
           id: faculty.id,
           ruta: '/events/faculties'
-        }))
+        })) : [])
       ].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
       .slice(0, 5)
 
@@ -230,18 +230,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <Section>
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
+        <div className="flex h-full flex-col">
+            <Section>
+              <div className="space-y-8">
+                <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold tracking-tight">Panel de Control</h1>
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Exportar Datos
             </Button>
-          </div>
+                </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <MetricCard 
               title="Total Eventos" 
               value={estadisticas.totalEventos} 
@@ -269,12 +269,12 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+                  <Card>
               <CardHeader className="flex flex-col">
                 <CardTitle>Eventos Recientes</CardTitle>
                 <CardDescription>Últimos 5 eventos registrados</CardDescription>
-              </CardHeader>
-              <CardContent>
+                    </CardHeader>
+                    <CardContent>
                 {isLoading ? (
                   <TableLoader />
                 ) : (
@@ -307,15 +307,15 @@ export default function DashboardPage() {
                     </TableBody>
                   </Table>
                 )}
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
 
-            <Card>
+                  <Card>
               <CardHeader className="flex flex-col">
                 <CardTitle>Actividades Recientes</CardTitle>
                 <CardDescription>Últimas acciones en el sistema</CardDescription>
-              </CardHeader>
-              <CardContent>
+                    </CardHeader>
+                    <CardContent>
                 {isLoading ? (
                   <div className="space-y-4">
                     {[...Array(5)].map((_, i) => (
@@ -370,17 +370,17 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+                    </CardContent>
+                  </Card>
+                </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Card>
               <CardHeader className="flex flex-col">
                 <CardTitle>Distribución de Participación</CardTitle>
                 <CardDescription>Comparación de inscripciones y asistencias</CardDescription>
-              </CardHeader>
-              <CardContent>
+                    </CardHeader>
+                    <CardContent>
                 {isLoading ? (
                   <ChartLoader />
                 ) : estadisticas.totalInscripciones === 0 ? (
@@ -388,30 +388,30 @@ export default function DashboardPage() {
                     No hay datos para mostrar
                   </div>
                 ) : (
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={[
                         { name: "Inscripciones", value: estadisticas.totalInscripciones },
                         { name: "Asistencias", value: estadisticas.totalAsistencias }
                       ]}>
                         <XAxis dataKey="name" />
                         <YAxis />
-                        <Tooltip />
-                        <Legend />
+                            <Tooltip />
+                            <Legend />
                         <Bar dataKey="value" fill="#8884d8" name="Total" />
                       </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                        </ResponsiveContainer>
+                      </div>
                 )}
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
 
-            <Card>
+                  <Card>
               <CardHeader className="flex flex-col">
                 <CardTitle>Resumen de Participación</CardTitle>
                 <CardDescription>Métricas clave de participación</CardDescription>
-              </CardHeader>
-              <CardContent>
+                    </CardHeader>
+                    <CardContent>
                 {isLoading ? (
                   <div className="space-y-6">
                     {[...Array(3)].map((_, i) => (
@@ -421,13 +421,13 @@ export default function DashboardPage() {
                           <div className="h-4 w-12 bg-muted rounded animate-pulse" />
                         </div>
                         <div className="h-2 w-full bg-muted rounded animate-pulse" />
-                      </div>
+                </div>
                     ))}
                   </div>
                 ) : estadisticas.totalInscripciones === 0 ? (
                   <div className="flex h-[300px] items-center justify-center text-muted-foreground">
                     No hay datos para mostrar
-                  </div>
+                          </div>
                 ) : (
                   <div className="space-y-6">
                     <div>
@@ -439,7 +439,7 @@ export default function DashboardPage() {
                         <span className="text-sm font-medium">{estadisticas.totalInscripciones}</span>
                       </div>
                       <Progress value={100} className="h-2" />
-                    </div>
+                          </div>
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -448,12 +448,12 @@ export default function DashboardPage() {
                           <span className="text-sm font-medium">Asistencias</span>
                         </div>
                         <span className="text-sm font-medium">{estadisticas.totalAsistencias}</span>
-                      </div>
+                          </div>
                       <Progress 
                         value={(estadisticas.totalAsistencias / estadisticas.totalInscripciones) * 100} 
                         className="h-2" 
                       />
-                    </div>
+                        </div>
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -462,22 +462,22 @@ export default function DashboardPage() {
                           <span className="text-sm font-medium">Tasa de Asistencia</span>
                         </div>
                         <span className="text-sm font-medium">{estadisticas.tasaAsistencia}%</span>
-                      </div>
+                          </div>
                       <div className="h-2 w-full rounded-full bg-muted">
                         <div 
                           className="h-full rounded-full bg-primary transition-all duration-500"
                           style={{ width: `${estadisticas.tasaAsistencia}%` }}
                         />
-                      </div>
+                        </div>
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+                  </CardContent>
+                </Card>
+              </div>
+              </div>
+            </Section>
         </div>
-      </Section>
-    </div>
   )
 }
 

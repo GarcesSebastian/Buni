@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useEffect } from "react";
+import { createContext, useContext, ReactNode, useEffect, useState } from "react";
 import type { Form } from "@/types/Forms";
 import { Event, Scenery } from "@/types/Events";
 import { Faculty } from "@/types/Faculty";
@@ -11,6 +11,7 @@ import { useUserSettings } from "./useUserSettings";
 import { TemplateData } from "@/config/TemplateData";
 import { useAuth } from "./useAuth";
 
+
 export interface User {
     events: Event[];
     faculty: Faculty[];
@@ -18,6 +19,15 @@ export interface User {
     forms: Form[];
     users: UserType[];
     roles: Role[];
+}
+
+export interface Views {
+    events: boolean;
+    programs: boolean;
+    scenery: boolean;
+    formularios: boolean;
+    users: boolean;
+    roles: boolean;
 }
 
 export interface States {
@@ -36,13 +46,25 @@ const UserDataContext = createContext<{
     isLoaded: boolean;
     setIsLoaded: (data: boolean) => void;
     fetchAllData: () => Promise<void>;
+    views: Views;
+    setViews: (data: Views) => void;
 } | null>(null);
+
+const viewsDefault = {
+    events: true,
+    programs: true,
+    scenery: true,
+    formularios: true,
+    users: true,
+    roles: true,
+}
 
 export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     const { states, setStates } = useUserSettings();
     const { isLoaded, setIsLoaded } = useUserState();
     const { user, setUser, updateEvent, fetchAllData } = useDataSync();
-    const { isAuthenticated } = useAuth();
+    const { user: authUser, isAuthenticated } = useAuth();
+    const [views, setViews] = useState<Views>(viewsDefault);
 
     useEffect(() => {
         const initializeData = async () => {
@@ -59,6 +81,23 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         initializeData();
     }, [isAuthenticated]);
 
+    useEffect(() => {
+        if(authUser?.permissions && typeof authUser.permissions === "object"){
+            Object.entries(viewsDefault).forEach(([key]) => {
+                const isView = (authUser.permissions as Record<string, { view: boolean }>)[key]?.view ?? false;
+                setViews((prev) => ({...prev, [key]: isView}));
+            });
+        }
+
+        if(authUser?.permissions === "***"){
+            setViews(viewsDefault);
+        }
+    }, [authUser])
+
+    useEffect(() => {
+        console.log("views", views);
+    }, [views])
+
     return (
         <UserDataContext.Provider value={{ 
             user, 
@@ -68,7 +107,9 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
             setStates, 
             isLoaded, 
             setIsLoaded,
-            fetchAllData
+            fetchAllData,
+            views,
+            setViews
         }}>
             {children}
         </UserDataContext.Provider> 

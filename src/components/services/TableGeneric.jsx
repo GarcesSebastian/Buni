@@ -18,6 +18,7 @@ import CustomLoader from "@/components/ui/CustomLoader"
 export function TableGeneric({structure, structureForm, table}) {
   const { user, isLoaded } = useUserData()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -34,6 +35,10 @@ export function TableGeneric({structure, structureForm, table}) {
   const [openDelete, setOpenDelete] = useState(false)
   const [eventToDelete, setEventToDelete] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const userTableData = useMemo(() => {
     if (!isLoaded) return [];
@@ -84,10 +89,9 @@ export function TableGeneric({structure, structureForm, table}) {
         structureForm[value].options = rest
       }
     })
-
   }, [isLoaded, structureForm, user]);
 
-  if(!isLoaded){
+  if(!mounted || !isLoaded){
     return (
       <CustomLoader />
     )

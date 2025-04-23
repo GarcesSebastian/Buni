@@ -47,8 +47,6 @@ export interface User {
 export interface Role {
   id: number;
   name: string;
-  permissions: {
-      [key: string]: boolean;
-  };
+  permissions: Permissions;
   state: string;
 }
