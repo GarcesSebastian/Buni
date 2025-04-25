@@ -88,14 +88,21 @@ export function RoleDialog({
 
     const isCategoryFullySelected = (moduleId: string) => {
         const moduleData = permissionModules.find(m => m.id === moduleId)
-        if (!moduleData) return false
-        return moduleData.actions.every(action => selectedPermissions[moduleId][action.id as keyof PermissionType])
+        if (!moduleData) return 
+
+        try {
+            return moduleData.actions.every(action => selectedPermissions[moduleId][action.id as keyof PermissionType])
+        } catch (error) {
+            console.log(error)
+            return false
+        }
     }
 
     const isCategoryPartiallySelected = (moduleId: string) => {
         const moduleData = permissionModules.find(m => m.id === moduleId)
         if (!moduleData) return false
-        const hasSelected = moduleData.actions.some(action => selectedPermissions[moduleId][action.id as keyof PermissionType])
+        if (!selectedPermissions[moduleId]) return false
+        const hasSelected = moduleData.actions.some(action => selectedPermissions[moduleId]?.[action.id as keyof PermissionType])
         return hasSelected && !isCategoryFullySelected(moduleId)
     }
 

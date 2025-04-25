@@ -23,7 +23,7 @@ export type Permissions = {
     events: PermissionType;
     users: PermissionType;
     roles: PermissionType;
-    faculty: PermissionType;
+    programs: PermissionType;
     scenery: PermissionType;
     forms: PermissionType;
     additional: PermissionType;

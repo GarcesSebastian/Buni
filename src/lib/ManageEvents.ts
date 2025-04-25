@@ -16,7 +16,7 @@ export const COLORS = [
 
 export const getDataForCharts = (
     event: Event, 
-    selectedFacultad: string, 
+    selectedProgram: string, 
     assistsDistributionField: string | undefined,
     inscriptionsDistributionField: string | undefined,
     formAssists?: Form,
@@ -25,14 +25,14 @@ export const getDataForCharts = (
     if (!event?.assists || !event?.inscriptions || !assistsDistributionField || !inscriptionsDistributionField) return { assistData: [], inscriptionData: [] }
 
     const assistsFiltradas =
-      selectedFacultad === "todas"
+      selectedProgram === "todas"
         ? event.assists
-        : event.assists.filter((a) => a.facultad === selectedFacultad)
+        : event.assists.filter((a) => a.programs === selectedProgram)
 
     const inscriptionsFiltradas =
-      selectedFacultad === "todas"
+      selectedProgram === "todas"
         ? event.inscriptions
-        : event.inscriptions.filter((i) => i.facultad === selectedFacultad)
+        : event.inscriptions.filter((i) => i.programs === selectedProgram)
 
     console.log(assistsFiltradas)
     console.log(assistsDistributionField)

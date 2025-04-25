@@ -17,7 +17,7 @@ export interface Event {
     id: number
     key: string
   }
-  faculty: {
+  programs: {
     id: number
     key: string
   }
@@ -64,7 +64,7 @@ export interface ConfigEventForm {
     name: string
     type: string
   }
-  faculty: {
+  programs: {
     name: string
     type: string
     options: { value: string, label: string, id: number }[] | []

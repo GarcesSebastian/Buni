@@ -119,7 +119,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     } else if(data.form.type == "select"){
         return(
             <>
-                <Label htmlFor="faculty">{data.form.name}</Label>
+                <Label htmlFor="programs">{data.form.name}</Label>
                 <Select
                     key={data.index}
                     value={typeof valueFormatted == "object" ? valueFormatted.name + "_" + valueFormatted.id : valueFormatted}

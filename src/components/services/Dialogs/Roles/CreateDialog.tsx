@@ -17,12 +17,13 @@ interface CreateDialogProps {
 
 const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit, isLoading }: CreateDialogProps) => {
     const [roleName, setRoleName] = useState(roleToEdit?.name || "")
-    const [selectedPermissions, setSelectedPermissions] = useState<Permissions>(permissionsDefault)
+    const [selectedPermissions, setSelectedPermissions] = useState<Record<string, PermissionType>>(permissionsDefault)
 
     useEffect(() => {
         if (open) {
             setRoleName(roleToEdit?.name || "")
-            setSelectedPermissions((roleToEdit?.permissions || permissionsDefault) as Permissions)
+            const permissions = roleToEdit?.permissions || permissionsDefault
+            setSelectedPermissions(permissions as Record<string, PermissionType>)
         }
     }, [open, roleToEdit])
 
@@ -45,8 +46,8 @@ const CreateDialog = ({ open, onOpenChange, onRoleCreate, isEditing, roleToEdit,
             }}
             roleName={roleName}
             setRoleName={setRoleName}
-            selectedPermissions={selectedPermissions as Record<string, PermissionType>}
-            setSelectedPermissions={setSelectedPermissions as React.Dispatch<React.SetStateAction<Record<string, PermissionType>>>}
+            selectedPermissions={selectedPermissions}
+            setSelectedPermissions={setSelectedPermissions}
             onSubmit={handleCreateRole}
             isEditing={isEditing}
             isLoading={isLoading}

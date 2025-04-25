@@ -19,7 +19,7 @@ export const permissionsDefault: Permissions = {
         delete: false,
         view: false
     },
-    faculty: {
+    programs: {
         create: false,
         edit: false,
         delete: false,
@@ -63,7 +63,7 @@ export const permissionModules: PermissionModule[] = [
         actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
     },
     {
-        id: 'faculty',
+        id: 'programs',
         name: 'Programas',
         description: 'Gestión de programas académicos',
         actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]

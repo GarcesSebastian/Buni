@@ -90,8 +90,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             Cookies.set('token', data.token, { expires: 1 });
 
-            console.log("data", data);
-
             setUser(data.user as User);
             setIsAuthenticated(true);
             setIsLoading(false);

@@ -108,6 +108,8 @@ export default function FormsPage() {
         setProgress(calculatedProgress)
       }
     }
+
+    setIsLoading(false)
   }, [formValues, event, keyForm, user.forms])
 
   useEffect(() => {

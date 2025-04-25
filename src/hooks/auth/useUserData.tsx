@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode, useEffect, useState } from "react";
 import type { Form } from "@/types/Forms";
 import { Event, Scenery } from "@/types/Events";
-import { Faculty } from "@/types/Faculty";
+import { Programs } from "@/types/Programs";
 import { Role, User as UserType } from "@/types/User";
 import { useDataSync } from "./useDataSync";
 import { useUserState } from "./useUserState";
@@ -14,7 +14,7 @@ import { useAuth } from "./useAuth";
 
 export interface User {
     events: Event[];
-    faculty: Faculty[];
+    programs: Programs[];
     scenery: Scenery[];
     forms: Form[];
     users: UserType[];
@@ -63,7 +63,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     const { states, setStates } = useUserSettings();
     const { isLoaded, setIsLoaded } = useUserState();
     const { user, setUser, updateEvent, fetchAllData } = useDataSync();
-    const { user: authUser, isAuthenticated } = useAuth();
+    const { user: authUser, isAuthenticated, isLoading } = useAuth();
     const [views, setViews] = useState<Views>(viewsDefault);
 
     useEffect(() => {
@@ -82,6 +82,12 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
     }, [isAuthenticated]);
 
     useEffect(() => {
+        if(isLoading){
+            return;
+        }
+
+        console.log("authUser", authUser)
+
         if(authUser?.permissions && typeof authUser.permissions === "object"){
             Object.entries(viewsDefault).forEach(([key]) => {
                 const isView = (authUser.permissions as Record<string, { view: boolean }>)[key]?.view ?? false;
@@ -93,10 +99,6 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
             setViews(viewsDefault);
         }
     }, [authUser])
-
-    useEffect(() => {
-        console.log("views", views);
-    }, [views])
 
     return (
         <UserDataContext.Provider value={{ 

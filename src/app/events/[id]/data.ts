@@ -111,9 +111,9 @@ export const eventosEjemplo: Event[] = [
         fecha: "2025-03-18",
         hora: "05:39",
         cupos: "-1",
-        faculty: {
+        programs: {
             id: 1,
-            key: "faculty"
+            key: "program"
         },
         scenery: {
             id: 1,
@@ -162,7 +162,7 @@ export const eventosEjemplo: Event[] = [
                     options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
-                    id: "facultad_1742294260490",
+                    id: "programs_1742294260490",
                     name: "Programa",
                     type: "select",
                     required: true,
@@ -222,7 +222,7 @@ export const eventosEjemplo: Event[] = [
                     options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
-                    id: "facultad_1742294260490",
+                    id: "programs_1742294260490",
                     name: "Programa",
                     type: "select",
                     required: true,
@@ -251,14 +251,14 @@ export const eventosEjemplo: Event[] = [
     {
         id: 2,
         nombre: "Conferencia de Ingeniería",
-        organizador: "Facultad de Ingeniería",
+        organizador: "Programa de Ingeniería",
         state: "inactivo",
         fecha: "2024-03-15",
         hora: "14:00",
         cupos: "100",
-        faculty: {
+        programs: {
             id: 1,
-            key: "faculty"
+            key: "program"
         },
         scenery: {
             id: 2,
@@ -307,7 +307,7 @@ export const eventosEjemplo: Event[] = [
                     options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
-                    id: "facultad_1742294260490",
+                    id: "programs_1742294260490",
                     name: "Programa",
                     type: "select",
                     required: true,
@@ -367,7 +367,7 @@ export const eventosEjemplo: Event[] = [
                     options: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"],
                 },
                 {
-                    id: "facultad_1742294260490",
+                    id: "programs_1742294260490",
                     name: "Programa",
                     type: "select",
                     required: true,

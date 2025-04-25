@@ -126,16 +126,16 @@ export default function DashboardPage() {
           fecha: user.events.find(e => e.formAssists?.id === form.id || e.formInscriptions?.id === form.id)?.fecha || new Date().toISOString(),
           usuario: user.events.find(e => e.formAssists?.id === form.id || e.formInscriptions?.id === form.id)?.organizador || 'Sistema',
           id: form.id,
-          ruta: '/forms'
+          ruta: '/formularios'
         })) : []),
-        ...(user.faculty?.length > 0 ? user.faculty.map(faculty => ({
+        ...(user.programs?.length > 0 ? user.programs.map(program => ({
           tipo: 'creacion' as const,
           entidad: 'programa' as const,
-          nombre: faculty.name,
-          fecha: user.events.find(e => e.faculty?.id === faculty.id)?.fecha || new Date().toISOString(),
-          usuario: user.events.find(e => e.faculty?.id === faculty.id)?.organizador || 'Sistema',
-          id: faculty.id,
-          ruta: '/events/faculties'
+          nombre: program.name,
+          fecha: user.events.find(e => e.programs?.id === program.id)?.fecha || new Date().toISOString(),
+          usuario: user.events.find(e => e.programs?.id === program.id)?.organizador || 'Sistema',
+          id: program.id,
+          ruta: '/programs'
         })) : [])
       ].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
       .slice(0, 5)

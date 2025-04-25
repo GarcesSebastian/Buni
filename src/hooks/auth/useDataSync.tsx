@@ -2,21 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import type { Form } from "@/types/Forms";
-import { Event, Scenery } from "@/types/Events";
-import { Faculty } from "@/types/Faculty";
-import { Role, User as UserType } from "@/types/User";
+import { Event } from "@/types/Events";
+import { User } from "./useUserData";
 import { TemplateData } from "@/config/TemplateData";
 import { useAuth } from "./useAuth";
 
-export interface User {
-    events: Event[];
-    faculty: Faculty[];
-    scenery: Scenery[];
-    forms: Form[];
-    users: UserType[];
-    roles: Role[];
-}
 
 export const useDataSync = () => {
     const [user, setUserState] = useState<User>(TemplateData);

@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import Section from "@/components/ui/Section"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
@@ -34,6 +34,11 @@ export default function RolesPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleCreateRole = async (role: { name: string; permissions: Permissions }) => {
         const newRole = {
@@ -157,62 +162,69 @@ export default function RolesPage() {
                         </Button>
                     </div>
 
-                    {!isLoaded && <CustomLoader />}
-                    {isLoaded && (
+                    {!mounted ? (
+                        <div className="flex flex-col gap-4 justify-center items-center h-full">
+                            <CustomLoader />
+                        </div>
+                    ) : !isLoaded ? (
+                        <div className="flex flex-col gap-4 justify-center items-center h-full">
+                            <CustomLoader />
+                        </div>
+                    ) : (
                         <div className="rounded-md border">
                             <Table>
                                 <TableHeader>
-                                <TableRow>
-                                    <TableHead>N°</TableHead>
-                                    <TableHead>Nombre</TableHead>
-                                    <TableHead>Permisos</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {user.roles.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center">
-                                            No se encontraron roles
-                                        </TableCell>
+                                        <TableHead>N°</TableHead>
+                                        <TableHead>Nombre</TableHead>
+                                        <TableHead>Permisos</TableHead>
+                                        <TableHead className="text-right">Acciones</TableHead>
                                     </TableRow>
-                                ) : user.roles.map((role) => (
-                                    <TableRow key={role.id}>
-                                        <TableCell>{role.id}</TableCell>
-                                        <TableCell className="font-medium">{role.name}</TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => setSelectedRole(role)}
-                                                className="flex items-center gap-2 max-sm:text-xs"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                                Ver permisos
-                                            </Button>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-fit w-fit p-0">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => handleEditClick(role)}>
-                                                        <Edit className="mr-2 h-4 w-4" />
-                                                        Editar
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleDeleteClick(role)}>
-                                                        <Trash className="mr-2 h-4 w-4" />
-                                                        Eliminar
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
+                                </TableHeader>
+                                <TableBody>
+                                    {user.roles.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="text-center">
+                                                No se encontraron roles
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : user.roles.map((role) => (
+                                        <TableRow key={role.id}>
+                                            <TableCell>{role.id}</TableCell>
+                                            <TableCell className="font-medium">{role.name}</TableCell>
+                                            <TableCell>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setSelectedRole(role)}
+                                                    className="flex items-center gap-2 max-sm:text-xs"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    Ver permisos
+                                                </Button>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-fit w-fit p-0">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => handleEditClick(role)}>
+                                                            <Edit className="mr-2 h-4 w-4" />
+                                                            Editar
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(role)}>
+                                                            <Trash className="mr-2 h-4 w-4" />
+                                                            Eliminar
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
                             </Table>
                         </div>
                     )}

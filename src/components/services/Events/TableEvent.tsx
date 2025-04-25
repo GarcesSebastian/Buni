@@ -181,6 +181,8 @@ export function DataTable({
     return typeof value === "object" ? JSON.stringify(value) : value?.toString() || "-"
   }
 
+  console.log(columns, paginatedData)
+
   return (
     <div className="space-y-4">
       {(Object.keys(assistsFilters).length > 0 || Object.keys(inscriptionsFilters).length > 0) && (
@@ -192,11 +194,12 @@ export function DataTable({
         </div>
       )}
 
-      <div className="rounded-md border overflow-x-auto">
-        <Table>
-          <TableHeader>
+      {columns.length > 0 && (
+        <div className="rounded-md border overflow-x-auto">
+          <Table>
+            <TableHeader>
             <TableRow>
-              {columns.map((column) => (
+              {columns.length > 0 && columns.map((column) => (
                 <TableHead key={`header-${column.key}`} className="whitespace-nowrap">
                   <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
                     {column.label}
@@ -244,8 +247,25 @@ export function DataTable({
           </TableBody>
         </Table>
       </div>
+      )}
+      
+      {columns.length === 0 && (
+        <div className="rounded-md border overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  <span className="p-1" style={{ display: "table-cell", verticalAlign: "middle" }}>
+                    No se encontro un formulario para este evento
+                  </span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+          </Table>
+        </div>
+      )}
 
-      {data.length > 0 && (
+      {data.length > 0 && columns.length > 0 && (
         <Pagination
           type={type}
           currentPage={pagination.currentPage}

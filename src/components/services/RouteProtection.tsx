@@ -20,9 +20,6 @@ export function RouteProtection({ children }: { children: React.ReactNode }) {
   const { views } = useUserData()
   const routeToViewMap = getRouteToViewMap()
 
-  console.log(pathname)
-  console.log(routeToViewMap)
-  
   const viewKey = routeToViewMap[pathname]
 
   if (viewKey && !views[viewKey]) {

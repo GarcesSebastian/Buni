@@ -1,13 +1,13 @@
-import { Faculty } from "@/types/Faculty";
+import { Programs } from "@/types/Programs";
 import { useState } from "react";
 import Cookies from "js-cookie";
 
-const useFaculty = () => {
-    const [faculty, setFaculty] = useState<Faculty[]>([]);
+const usePrograms = () => {
+    const [programs, setPrograms] = useState<Programs[]>([]);
 
-    const getFaculty = async () => {  
+    const getPrograms = async () => {  
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -17,60 +17,60 @@ const useFaculty = () => {
             const data = await response.json();
 
             if (!data || !Array.isArray(data)) {
-                setFaculty([]);
+                setPrograms([]);
                 return;
             }
 
-            setFaculty(data);
+            setPrograms(data);
         } catch (error) {
             console.error(error);
-            setFaculty([]);
+            setPrograms([]);
         }
     }
 
-    const createFaculty = async (faculty: Faculty) => {
+    const createPrograms = async (programs: Programs) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(faculty)
+                body: JSON.stringify(programs)
             });
             const data = await response.json();
 
             if (response.ok) {  
-                setFaculty(data);
+                setPrograms(data);
                 return data;
             }
 
-            throw new Error(data.error || 'Error al crear el facultad');
+            throw new Error(data.error || 'Error al crear el programa');
         } catch (error) {
             throw error;
         }
     }
 
-    const updateFaculty = async (faculty: Faculty) => {
+    const updatePrograms = async (programs: Programs) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty/${faculty.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${programs.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${Cookies.get("token")}`
                 },
-                body: JSON.stringify(faculty)
+                body: JSON.stringify(programs)
             });
             const data = await response.json();
-            setFaculty(data);
+            setPrograms(data);
         } catch (error) {
             console.error(error);
         }
     }
 
-    const deleteFaculty = async (facultyId: number) => {
+    const deletePrograms = async (programsId: number) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty/${facultyId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${programsId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -85,7 +85,7 @@ const useFaculty = () => {
         }
     }
 
-    return { faculty, getFaculty, createFaculty, updateFaculty, deleteFaculty };
+    return { programs, getPrograms, createPrograms, updatePrograms, deletePrograms };
 }
 
-export default useFaculty;
+export default usePrograms;

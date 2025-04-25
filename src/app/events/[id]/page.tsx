@@ -22,7 +22,7 @@ import { Alert, AlertTitle } from "@/components/ui/Alert"
 import { Form } from "@/types/Forms"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { generateSampleData } from "./data"
-import { Faculty } from "@/types/Faculty"
+import { Programs } from "@/types/Programs"
 import { fieldsDistribution } from "@/config/Forms"
 import { useSocket } from "@/hooks/server/useSocket"
 
@@ -38,7 +38,7 @@ export default function EventDetailPage() {
     const [formAssists, setFormAssists] = useState<Form | undefined>()
     const [formInscriptions, setFormInscriptions] = useState<Form | undefined>()
     const [scenery, setScenery] = useState<Scenery | undefined>()
-    const [faculty, setFaculty] = useState<Faculty | undefined>()
+    const [program, setProgram] = useState<Programs | undefined>()
     const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
     const [hasDistributionAssists, setHasDistributionAssists] = useState(false)
@@ -50,7 +50,7 @@ export default function EventDetailPage() {
     const [assistsFilters, setAssistsFilters] = useState<Record<string, string | string[]>>({})
     const [inscriptionsFilters, setInscriptionsFilters] = useState<Record<string, string | string[]>>({})
 
-    const [selectedFaculty] = useState<string>("todas")
+    const [selectedProgram] = useState<string>("todas")
 
     const [assistsPagination, setAssistsPagination] = useState<Record<string, number>>({
         currentPage: 1,
@@ -73,12 +73,12 @@ export default function EventDetailPage() {
 
             const idFormAssists = foundEvent?.formAssists?.id
             const idFormInscriptions = foundEvent?.formInscriptions?.id
-            const idFaculty = foundEvent?.faculty?.id
+            const idProgram = foundEvent?.programs?.id
             const idScenery = foundEvent?.scenery?.id
 
             setFormAssists(user.forms.find((f) => f.id == Number(idFormAssists)) ?? undefined)
             setFormInscriptions(user.forms.find((f) => f.id == Number(idFormInscriptions)) ?? undefined)
-            setFaculty(user.faculty.find((f) => f.id == Number(idFaculty)) ?? undefined)
+            setProgram(user.programs.find((p) => p.id == Number(idProgram)) ?? undefined)
             setScenery(user.scenery.find((s) => s.id == Number(idScenery)) ?? undefined)
             
             const assistsField = formAssists?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
@@ -97,7 +97,7 @@ export default function EventDetailPage() {
         }
 
         setLoading(false)
-    }, [eventId, router, user.events, formAssists, formInscriptions, faculty, scenery, user.forms, user.faculty, user.scenery])
+    }, [eventId, router, user.events, formAssists, formInscriptions, program, scenery, user.forms, user.programs, user.scenery])
 
     useEffect(() => {
         socket?.on("UPDATE_DATA", (data: { users: User }) => {
@@ -157,7 +157,7 @@ export default function EventDetailPage() {
             assists: filteredAssists,
             inscriptions: filteredInscriptions
         }, 
-        selectedFaculty, 
+        selectedProgram, 
         selectedAssistsDistribution,
         selectedInscriptionsDistribution,
         formAssists,
@@ -336,8 +336,8 @@ export default function EventDetailPage() {
                                     </Button>
                                 </Link>
                                 <div>
-                                    <h1 className="text-xl sm:text-2xl font-bold">{event.nombre}</h1>
-                                    <p className="text-sm sm:text-base text-muted-foreground">{event.organizador}</p>
+                                    <h1 className="text-xl sm:text-2xl font-bold">{event.nombre || "Sin nombre"}</h1>
+                                    <p className="text-sm sm:text-base text-muted-foreground">{event.organizador || "Sin organizador"}</p>
                                 </div>
                             </div>
                             <Button 
@@ -376,7 +376,7 @@ export default function EventDetailPage() {
                                                     <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
                                                         <p className="text-sm font-medium">Fecha</p>
-                                                        <p className="text-sm sm:text-base">{event.fecha}</p>
+                                                        <p className="text-sm sm:text-base">{event.fecha || "Sin fecha"}</p>
                                                     </div>
                                                 </div>
 
@@ -384,7 +384,7 @@ export default function EventDetailPage() {
                                                     <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
                                                         <p className="text-sm font-medium">Hora</p>
-                                                        <p className="text-sm sm:text-base">{event.hora}</p>
+                                                        <p className="text-sm sm:text-base">{event.hora || "Sin hora"}</p>
                                                     </div>
                                                 </div>
 
@@ -392,7 +392,7 @@ export default function EventDetailPage() {
                                                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
                                                         <p className="text-sm font-medium">Escenario</p>
-                                                        <p className="text-sm sm:text-base">{scenery?.name}</p>
+                                                        <p className="text-sm sm:text-base">{scenery?.name || "Sin escenario"}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -411,7 +411,7 @@ export default function EventDetailPage() {
                                                     <div>
                                                         <p className="text-sm font-medium">Programa</p>
                                                         <Badge variant="outline" className="text-xs sm:text-sm">
-                                                            {faculty?.name}
+                                                            {program?.name || "Sin programa"}
                                                         </Badge>
                                                     </div>
                                                 </div>

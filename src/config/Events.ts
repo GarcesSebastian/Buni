@@ -14,7 +14,7 @@ export const configEvent: ConfigEvent[] = [
     { key: "cupos", value: "Cupos", filter: true },
     { key: "hora", value: "Hora", filter: true },
     { key: "fecha", value: "Fecha", filter: true },
-    { key: "faculty", value: "Programas", filter: true },
+    { key: "programs", value: "Programas", filter: true },
     { key: "scenery", value: "Escenario", filter: true },
     { key: "formAssists", value: "Formulario de Asistencias", filter: true },
     { key: "formInscriptions", value: "Formulario de Inscripciones", filter: true },
@@ -42,7 +42,7 @@ export const configFormEvent: ConfigEventForm = {
         name: "Fecha",
         type: "date"
     },
-    faculty: {
+    programs: {
         name: "Programa",
         type: "select",
         options: []

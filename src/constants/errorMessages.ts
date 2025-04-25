@@ -23,9 +23,9 @@ export const ERROR_MESSAGES = {
     buttonText: "Volver al inicio",
     buttonHref: "/"
   },
-  FACULTY_NOT_FOUND: {
+  PROGRAM_NOT_FOUND: {
     title: "Error",
-    description: "No se encontró la facultad especificada.",
+    description: "No se encontró el programa especificado.",
     buttonText: "Volver al inicio",
     buttonHref: "/"
   }

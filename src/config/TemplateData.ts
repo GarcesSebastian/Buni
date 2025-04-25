@@ -2,7 +2,7 @@ import { User } from "@/hooks/auth/useUserData";
 
 export const TemplateData: User = {
     events: [],
-    faculty: [],
+    programs: [],
     scenery: [],
     forms: [{
         "id": 1742291990002,
@@ -64,7 +64,7 @@ export const TemplateData: User = {
                 ]
             },
             {
-                "id": "facultad_1742294297671",
+                "id": "programs_1742294297671",
                 "name": "Programa",
                 "type": "select",
                 "required": true,

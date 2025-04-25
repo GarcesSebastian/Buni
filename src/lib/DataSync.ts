@@ -1,5 +1,5 @@
 import type { Event, Scenery } from '@/types/Events';
-import { Faculty } from '@/types/Faculty';
+import { Programs } from '@/types/Programs';
 import { Form } from '@/types/Forms';
 
 export async function getEvents(): Promise<Event[]> {
@@ -38,8 +38,8 @@ export async function getScenery(id: number): Promise<Scenery> {
     return data;
 }
 
-export async function getFaculty(id: number): Promise<Faculty> {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faculty/${id}`, {
+export async function getPrograms(id: number): Promise<Programs> {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
