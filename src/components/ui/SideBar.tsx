@@ -67,7 +67,7 @@ export function SideBar() {
 
   return (
     <div 
-      className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? isDeviceMobile ? "w-full h-full" : "w-64 h-full" : isDeviceMobile ? "w-full h-fit" : "w-16 h-full"}`}
+      className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? isDeviceMobile ? "w-full h-full" : "w-64 h-screen" : isDeviceMobile ? "w-full h-fit" : "w-16 h-full"}`}
     >
       <div className={`py-4 flex items-center ${isExpanded ? "md:px-4 justify-between" : "px-0 md:justify-center justify-between"}`}>
         <span className={`font-bold text-xl ${isExpanded ? "md:initial" : "md:hidden"}`}>BUNI</span>
@@ -82,22 +82,15 @@ export function SideBar() {
           </span>
         </Button>
       </div>
-
-      <div className={`flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? "max-md:initial" : "max-md:hidden"} ${isDeviceMobile ? "h-[calc(100vh-4rem)] overflow-y-auto" : ""}`}>
-        <nav className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out max-md:h-full`}>
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? "max-md:initial" : "max-md:hidden"}`}>
+        <nav className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out flex-1 max-md:h-screen`}>
           {ConfigSideBar.map((item) => (
             <div key={item.title}>
               <Link key={item.href} href={item.href || pathname}>
                 <Button
                   variant="ghost"
                   className={`w-full justify-left items-center text-white hover:text-white hover:bg-white/10 ${pathname === item.href ? "bg-white/10" : ""}`}
-                  onClick={() => {
-                    if (item.children) {
-                      toggleItem(item.title)
-                    } else if (isDeviceMobile) {
-                      toggleExpand()
-                    }
-                  }}
+                  onClick={() => item.children && toggleItem(item.title)}
                 >
                   <span className={`flex-shrink-0 ${isExpanded ? "max-md:flex" : "max-md:hidden"}`}>{item.icon}</span>
                   <div className={`w-full flex justify-left items-center ${isExpanded ? "flex" : "hidden"}`}>
@@ -118,7 +111,6 @@ export function SideBar() {
                       <Button
                         variant="ghost"
                         className={`w-full justify-left text-white hover:text-white hover:bg-white/10 ${pathname === child.href ? "bg-white/10" : ""}`}
-                        onClick={() => isDeviceMobile && toggleExpand()}
                       >
                         <span className="flex-shrink-0">{child.icon}</span>
                         <span className="ml-2 whitespace-nowrap">{child.title}</span>
