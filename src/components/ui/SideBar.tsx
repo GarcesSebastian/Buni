@@ -83,7 +83,7 @@ export function SideBar() {
         </Button>
       </div>
       <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? "max-md:initial" : "max-md:hidden"}`}>
-        <nav className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out flex-1 max-md:h-screen`}>
+        <nav className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out flex-1 max-md:h-full`}>
           {ConfigSideBar.map((item) => (
             <div key={item.title}>
               <Link key={item.href} href={item.href || pathname}>
