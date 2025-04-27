@@ -67,7 +67,7 @@ export function SideBar() {
 
   return (
     <div 
-      className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? isDeviceMobile ? "w-full h-fit" : "w-64 h-full" : isDeviceMobile ? "w-full h-fit" : "w-16 h-full"}`}
+      className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? isDeviceMobile ? "w-full h-fit max-h-full" : "w-64 h-full" : isDeviceMobile ? "w-full h-fit" : "w-16 h-full"}`}
     >
       <div className={`py-4 flex items-center ${isExpanded ? "md:px-4 justify-between" : "px-0 md:justify-center justify-between"}`}>
         <span className={`font-bold text-xl ${isExpanded ? "md:initial" : "md:hidden"}`}>BUNI</span>
