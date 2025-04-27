@@ -141,13 +141,14 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
+      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] overflow-hidden">
+        <form className="grid grid-rows-[auto_1fr] max-h-[90vh] overflow-hidden" onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Crear {data.table.name}</DialogTitle>
             <DialogDescription>Complete los datos para crear un nuevo {data.table.name}</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4 px-2 max-h-[100vh] overflow-y-auto">
             {Object.keys(data.structureForm).map((value, index) => (
               <div key={index}>
                 <InputBasic
@@ -167,6 +168,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
               </div>
             ))}
           </div>
+
           <DialogFooter className="flex flex-row mt-4">
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancelar

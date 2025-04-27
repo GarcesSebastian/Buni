@@ -1,4 +1,4 @@
-import { generateSampleData } from "@/app/events/[id]/data"
+import { generateSampleData } from "@/lib/DataTesting"
 import { User } from "@/hooks/auth/useUserData"
 import { Event } from "@/types/Events"
 import { Form } from "@/types/Forms"
@@ -148,9 +148,8 @@ export class DevToolsService {
             throw new Error("No se encontró el formulario de asistencias")
         }
 
-        const dataGenerated = await generateSampleData(dataPerInterval, formAssistsUser, (progress: number) => {
+        const dataGenerated = await generateSampleData(dataPerInterval, formAssistsUser, () => {
             if (this.isCancelled) return
-            console.log(`Progreso: ${progress}%`)
         })
 
         if (this.isCancelled) return
@@ -186,9 +185,8 @@ export class DevToolsService {
             throw new Error("No se encontró el formulario de inscripciones")
         }
 
-        const dataGenerated = await generateSampleData(dataPerInterval, formInscriptionsUser, (progress: number) => {
+        const dataGenerated = await generateSampleData(dataPerInterval, formInscriptionsUser, () => {
             if (this.isCancelled) return
-            console.log(`Progreso: ${progress}%`)
         })
 
         if (this.isCancelled) return

@@ -21,7 +21,8 @@ export interface Event {
     id: number
     key: string
   }
-  cupos: string
+  cupos: string | number
+  availableCupos: string | number
   fecha: string
   hora: string
   state: string

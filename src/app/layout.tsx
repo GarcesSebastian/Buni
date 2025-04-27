@@ -29,24 +29,24 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/logo-buni.png" type="image/x-icon" />
       </head>
       <body className={inter.className}>
-          <NotificationProvider>
-            <div className="h-screen overflow-hidden">
-              <AuthProvider>
-              <TopNav/>
-              <div className="flex overflow-hidden">
-                <UserDataProvider>
-                  <RouteProtection>
-                    <SocketProvider>
-                      <Suspense>
-                        <main className="w-full overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>{children}</main>
-                      </Suspense>
-                    </SocketProvider>
-                  </RouteProtection>
-                </UserDataProvider>
-              </div>
-            </AuthProvider>
-            </div>
-          </NotificationProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            <UserDataProvider>
+              <RouteProtection>
+                <SocketProvider>
+                  <div className="flex flex-col h-screen overflow-hidden">
+                    <TopNav />
+                    <Suspense>
+                      <main className="flex-1 overflow-hidden">
+                        {children}
+                      </main>
+                    </Suspense>
+                  </div>
+                </SocketProvider>
+              </RouteProtection>
+            </UserDataProvider>
+          </AuthProvider>
+        </NotificationProvider>
       </body>
     </html>
   )

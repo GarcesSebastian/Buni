@@ -181,8 +181,6 @@ export function DataTable({
     return typeof value === "object" ? JSON.stringify(value) : value?.toString() || "-"
   }
 
-  console.log(columns, paginatedData)
-
   return (
     <div className="space-y-4">
       {(Object.keys(assistsFilters).length > 0 || Object.keys(inscriptionsFilters).length > 0) && (

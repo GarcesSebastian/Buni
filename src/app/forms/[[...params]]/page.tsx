@@ -32,6 +32,7 @@ import { getDataForm as getDataFormFromBackend } from "@/lib/DataSync"
 import { useNotification } from "@/hooks/client/useNotification"
 import { Form } from "@/types/Forms"
 import { useSocket } from "@/hooks/server/useSocket"
+import { validateForm } from "@/lib/FormsValidation"
 
 export type formOptionsType = string | boolean | string[] | number
 
@@ -42,7 +43,7 @@ const getDataForm = async (eventId: number, typeForm: string): Promise<{event: E
 
 export default function FormsPage() {
   const params = useParams();
-  const { user, setUser } = useUserData()
+  const { user, setUser, isLoaded } = useUserData()
   const { showNotification } = useNotification()
   const { socket } = useSocket()
   const { params: dynamicParams } = params || {}; 
@@ -125,72 +126,27 @@ export default function FormsPage() {
     </div>
   }
 
-  if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
+  if ((!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
   }
 
-  if (!event) {
+  if (!event && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
   }
 
-  if (!currentForm) {
+  if (!currentForm && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
 
-  const sceneryId = (event.scenery as { id: number, key: string })?.id
-  if (!sceneryId) {
+  const sceneryId = (event?.scenery as { id: number, key: string })?.id
+  if (!sceneryId && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.SCENERY_NOT_FOUND} />
   }
 
   const secciones = {
-      personal: currentForm.fields.filter((campo) => campo.section === "personal") || [],
-      academic: currentForm.fields.filter((campo) => campo.section === "academic") || [],
-      additional: currentForm.fields.filter((campo) => campo.section === "additional") || [],
-  }
-
-  const validateForm = (sectionToValidate?: string) => {
-    const newErrors: Record<string, string> = {}
-
-    const camposAValidar = sectionToValidate
-      ? currentForm.fields.filter((campo) => campo.section === sectionToValidate)
-      : currentForm.fields
-
-    camposAValidar.forEach((campo) => {
-      if (campo.required) {
-        if (campo.type === "checkbox" && !formValues[campo.id]) {
-          newErrors[campo.id] = "Este campo es obligatorio"
-        } else if (campo.type === "checklist_single_grid" || campo.type === "checklist_multiple_grid") {
-          const gridValues = formValues[campo.id] as Record<string, string | string[]> || {}
-          const hasAllRowsSelected = campo.options?.every((opcion) => {
-            if (typeof opcion === 'object') {
-              const rowKey = `${campo.id}-${opcion.row}`
-              if (campo.type === "checklist_single_grid") {
-                return gridValues[rowKey] !== undefined && gridValues[rowKey] !== ""
-              } else {
-                return Array.isArray(gridValues[rowKey]) && (gridValues[rowKey] as string[]).length > 0
-              }
-            }
-            return false
-          })
-
-          if (!hasAllRowsSelected) {
-            newErrors[campo.id] = "Debe seleccionar al menos una opción en cada fila"
-          }
-        } else if (
-          campo.type !== "checkbox" &&
-          (!formValues[campo.id] || formValues[campo.id].toString().trim() === "")
-        ) {
-          newErrors[campo.id] = "Este campo es obligatorio"
-        }
-      }
-
-      if (campo.type === "email" && formValues[campo.id] && !/\S+@\S+\.\S+/.test(formValues[campo.id] as string)) {
-        newErrors[campo.id] = "Ingrese un correo electrónico válido"
-      }
-    })
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+      personal: currentForm?.fields.filter((campo) => campo.section === "personal") || [],
+      academic: currentForm?.fields.filter((campo) => campo.section === "academic") || [],
+      additional: currentForm?.fields.filter((campo) => campo.section === "additional") || [],
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -198,7 +154,7 @@ export default function FormsPage() {
     setIsSubmitting(true)
 
     try {
-      if (validateForm()) {
+      if (validateForm({currentForm, formValues, callback: setErrors})) {
         const newFormValues: Record<string, formOptionsType> = {}
         Object.keys(formValues).forEach((key) => {
           const value = formValues[key]
@@ -281,15 +237,15 @@ export default function FormsPage() {
 
   const handleNextSection = () => {
     if (currentSection === "personal") {
-      if (validateForm("personal")) {
+      if (validateForm({currentForm, formValues, sectionToValidate: "personal", callback: setErrors})) {
         setCurrentSection("academic")
       }
     } else if (currentSection === "academic") {
-      if (validateForm("academic")) {
+      if (validateForm({currentForm, formValues, sectionToValidate: "academic", callback: setErrors})) {
         setCurrentSection("additional")
       }
     } else if (currentSection === "additional") {
-      if (validateForm("additional")) {
+      if (validateForm({currentForm, formValues, sectionToValidate: "additional", callback: setErrors})) {
         setShowPreview(true)
       }
     }
@@ -317,8 +273,8 @@ export default function FormsPage() {
                   </Button>
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
-                <h1 className="text-2xl font-bold">{currentForm.name}</h1>
-                <p className="text-muted-foreground">{currentForm.description}</p>
+                <h1 className="text-2xl font-bold">{currentForm?.name}</h1>
+                <p className="text-muted-foreground">{currentForm?.description}</p>
               </div>
             </div>
 
@@ -334,7 +290,7 @@ export default function FormsPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-xl">{event?.nombre}</CardTitle>
-                  <CardDescription>{currentForm.description}</CardDescription>
+                  <CardDescription>{currentForm?.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div className="flex items-center">
@@ -343,7 +299,7 @@ export default function FormsPage() {
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{event.hora}</span>
+                    <span className="text-sm">{event?.hora}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -400,8 +356,8 @@ export default function FormsPage() {
 
             <Card className="mb-8 print:shadow-none">
               <CardHeader className="flex flex-col">
-                <CardTitle>{event.nombre}</CardTitle>
-                <CardDescription>{currentForm.description}</CardDescription>
+                <CardTitle>{event?.nombre}</CardTitle>
+                <CardDescription>{currentForm?.description}</CardDescription>
               </CardHeader>
 
               {isSubmitting && (

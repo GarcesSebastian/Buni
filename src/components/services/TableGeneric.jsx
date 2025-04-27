@@ -131,7 +131,6 @@ export function TableGeneric({structure, structureForm, table}) {
   }
 
   const normalizeData = (data, value) => {
-    console.log(value)
     if(typeof data[value] != "object"){
       if (value === "cupos" && data[value] === "-1") {
         return "Ilimitado"

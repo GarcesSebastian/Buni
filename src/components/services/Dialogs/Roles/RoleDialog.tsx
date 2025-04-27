@@ -88,12 +88,12 @@ export function RoleDialog({
 
     const isCategoryFullySelected = (moduleId: string) => {
         const moduleData = permissionModules.find(m => m.id === moduleId)
-        if (!moduleData) return 
+        if (!moduleData) return false
 
         try {
             return moduleData.actions.every(action => selectedPermissions[moduleId][action.id as keyof PermissionType])
         } catch (error) {
-            console.log(error)
+            console.error(error)
             return false
         }
     }

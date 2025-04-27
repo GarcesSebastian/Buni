@@ -34,8 +34,6 @@ export const getDataForCharts = (
         ? event.inscriptions
         : event.inscriptions.filter((i) => i.programs === selectedProgram)
 
-    console.log(assistsFiltradas)
-    console.log(assistsDistributionField)
     const assistsPorCampo = assistsFiltradas.reduce(
       (acc: Record<string, number>, asistencia) => {
         const valor = asistencia[assistsDistributionField]

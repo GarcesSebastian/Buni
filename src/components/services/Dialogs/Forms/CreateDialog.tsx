@@ -385,7 +385,7 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
                     </div>
                 </div>
 
-                <DialogFooter className="">
+                <DialogFooter>
                     <Button
                         variant="outline"
                         onClick={() => {

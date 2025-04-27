@@ -74,5 +74,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)', '/dashboard', "/forms/:path*"],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
