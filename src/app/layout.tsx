@@ -32,8 +32,8 @@ export default function RootLayout({
         <NotificationProvider>
           <AuthProvider>
             <UserDataProvider>
-              <RouteProtection>
-                <SocketProvider>
+              <SocketProvider>
+                <RouteProtection>
                   <div className="flex flex-col h-screen overflow-hidden">
                     <TopNav />
                     <Suspense>
@@ -42,8 +42,8 @@ export default function RootLayout({
                       </main>
                     </Suspense>
                   </div>
-                </SocketProvider>
-              </RouteProtection>
+                </RouteProtection>
+              </SocketProvider>
             </UserDataProvider>
           </AuthProvider>
         </NotificationProvider>
