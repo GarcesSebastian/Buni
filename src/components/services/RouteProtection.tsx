@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useUserData, Views } from "@/hooks/auth/useUserData"
 import { AlertCircle, ArrowLeft } from "lucide-react"
 import { Button } from "../ui/Button"
-
+import { useAuth } from "@/hooks/auth/useAuth"
 const getRouteToViewMap = (): Record<string, keyof Views> => ({
   "/events": "events",
   "/programs": "programs",
@@ -18,9 +18,18 @@ export function RouteProtection({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const { views } = useUserData()
+  const { isAuthenticated } = useAuth()
   const routeToViewMap = getRouteToViewMap()
 
   const viewKey = routeToViewMap[pathname]
+
+  const returnToDashboard = () => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+    } else {
+      router.push("/")
+    }
+  }
 
   if (viewKey && !views[viewKey]) {
     return (
@@ -34,7 +43,7 @@ export function RouteProtection({ children }: { children: React.ReactNode }) {
         </div>
         <Button 
           variant="outline" 
-          onClick={() => router.push("/")}
+          onClick={returnToDashboard}
           className="mt-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
