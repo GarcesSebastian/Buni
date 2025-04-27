@@ -37,7 +37,7 @@ export default function RootLayout({
                 <UserDataProvider>
                   <RouteProtection>
                     <SocketProvider>
-                      <div className="flex-1 overflow-hidden" style={{height: "calc(100vh - 4.05rem)"}}>
+                      <div className="flex-1 overflow-hidden md:h-[calc(100vh-4.05rem)] h-screen">
                         {children}
                       </div>
                     </SocketProvider>
