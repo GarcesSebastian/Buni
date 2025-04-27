@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { AlertTriangle, ArrowLeft, Calendar, Clock, Loader, MapPin, Users } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Calendar, Loader, MapPin, Users } from "lucide-react"
 import Link from "next/link"
 import type { Assists, Event, Scenery } from "@/types/Events"
 import type { User } from "@/hooks/auth/useUserData"
@@ -375,16 +375,16 @@ export default function EventDetailPage() {
                                                 <div className="flex items-center">
                                                     <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
-                                                        <p className="text-sm font-medium">Fecha</p>
-                                                        <p className="text-sm sm:text-base">{event.fecha || "Sin fecha"}</p>
+                                                        <p className="text-sm font-medium">Fecha de Inicio</p>
+                                                        <p className="text-sm sm:text-base">{new Date(event.horarioInicio).toLocaleString()}</p>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex items-center">
-                                                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
+                                                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
                                                     <div>
-                                                        <p className="text-sm font-medium">Hora</p>
-                                                        <p className="text-sm sm:text-base">{event.hora || "Sin hora"}</p>
+                                                        <p className="text-sm font-medium">Fecha de Fin</p>
+                                                        <p className="text-sm sm:text-base">{new Date(event.horarioFin).toLocaleString()}</p>
                                                     </div>
                                                 </div>
 

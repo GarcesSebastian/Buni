@@ -12,10 +12,6 @@ import { Badge } from "@/components/ui/Badge"
 import {
   Save,
   CheckCircle2,
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
@@ -33,6 +29,7 @@ import { useNotification } from "@/hooks/client/useNotification"
 import { Form } from "@/types/Forms"
 import { useSocket } from "@/hooks/server/useSocket"
 import { validateForm } from "@/lib/FormsValidation"
+import { Countdown } from "@/components/ui/Countdown"
 
 export type formOptionsType = string | boolean | string[] | number
 
@@ -63,6 +60,19 @@ export default function FormsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isFormAvailable, setIsFormAvailable] = useState(false)
+  const [isFormClosed, setIsFormClosed] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  })
   
   useEffect(() => {
     const fetchEvent = async () => {
@@ -72,13 +82,62 @@ export default function FormsPage() {
           setEvent(data.event)
           setCurrentForm(data.form)
           setScenery(data.scenery)
-
           setIsActive(data.event.state === "true")
+          
+          const now = new Date()
+          const startDateTime = new Date(data.event.horarioInicio)
+          const endDateTime = new Date(data.event.horarioFin)
+
+          if (now >= startDateTime && now <= endDateTime) {
+            setIsFormAvailable(true)
+          } else {
+            setIsFormAvailable(false)
+          }
+
+          if (now > endDateTime) {
+            setIsFormClosed(true)
+          } else {
+            setIsFormClosed(false)
+          }
         }
       }
     }
     fetchEvent()
   }, [user, idEvent])
+
+  useEffect(() => {
+    if (event && isFormAvailable && !isFormClosed) {
+      const calculateTimeLeft = () => {
+        const now = new Date()
+        const endDateTime = new Date(event.horarioFin)
+        const difference = endDateTime.getTime() - now.getTime()
+
+        if (difference <= 0) {
+          setIsFormClosed(true)
+          return {
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+          }
+        }
+
+        return {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        }
+      }
+
+      setTimeLeft(calculateTimeLeft())
+      const timer = setInterval(() => {
+        setTimeLeft(calculateTimeLeft())
+      }, 1000)
+
+      return () => clearInterval(timer)
+    }
+  }, [event, isFormAvailable, isFormClosed])
 
   useEffect(() => {
     if (event && keyForm) {
@@ -210,7 +269,7 @@ export default function FormsPage() {
           newUser.events = newUser.events.map((eventUser) => {
             if (eventUser.id === Number(idEvent)) {
               const formKey = typeForm as 'assists' | 'inscriptions'
-              return { ...eventUser, [formKey]: [...eventUser[formKey], sanitizedFormValues] };
+              return { ...eventUser, [formKey]: [...(eventUser[formKey] || []), sanitizedFormValues] };
             }
             return eventUser
           })
@@ -261,6 +320,27 @@ export default function FormsPage() {
     }
   }
 
+  if (!isFormAvailable && event) {
+    const startDateTime = new Date(event.horarioInicio)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Countdown 
+          targetDate={startDateTime.toISOString()} 
+          onComplete={() => setIsFormAvailable(true)}
+        />
+      </div>
+    )
+  }
+
+  if (isFormClosed) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h2 className="text-2xl font-bold mb-4">El evento ha finalizado</h2>
+        <p className="text-muted-foreground">Lo sentimos, este formulario ya no está disponible.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full">
       <div className="h-full bg-gray-100">
@@ -268,15 +348,32 @@ export default function FormsPage() {
           <div className="max-w-4xl mx-auto">
             <div className="flex max-md:flex-col gap-2 justify-start items-center mb-6">
               <Link href="/events" className="mr-4">
-                  <Button variant="outline" size="icon" className="flex justify-center items-center">
-                      <ArrowLeft className="h-4 w-4" />
-                  </Button>
+                <Button variant="outline" size="icon" className="flex justify-center items-center">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
                 <h1 className="text-2xl font-bold">{currentForm?.name}</h1>
                 <p className="text-muted-foreground">{currentForm?.description}</p>
               </div>
             </div>
+
+            {isFormAvailable && !isFormClosed && (
+              <div className="mb-6">
+                <div className="flex items-center justify-center gap-4 text-sm">
+                  <span className="text-muted-foreground">Tiempo restante:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{timeLeft.days}d</span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="font-medium">{timeLeft.hours}h</span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="font-medium">{timeLeft.minutes}m</span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="font-medium">{timeLeft.seconds}s</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <Card className={`${isActive ? "md:col-span-2" : "md:col-span-3"}`}>
@@ -293,20 +390,20 @@ export default function FormsPage() {
                   <CardDescription>{currentForm?.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{event?.fecha}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Horario de inicio</Badge>
+                    <span className="text-sm">{new Date(event?.horarioInicio || "").toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{event?.hora}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Horario de fin</Badge>
+                    <span className="text-sm">{new Date(event?.horarioFin || "").toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Escenario</Badge>
                     <span className="text-sm">{scenery?.name}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Cupos</Badge>
                     <span className="text-sm">
                       {event?.cupos == "-1" ? "Cupos ilimitados" : event?.cupos + " Cupos"}
                     </span>

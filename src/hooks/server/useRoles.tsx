@@ -44,14 +44,14 @@ const useRoles = () => {
                 },
                 body: JSON.stringify(role)
             });
-            const data = await response.json();
+            const data_response = await response.json();
 
             if (response.ok) {
-                setRoles(data);
-                return data;
+                setRoles(data_response.data);
+                return data_response.data;
             }
 
-            throw new Error(data.error || 'Error al crear el rol');
+            throw new Error(data_response.error || 'Error al crear el rol');
         } catch (error) {
             throw error;
         }

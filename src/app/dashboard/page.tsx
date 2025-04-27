@@ -141,7 +141,7 @@ export default function DashboardPage() {
       const hace7Dias = subDays(hoy, 7)
       
       const eventosOrdenados = [...user.events].sort((a, b) => 
-        new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        new Date(b.horarioInicio).getTime() - new Date(a.horarioInicio).getTime()
       ).slice(0, 5)
 
       setEventosRecientes(eventosOrdenados)
@@ -158,7 +158,7 @@ export default function DashboardPage() {
         : 0
 
       const eventosUltimaSemana = user.events.filter(event => 
-        new Date(event.fecha) >= hace7Dias
+        new Date(event.horarioInicio) >= hace7Dias
       )
       const inscripcionesUltimaSemana = eventosUltimaSemana.reduce((acc, event) => 
         acc + (event.inscriptions?.length || 0), 0
@@ -172,7 +172,7 @@ export default function DashboardPage() {
           tipo: 'creacion' as const,
           entidad: 'evento' as const,
           nombre: event.nombre,
-          fecha: event.fecha,
+          fecha: event.horarioInicio,
           usuario: event.organizador,
           id: event.id,
           ruta: `/events/${event.id}`
@@ -181,7 +181,7 @@ export default function DashboardPage() {
           tipo: 'creacion' as const,
           entidad: 'escenario' as const,
           nombre: scenery.name,
-          fecha: user.events.find(e => e.scenery?.id === scenery.id)?.fecha || new Date().toISOString(),
+          fecha: user.events.find(e => e.scenery?.id === scenery.id)?.horarioInicio || new Date().toISOString(),
           usuario: user.events.find(e => e.scenery?.id === scenery.id)?.organizador || 'Sistema',
           id: scenery.id,
           ruta: '/events/scenerys'
@@ -190,7 +190,7 @@ export default function DashboardPage() {
           tipo: 'creacion' as const,
           entidad: 'formulario' as const,
           nombre: form.name,
-          fecha: user.events.find(e => e.formAssists?.id === form.id || e.formInscriptions?.id === form.id)?.fecha || new Date().toISOString(),
+          fecha: user.events.find(e => e.formAssists?.id === form.id || e.formInscriptions?.id === form.id)?.horarioInicio || new Date().toISOString(),
           usuario: user.events.find(e => e.formAssists?.id === form.id || e.formInscriptions?.id === form.id)?.organizador || 'Sistema',
           id: form.id,
           ruta: '/formularios'
@@ -199,7 +199,7 @@ export default function DashboardPage() {
           tipo: 'creacion' as const,
           entidad: 'programa' as const,
           nombre: program.name,
-          fecha: user.events.find(e => e.programs?.id === program.id)?.fecha || new Date().toISOString(),
+          fecha: user.events.find(e => e.programs?.id === program.id)?.horarioInicio || new Date().toISOString(),
           usuario: user.events.find(e => e.programs?.id === program.id)?.organizador || 'Sistema',
           id: program.id,
           ruta: '/programs'
@@ -301,7 +301,7 @@ export default function DashboardPage() {
                         eventosRecientes.map((evento) => (
                           <TableRow key={evento.id}>
                             <TableCell>{evento.nombre}</TableCell>
-                            <TableCell>{format(new Date(evento.fecha), "PPP", { locale: es })}</TableCell>
+                            <TableCell>{format(new Date(evento.horarioInicio), "PPP", { locale: es })}</TableCell>
                             <TableCell>{evento.inscriptions?.length || 0}</TableCell>
                             <TableCell>{evento.assists?.length || 0}</TableCell>
                           </TableRow>

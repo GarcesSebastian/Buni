@@ -142,7 +142,7 @@ export class DevToolsService {
             throw new Error("No se encontró el evento")
         }
 
-        const formAssistsUser = user.forms.find((form: Form) => form.id === event.formAssists.id)
+        const formAssistsUser = user.forms.find((form: Form) => form.id === event.formAssists?.id)
 
         if (!formAssistsUser) {
             throw new Error("No se encontró el formulario de asistencias")
@@ -179,7 +179,7 @@ export class DevToolsService {
             throw new Error("No se encontró el evento")
         }
 
-        const formInscriptionsUser = user.forms.find((form: Form) => form.id === event.formInscriptions.id)
+        const formInscriptionsUser = user.forms.find((form: Form) => form.id === event.formInscriptions?.id)
 
         if (!formInscriptionsUser) {
             throw new Error("No se encontró el formulario de inscripciones")

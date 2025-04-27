@@ -155,7 +155,7 @@ export default function RolesPage() {
                     <p className="text-muted-foreground">Crea y gestiona roles personalizados</p>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex justify-end mb-4">
+                    <div className="flex justify-start mb-4">
                         <Button onClick={() => setIsCreating(true)} className="bg-primary hover:bg-primary/90">
                             <Plus className="mr-2 h-4 w-4" />
                             Crear Rol

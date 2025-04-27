@@ -168,6 +168,10 @@ export function TableGeneric({structure, structureForm, table}) {
         )
       }
 
+      if (value === "horarioInicio" || value === "horarioFin") {
+        return new Date(data[value]).toLocaleString("es-ES", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
+      }
+
       return data[value]
     }
 

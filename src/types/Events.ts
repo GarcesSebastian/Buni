@@ -13,29 +13,29 @@ export interface Event {
   id: number
   nombre: string
   organizador: string
-  scenery: {
+  scenery?: {
     id: number
     key: string
   }
-  programs: {
+  programs?: {
     id: number
     key: string
   }
   cupos: string | number
   availableCupos: string | number
-  fecha: string
-  hora: string
+  horarioInicio: string
+  horarioFin: string
   state: string
-  formAssists: {
+  formAssists?: {
     id: number
     key: string
   }
-  formInscriptions: {
+  formInscriptions?: {
     id: number
     key: string
   }
-  assists: Assists[]
-  inscriptions: Assists[]
+  assists?: Assists[]
+  inscriptions?: Assists[]
 }
 
 export interface ConfigEvent {
@@ -57,14 +57,14 @@ export interface ConfigEventForm {
     name: string
     type: string
   }
-  hora: {
+  horarioInicio: {
     name: string
     type: string
-  }
-  fecha: {
+  },
+  horarioFin: {
     name: string
     type: string
-  }
+  },
   programs: {
     name: string
     type: string

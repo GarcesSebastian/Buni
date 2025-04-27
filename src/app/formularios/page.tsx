@@ -217,16 +217,16 @@ export default function FormulariosPage() {
         },
       })
 
-      const data = await response.json()
+      const data_response = await response.json()
 
       if (response.ok) {
         const newData = {
           ...user,
-          forms: [...user.forms, { ...nuevoFormulario, id: data.id }]
+          forms: [...user.forms, data_response.data]
         }
         
         setUser(newData)
-        setCurrentForm({ ...nuevoFormulario, id: data.id })
+        setCurrentForm(data_response.data)
         socket?.emit("UPDATE_DATA", newData)
         showNotification({
           title: "Éxito",
@@ -238,7 +238,7 @@ export default function FormulariosPage() {
       
       showNotification({
         title: "Error",
-        message: data.error || "Error al crear el formulario",
+        message: data_response.error || "Error al crear el formulario",
         type: "error"
       })
     } catch (error) {
@@ -273,7 +273,7 @@ export default function FormulariosPage() {
         },
       })
 
-      const data = await response.json()
+      const data_response = await response.json()
 
       if (response.ok) {
           setUser(newData)
@@ -293,7 +293,7 @@ export default function FormulariosPage() {
           return;
       }
 
-      throw new Error(data.error || "Error al eliminar el formulario")
+      throw new Error(data_response.error || "Error al eliminar el formulario")
     } catch (error) {
       console.error("Error al eliminar el formulario:", error)
       showNotification({

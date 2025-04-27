@@ -5,11 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User } from "@/hooks/auth/useUserData";
 import { useState } from "react";
 import { Button } from "../ui/Button";
+
 interface PropsInputBasic {
     data: {
         form: {
             name: string;
-            type: "text" | "number" | "date" | "time" | "select" | "password" | "email";
+            type: "text" | "number" | "date" | "datetime-local" | "time" | "select" | "password" | "email";
             required?: boolean;
             options?: { value: string; label: string; id?: number }[];
         } & (
@@ -18,7 +19,7 @@ interface PropsInputBasic {
                 options: { value: string; label: string; id?: number }[];
             }
             | {
-                type: "text" | "number" | "date" | "time" | "password" | "email";
+                type: "text" | "number" | "date" | "datetime-local" | "time" | "password" | "email";
             }
         );
         key: string;
@@ -29,7 +30,7 @@ interface PropsInputBasic {
     user?: User
 }
 
-const options = ["text", "number", "date", "time", "email"]
+const options = ["text", "number", "date", "datetime-local", "time", "email"]
 
 export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     const [isUnlimited, setIsUnlimited] = useState(formData[data.key] === "-1");
@@ -89,6 +90,21 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
                             Ilimitado
                         </Button>
                     </div>
+                </>
+            )
+        }
+
+        if (data.form.type === "datetime-local") {
+            return(
+                <>
+                    <Label>{data.form.name}</Label>
+                    <Input
+                        key={data.index}
+                        type="datetime-local"
+                        value={valueFormatted as string}
+                        onChange={data.onChange}
+                        required={data.form.required}
+                    />
                 </>
             )
         }

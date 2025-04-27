@@ -65,8 +65,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       }
 
       const keyData = user[data.table.key as keyof typeof user];
-      const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
-      const updatedFormData: UpdatedFormData = { ...formData, id };
+      const updatedFormData: UpdatedFormData = { ...formData, id: (Array.isArray(keyData) ? keyData.length : 0) + 1 };
       
       Object.keys(updatedFormData).forEach((key: string) => {
         if (typeof updatedFormData[key] == "string"){
@@ -94,10 +93,6 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       }
 
       const key = data.table.key as keyof User;
-      const newData = {
-        ...user,
-        [key]: [...user[key], updatedFormData],
-      }
 
       const body_response = JSON.parse(JSON.stringify(updatedFormData))
 
@@ -114,6 +109,11 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
       if (!response.ok) {
         throw new Error(data_response.error || 'Error al crear el registro'); 
+      }
+
+      const newData = {
+        ...user,
+        [key]: [...user[key], data_response.data],
       }
 
       setUser(newData);
