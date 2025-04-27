@@ -67,7 +67,7 @@ export function SideBar() {
 
   return (
     <div 
-      className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? isDeviceMobile ? "w-full h-screen max-h-screen" : "w-64 h-full" : isDeviceMobile ? "w-full h-fit" : "w-16 h-full"}`}
+      className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? isDeviceMobile ? "w-full h-full" : "w-64 h-full" : isDeviceMobile ? "w-full h-fit" : "w-16 h-full"}`}
     >
       <div className={`py-4 flex items-center ${isExpanded ? "md:px-4 justify-between" : "px-0 md:justify-center justify-between"}`}>
         <span className={`font-bold text-xl ${isExpanded ? "md:initial" : "md:hidden"}`}>BUNI</span>
@@ -82,10 +82,9 @@ export function SideBar() {
           </span>
         </Button>
       </div>
+
       <div className={`flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? "max-md:initial" : "max-md:hidden"} ${isDeviceMobile ? "h-[calc(100vh-4rem)] overflow-y-auto" : ""}`}>
-        <nav 
-          className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out max-md:h-fit`}
-        >
+        <nav className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out max-md:h-full`}>
           {ConfigSideBar.map((item) => (
             <div key={item.title}>
               <Link key={item.href} href={item.href || pathname}>
