@@ -74,39 +74,45 @@ export default function FormsPage() {
     minutes: 0,
     seconds: 0
   })
-  
-  useEffect(() => {
-    const fetchEvent = async () => {
-      setIsLoadingForm(true)
-      if (user && idEvent) {
-        const data = await getDataForm(idEvent, keyForm)
-        if (data) {
-          setEvent(data.event)
-          setCurrentForm(data.form)
-          setScenery(data.scenery)
-          setIsActive(data.event.state === "true")
-          
-          const startDateTime = new Date(data.event.horarioInicio)
-          const endDateTime = new Date(data.event.horarioFin)
 
-          const now = data.date_now
-          if (now >= startDateTime && now <= endDateTime) {
-            setIsFormAvailable(true)
-          } else {
-            setIsFormAvailable(false)
-          }
+  const updateDataForm = async (data: {event: Event, form: Form, scenery: Scenery, date_now: Date}) => {
+    if (data) {
+      setEvent(data.event)
+      setCurrentForm(data.form)
+      setScenery(data.scenery)
+      setIsActive(data.event.state === "true")
+      
+      const startDateTime = new Date(data.event.horarioInicio)
+      const endDateTime = new Date(data.event.horarioFin)
 
-          if (now > endDateTime) {
-            setIsFormClosed(true)
-          } else {
-            setIsFormClosed(false)
-          }
-        }
-        
-        setIsLoadingForm(false)
+      const now = data.date_now
+      if (now >= startDateTime && now <= endDateTime) {
+        setIsFormAvailable(true)
+      } else {
+        setIsFormAvailable(false)
+      }
+
+      if (now > endDateTime) {
+        setIsFormClosed(true)
+      } else {
+        setIsFormClosed(false)
       }
     }
-    fetchEvent()
+  }
+  
+  useEffect(() => {
+    if (idEvent) {
+      const handleFetchEvent = async () => {
+        setIsLoadingForm(true)
+        const data = await getDataForm(idEvent, keyForm)
+        if (data) {
+          await updateDataForm(data)
+        }
+        setIsLoadingForm(false)
+      }
+
+      handleFetchEvent()
+    }
   }, [user, idEvent])
 
   useEffect(() => {
@@ -182,7 +188,7 @@ export default function FormsPage() {
     }
   }, [event, keyForm])
 
-  if (isLoading || !isLoaded || isLoadingForm) {
+  if (isLoading || !isLoaded) {
     return <div className="flex flex-col gap-4 justify-center items-center h-full">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-muted-foreground">Cargando...</p>

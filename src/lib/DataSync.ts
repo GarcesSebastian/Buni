@@ -75,6 +75,5 @@ export async function getDataForm(eventId: string, typeForm: string): Promise<{e
     }
 
     const data = await response.json();
-    console.log(data);
     return data;
 }
