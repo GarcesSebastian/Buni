@@ -33,7 +33,7 @@ import { Countdown } from "@/components/ui/Countdown"
 
 export type formOptionsType = string | boolean | string[] | number
 
-const getDataForm = async (eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery} | undefined> => {
+const getDataForm = async (eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date} | undefined> => {
   const form = await getDataFormFromBackend(eventId, typeForm)
   return form
 }
@@ -84,10 +84,10 @@ export default function FormsPage() {
           setScenery(data.scenery)
           setIsActive(data.event.state === "true")
           
-          const now = new Date()
           const startDateTime = new Date(data.event.horarioInicio)
           const endDateTime = new Date(data.event.horarioFin)
 
+          const now = data.date_now
           if (now >= startDateTime && now <= endDateTime) {
             setIsFormAvailable(true)
           } else {
@@ -178,7 +178,7 @@ export default function FormsPage() {
     }
   }, [event, keyForm])
 
-  if (isLoading || !isLoaded || isFormAvailable || isFormClosed) {
+  if (isLoading || !isLoaded) {
     return <div className="flex flex-col gap-4 justify-center items-center h-full">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-muted-foreground">Cargando...</p>

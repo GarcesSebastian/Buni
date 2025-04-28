@@ -62,7 +62,7 @@ export async function getForm(id: number): Promise<Form> {
     return data;
 }
 
-export async function getDataForm(eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery}> {
+export async function getDataForm(eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date}> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${typeForm}/${eventId}`, {
         method: 'GET',
         headers: {
@@ -74,5 +74,7 @@ export async function getDataForm(eventId: number, typeForm: string): Promise<{e
         throw new Error('Error al obtener los datos del formulario');
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(data);
+    return data;
 }
