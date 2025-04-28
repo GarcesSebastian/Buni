@@ -188,7 +188,7 @@ export default function FormsPage() {
     }
   }, [event, keyForm])
 
-  if (isLoading || !isLoaded) {
+  if (isLoading || !isLoaded || isLoadingForm) {
     return <div className="flex flex-col gap-4 justify-center items-center h-full">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-muted-foreground">Cargando...</p>
