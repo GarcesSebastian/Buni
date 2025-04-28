@@ -10,7 +10,7 @@ export interface TestConfig {
     delay: number
     interval: number
     dataType: string
-    eventId?: number
+    eventId?: string
     dataPerInterval?: number
     currentIteration: number
     status: 'idle' | 'running' | 'paused' | 'cancelled'
@@ -133,7 +133,7 @@ export class DevToolsService {
         await new Promise(resolve => setTimeout(resolve, interval))
     }
 
-    public async generateAssists(interval: number, user: User, eventId: number | undefined, dataPerInterval: number = 1) {
+    public async generateAssists(interval: number, user: User, eventId: string | undefined, dataPerInterval: number = 1) {
         if (this.isCancelled) return
 
         const event = user.events.find((event: Event) => event.id === eventId)
@@ -158,7 +158,7 @@ export class DevToolsService {
             if (this.isCancelled) break
 
             const payload = {
-                idEvent: Number(eventId),
+                idEvent: eventId,
                 typeForm: "assists",
                 data: data
             }
@@ -170,7 +170,7 @@ export class DevToolsService {
         }
     }
 
-    public async generateInscriptions(interval: number, user: User, eventId: number | undefined, dataPerInterval: number = 1) {
+    public async generateInscriptions(interval: number, user: User, eventId: string | undefined, dataPerInterval: number = 1) {
         if (this.isCancelled) return
 
         const event = user.events.find((event: Event) => event.id === eventId)
@@ -195,7 +195,7 @@ export class DevToolsService {
             if (this.isCancelled) break
 
             const payload = {
-                idEvent: Number(eventId),
+                idEvent: eventId,
                 typeForm: "inscriptions",
                 data: data
             }

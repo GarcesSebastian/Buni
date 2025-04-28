@@ -188,9 +188,9 @@ export default function RolesPage() {
                                                 No se encontraron roles
                                             </TableCell>
                                         </TableRow>
-                                    ) : user.roles.map((role) => (
+                                    ) : user.roles.map((role, index) => (
                                         <TableRow key={role.id}>
-                                            <TableCell>{role.id}</TableCell>
+                                            <TableCell>{index + 1}</TableCell>
                                             <TableCell className="font-medium">{role.name}</TableCell>
                                             <TableCell>
                                                 <Button

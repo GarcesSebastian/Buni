@@ -14,7 +14,7 @@ export async function getEvents(): Promise<Event[]> {
     return data;
 }
 
-export async function getEvent(id: number): Promise<Event> {
+export async function getEvent(id: string): Promise<Event> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`, {
         method: 'GET',
         headers: {
@@ -26,7 +26,7 @@ export async function getEvent(id: number): Promise<Event> {
     return data;
 }
 
-export async function getScenery(id: number): Promise<Scenery> {
+export async function getScenery(id: string): Promise<Scenery> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery/${id}`, {
         method: 'GET',
         headers: {
@@ -38,7 +38,7 @@ export async function getScenery(id: number): Promise<Scenery> {
     return data;
 }
 
-export async function getPrograms(id: number): Promise<Programs> {
+export async function getPrograms(id: string): Promise<Programs> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${id}`, {
         method: 'GET',
         headers: {
@@ -50,7 +50,7 @@ export async function getPrograms(id: number): Promise<Programs> {
     return data;
 }
 
-export async function getForm(id: number): Promise<Form> {
+export async function getForm(id: string): Promise<Form> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${id}`, {
         method: 'GET',
         headers: {
@@ -62,7 +62,7 @@ export async function getForm(id: number): Promise<Form> {
     return data;
 }
 
-export async function getDataForm(eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date}> {
+export async function getDataForm(eventId: string, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date}> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${typeForm}/${eventId}`, {
         method: 'GET',
         headers: {

@@ -17,7 +17,7 @@ const useRoles = () => {
             const data = await response.json();
 
             if (response.ok) {
-                const rolesFiltered = data.map((role: { id: number, name: string, permissions: Record<string, boolean>, state: string }) => ({
+                const rolesFiltered = data.map((role: { id: string, name: string, permissions: Record<string, boolean>, state: string }) => ({
                         id: role.id,
                         name: role.name,
                         permissions: role.permissions,
@@ -81,7 +81,7 @@ const useRoles = () => {
         }
     }
 
-    const deleteRole = async (roleId: number) => {
+    const deleteRole = async (roleId: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/${roleId}`, {
                 method: "DELETE",

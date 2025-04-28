@@ -44,7 +44,7 @@ export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
         throw new Error("Error al eliminar el registro: estructura de datos inválida")
       }
 
-      const updatedData = (user[key] as Array<{ id: number }>).filter((item) => item.id !== Number(initialData.id))
+      const updatedData = (user[key] as Array<{ id: string }>).filter((item) => item.id !== initialData.id)
 
       const newData = {
         ...user,

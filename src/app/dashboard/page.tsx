@@ -47,7 +47,7 @@ interface Actividad {
   nombre: string,
   fecha: string,
   usuario: string,
-  id?: number,
+  id?: string,
   ruta?: string
 }
 

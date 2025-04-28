@@ -34,18 +34,18 @@ export interface ConfigFormUser {
 }
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   roles: {
-    id: number;
+    id: string;
     key: string;
   };
   created_at: string;
 }
 
 export interface Role {
-  id: number;
+  id: string;
   name: string;
   permissions: Permissions;
   state: string;

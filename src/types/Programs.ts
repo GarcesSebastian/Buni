@@ -4,7 +4,7 @@ export interface TablePrograms {
 }
 
 export interface Programs {
-  id: number;
+  id: string;
   name: string;
   state: string;
 }

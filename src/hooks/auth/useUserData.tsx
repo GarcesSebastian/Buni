@@ -40,7 +40,7 @@ export interface States {
 const UserDataContext = createContext<{
     user: User;
     setUser: (data: User) => void;
-    updateEvent: (eventId: number, updatedEvent: Event) => void;
+    updateEvent: (eventId: string, updatedEvent: Event) => void;
     states: States;
     setStates: (data: States) => void;
     isLoaded: boolean;

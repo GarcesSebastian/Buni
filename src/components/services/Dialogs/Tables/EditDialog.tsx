@@ -37,7 +37,7 @@ interface HandleSubmitProps {
 }
 
 interface FormattedData {
-  id: number;
+  id: string;
   key: string;
 }
 
@@ -85,7 +85,7 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
 
           const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "forms" : key
           const dataId = dataSplit[dataSplit.length - 1]
-          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: string; nombre: string })[]).find(d => d.id == dataId)
           if(findDataUser){
             updatedFormData[key] = {
               id: findDataUser.id,
@@ -98,8 +98,8 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
       const key = data.table.key as keyof User;
       const newData = {
         ...user,
-        [data.table.key]: (user[key] as (Form | { id: number; nombre: string })[]).map((item: Form | { id: number; nombre: string }) =>
-          item.id === Number(initialData.id) ? updatedFormData : item
+        [data.table.key]: (user[key] as (Form | { id: string; nombre: string })[]).map((item: Form | { id: string; nombre: string }) =>
+          item.id === initialData.id ? updatedFormData : item
         ),
       }
 

@@ -10,15 +10,15 @@ export interface Assists {
 }
 
 export interface Event {
-  id: number
+  id: string
   nombre: string
   organizador: string
   scenery?: {
-    id: number
+    id: string
     key: string
   }
   programs?: {
-    id: number
+    id: string
     key: string
   }
   cupos: string | number
@@ -27,11 +27,11 @@ export interface Event {
   horarioFin: string
   state: string
   formAssists?: {
-    id: number
+    id: string
     key: string
   }
   formInscriptions?: {
-    id: number
+    id: string
     key: string
   }
   assists?: Assists[]
@@ -68,22 +68,22 @@ export interface ConfigEventForm {
   programs: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   scenery: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   formAssists: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   formInscriptions: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   state: {
     name: string
@@ -98,7 +98,7 @@ export interface TableScenery {
 }
 
 export interface Scenery {
-  id: number;
+  id: string;
   name: string;
   state: string;
 }

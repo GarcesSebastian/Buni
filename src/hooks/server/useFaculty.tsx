@@ -68,7 +68,7 @@ const usePrograms = () => {
         }
     }
 
-    const deletePrograms = async (programsId: number) => {
+    const deletePrograms = async (programsId: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${programsId}`, {
                 method: "DELETE",

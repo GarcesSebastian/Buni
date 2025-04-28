@@ -68,7 +68,7 @@ const useEvents = () => {
         }
     }
 
-    const deleteEvent = async (eventId: number) => {
+    const deleteEvent = async (eventId: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
                 method: "DELETE",

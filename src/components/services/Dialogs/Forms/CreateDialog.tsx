@@ -29,8 +29,8 @@ interface Props{
     setEditingField: (editingField: FormField | undefined) => void
 }
 
-export type ItemList = {id: number, value: string}
-export type ItemListGrid = {id: number, value: string, data: string[]}
+export type ItemList = {id: string, value: string}
+export type ItemListGrid = {id: string, value: string, data: string[]}
 
 const DialogDefault: FormField = {
     id: "",
@@ -118,13 +118,13 @@ const CreateDialog = ({currentForm, setCurrentForm, dialogAddField, setDialogAdd
 
             if (editingField.options) {
                 if (typeof editingField.options[0] === 'string') {
-                    setItemsList(editingField.options.map((option, index) => ({ id: index, value: option as string })))
+                    setItemsList(editingField.options.map((option, index) => ({ id: index.toString(), value: option as string })))
                 } else {
                     const gridOptions = editingField.options as unknown as { row: string; data: string[] }[]
                     const uniqueRows = [...new Set(gridOptions.map(opt => opt.row))]
                     const uniqueCols = gridOptions[0]?.data || []
-                    setGridRows(uniqueRows.map((row, index) => ({ id: index, value: row })))
-                    setGridCols(uniqueCols.map((col, index) => ({ id: index, value: col })))
+                    setGridRows(uniqueRows.map((row, index) => ({ id: index.toString(), value: row })))
+                    setGridCols(uniqueCols.map((col, index) => ({ id: index.toString(), value: col })))
                 }
             }
 

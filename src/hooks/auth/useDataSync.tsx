@@ -16,7 +16,7 @@ export const useDataSync = () => {
         setUserState(data);
     };
 
-    const updateEvent = (eventId: number, updatedEvent: Event) => {
+    const updateEvent = (eventId: string, updatedEvent: Event) => {
         setUserState(prevUser => ({
             ...prevUser,
             events: prevUser.events.map(event => 
@@ -46,7 +46,7 @@ export const useDataSync = () => {
 
             const data = await response.json();
 
-            data.users = data.users.map((user: { id: number, name: string, email: string, password: string, role_id: number, created_at: string }) => ({
+            data.users = data.users.map((user: { id: string, name: string, email: string, password: string, role_id: string, created_at: string }) => ({
                 ...user,
                 roles: {
                     id: user.role_id,
@@ -54,7 +54,7 @@ export const useDataSync = () => {
                 }
             }));
 
-            data.roles = data.roles.map((role: { id: number, name: string, permissions: Record<string, boolean>, state: string }) => ({
+            data.roles = data.roles.map((role: { id: string, name: string, permissions: Record<string, boolean>, state: string }) => ({
                 ...role,
                 state: "true"
             }));

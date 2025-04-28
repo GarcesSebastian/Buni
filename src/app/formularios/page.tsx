@@ -257,7 +257,7 @@ export default function FormulariosPage() {
     setCurrentForm({ ...formulario })
   }
 
-  const deleteForm = async (id: number) => {
+  const deleteForm = async (id: string) => {
     setIsDeleting(true)
 
     try {
@@ -385,7 +385,7 @@ export default function FormulariosPage() {
     setDialogAddField(true)
   }
 
-  const toggleStateForm = async (id: number) => {
+  const toggleStateForm = async (id: string) => {
     setIsUpdating(true)
 
     try {
@@ -731,7 +731,7 @@ export default function FormulariosPage() {
                   <AlertDialogFooter>
                     <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>Cancelar</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => deleteForm(formToDelete?.id || 0)}
+                      onClick={() => deleteForm(formToDelete?.id ?? "")}
                       className="bg-primary hover:bg-primary/90"
                       disabled={isDeleting}
                     >

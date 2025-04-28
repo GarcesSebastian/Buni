@@ -66,7 +66,7 @@ export default function EventDetailPage() {
 
     useEffect(() => {
         setLoading(true)
-        const foundEvent = user.events.find((e) => e.id === Number(eventId))
+        const foundEvent = user.events.find((e) => e.id === eventId)
 
         if (foundEvent) {
             setEvent(foundEvent)
@@ -76,10 +76,10 @@ export default function EventDetailPage() {
             const idProgram = foundEvent?.programs?.id
             const idScenery = foundEvent?.scenery?.id
 
-            setFormAssists(user.forms.find((f) => f.id == Number(idFormAssists)) ?? undefined)
-            setFormInscriptions(user.forms.find((f) => f.id == Number(idFormInscriptions)) ?? undefined)
-            setProgram(user.programs.find((p) => p.id == Number(idProgram)) ?? undefined)
-            setScenery(user.scenery.find((s) => s.id == Number(idScenery)) ?? undefined)
+            setFormAssists(user.forms.find((f) => f.id == idFormAssists) ?? undefined)
+            setFormInscriptions(user.forms.find((f) => f.id == idFormInscriptions) ?? undefined)
+            setProgram(user.programs.find((p) => p.id == idProgram) ?? undefined)
+            setScenery(user.scenery.find((s) => s.id == idScenery) ?? undefined)
             
             const assistsField = formAssists?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
             const inscriptionsField = formInscriptions?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
@@ -102,11 +102,11 @@ export default function EventDetailPage() {
     useEffect(() => {
         socket?.on("UPDATE_DATA", (data: { users: User }) => {
             const updatedUser = data.users;
-            const updatedEvent = updatedUser.events.find((e: Event) => e.id === Number(eventId));
+            const updatedEvent = updatedUser.events.find((e: Event) => e.id === eventId);
             
             if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
                 setEvent(updatedEvent);
-                updateEvent(Number(eventId), updatedEvent);
+                updateEvent(eventId, updatedEvent);
             }
         });
 

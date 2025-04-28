@@ -33,7 +33,7 @@ import { Countdown } from "@/components/ui/Countdown"
 
 export type formOptionsType = string | boolean | string[] | number
 
-const getDataForm = async (eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date} | undefined> => {
+const getDataForm = async (eventId: string, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date} | undefined> => {
   const form = await getDataFormFromBackend(eventId, typeForm)
   return form
 }
@@ -60,6 +60,7 @@ export default function FormsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isLoadingForm, setIsLoadingForm] = useState(true)
   const [isFormAvailable, setIsFormAvailable] = useState(false)
   const [isFormClosed, setIsFormClosed] = useState(false)
   const [timeLeft, setTimeLeft] = useState<{
@@ -76,8 +77,9 @@ export default function FormsPage() {
   
   useEffect(() => {
     const fetchEvent = async () => {
+      setIsLoadingForm(true)
       if (user && idEvent) {
-        const data = await getDataForm(Number(idEvent), keyForm)
+        const data = await getDataForm(idEvent, keyForm)
         if (data) {
           setEvent(data.event)
           setCurrentForm(data.form)
@@ -100,6 +102,8 @@ export default function FormsPage() {
             setIsFormClosed(false)
           }
         }
+        
+        setIsLoadingForm(false)
       }
     }
     fetchEvent()
@@ -141,7 +145,7 @@ export default function FormsPage() {
 
   useEffect(() => {
     if (event && keyForm) {
-      const form = user.forms.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
+      const form = user.forms.find((f) => f.id === (event[keyForm as keyof Event] as { id: string, key: string })?.id)
       if (form) {
         const initialValues: Record<string, (string | boolean)> = {}
         form.fields.forEach((campo) => {
@@ -154,7 +158,7 @@ export default function FormsPage() {
 
   useEffect(() => {
     if (event && keyForm) {
-      const form = user.forms.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
+      const form = user.forms.find((f) => f.id === (event[keyForm as keyof Event] as { id: string, key: string })?.id)
       if (form) {
         const totalFields = form.fields.filter((campo) => campo.required).length
         const completedFields = form.fields
@@ -178,7 +182,7 @@ export default function FormsPage() {
     }
   }, [event, keyForm])
 
-  if (isLoading || !isLoaded) {
+  if (isLoading || !isLoaded || isLoadingForm) {
     return <div className="flex flex-col gap-4 justify-center items-center h-full">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-muted-foreground">Cargando...</p>
@@ -197,7 +201,7 @@ export default function FormsPage() {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
 
-  const sceneryId = (event?.scenery as { id: number, key: string })?.id
+  const sceneryId = (event?.scenery as { id: string, key: string })?.id
   if (!sceneryId && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.SCENERY_NOT_FOUND} />
   }
@@ -260,14 +264,14 @@ export default function FormsPage() {
           setSubmitted(true)
 
           const payload = {
-            idEvent: Number(idEvent),
+            idEvent: idEvent,
             typeForm: typeForm,
             data: sanitizedFormValues
           }
 
           const newUser = { ...user }
           newUser.events = newUser.events.map((eventUser) => {
-            if (eventUser.id === Number(idEvent)) {
+            if (eventUser.id === idEvent) {
               const formKey = typeForm as 'assists' | 'inscriptions'
               return { ...eventUser, [formKey]: [...(eventUser[formKey] || []), sanitizedFormValues] };
             }

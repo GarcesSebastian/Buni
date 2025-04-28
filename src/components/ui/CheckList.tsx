@@ -23,16 +23,16 @@ import { Input } from "./Input"
 import { ItemList } from "../services/Dialogs/Forms/CreateDialog"
 
 interface Field {
-    id: number,
+    id: string,
     value: string
 }
 
 interface SorteableFieldProps {
     campo: Field,
-    onDelete: (id: number) => void,
-    onEdit: (id: number) => void,
-    editingField: number | null,
-    handleEdit: (id: number, value: string) => void,
+    onDelete: (id: string) => void,
+    onEdit: (id: string) => void,
+    editingField: string | null,
+    handleEdit: (id: string, value: string) => void,
     isOpen: Record<string, boolean>,
     setIsOpen: (value: Record<string, boolean>) => void
 }
@@ -43,7 +43,7 @@ interface CheckListProps {
     normalizeString: (str: string) => string
 }
 
-const SorteableOptions = ({campo, onDelete, onEdit}: {campo: Field, onDelete: (id: number) => void, onEdit: (id: number) => void}) => {
+const SorteableOptions = ({campo, onDelete, onEdit}: {campo: Field, onDelete: (id: string) => void, onEdit: (id: string) => void}) => {
     return (
         <>
             <Button
@@ -151,7 +151,7 @@ function SortableCampo({ campo, onDelete, onEdit, editingField, handleEdit, isOp
 
 const CheckList = ({itemsList, setItemsList, normalizeString}: CheckListProps) => {
     const [currentItem, setCurrentItem] = useState<string>("Crear nuevo")
-    const [editingField, setEditingField] = useState<number | null>(null)
+    const [editingField, setEditingField] = useState<string | null>(null)
     const [isOpenItems, setIsOpenItems] = useState<Record<string, boolean>>({})
     const [error, setError] = useState<string>("")
 
@@ -178,7 +178,7 @@ const CheckList = ({itemsList, setItemsList, normalizeString}: CheckListProps) =
         }
     }
 
-    const deleteField = (id: number) => {
+    const deleteField = (id: string) => {
         setItemsList((prev: ItemList[]) => prev.filter((item) => item.id !== id))
         setIsOpenItems((prev: Record<string, boolean>) => {
             const newIsOpen = {...prev}
@@ -200,17 +200,17 @@ const CheckList = ({itemsList, setItemsList, normalizeString}: CheckListProps) =
         }
 
         const newId = itemsList[itemsList.length - 1] ? itemsList[itemsList.length - 1].id + 1 : 1
-        setItemsList((prev: ItemList[]) => [...prev, {id: newId, value: currentItem}])
+        setItemsList((prev: ItemList[]) => [...prev, {id: newId.toString(), value: currentItem}])
         setCurrentItem("Crear nuevo")
         setIsOpenItems((prev: Record<string, boolean>) => ({...prev, [newId.toString()]: false}))
         setError("")
     }
 
-    const editField = (id: number) => {
+    const editField = (id: string) => {
         setEditingField(id)
     }
 
-    const handleEdit = (id: number, value: string) => {
+    const handleEdit = (id: string, value: string) => {
         if (value.trim() === "") {
             setError("El campo no puede estar vacío")
             return

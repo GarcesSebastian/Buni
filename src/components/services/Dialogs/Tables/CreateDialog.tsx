@@ -35,7 +35,7 @@ interface Props {
 }
 
 interface UpdatedFormData {
-  [key: string]: string | number | { value: string; data: Form | { id: number; nombre: string } } | DataExtraValue;
+  [key: string]: string | number | { value: string; data: Form | { id: string; nombre: string } } | DataExtraValue;
 }
 
 export function CreateEventDialog({ data, open, onOpenChange }: Props) {
@@ -74,7 +74,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
           const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "forms" : key
           const dataId = dataSplit[dataSplit.length - 1]
-          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: string; nombre: string })[]).find(d => d.id == dataId)
           if(findDataUser){
             updatedFormData[key] = {
               id: findDataUser.id,

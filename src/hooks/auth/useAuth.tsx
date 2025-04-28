@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 import { Permissions } from '@/types/Permissions';
 
 interface User {
-    id: number;
+    id: string;
     name: string;
     email: string;
     role: string;

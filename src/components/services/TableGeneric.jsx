@@ -181,7 +181,7 @@ export function TableGeneric({structure, structureForm, table}) {
       return data[value]
     }
 
-    const dataFind = user[DataEvent.key]?.find((f) => f.id === Number(DataEvent.id))
+    const dataFind = user[DataEvent.key]?.find((f) => f.id === DataEvent.id)
     return dataFind?.name || dataFind?.nombre
   }
 

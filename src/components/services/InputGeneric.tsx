@@ -34,15 +34,15 @@ const options = ["text", "number", "date", "datetime-local", "time", "email"]
 
 export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     const [isUnlimited, setIsUnlimited] = useState(formData[data.key] === "-1");
-    let valueFormatted: string | {id: number, name: string} = "";
+    let valueFormatted: string | {id: string, name: string} = "";
 
-    const getValueFormatted = (user: User, value: string | {id: number, key: string}, key: string): string | {id: number, name: string} => {
+    const getValueFormatted = (user: User, value: string | {id: string, key: string}, key: string): string | {id: string, name: string} => {
         if(typeof value != "object"){
             return value
         }
 
         const keyData = user[key as keyof User];
-        const valueFormatted = keyData?.find((d: { id: number }) => d.id == Number(value.id)) as { id: number, name: string }
+        const valueFormatted = keyData?.find((d: { id: string }) => d.id == value.id) as { id: string, name: string }
 
         if(!valueFormatted){
             return ""
@@ -55,7 +55,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
         const keyFormatted = data.key == "formAssists" || data.key == "formInscriptions" ? "forms" : data.key
         const valueInit = formData[data.key] 
 
-        valueFormatted = getValueFormatted(user, valueInit as string | {id: number, key: string}, keyFormatted)
+        valueFormatted = getValueFormatted(user, valueInit as string | {id: string, key: string}, keyFormatted)
     }
 
     if (options.includes(data.form.type)) {
