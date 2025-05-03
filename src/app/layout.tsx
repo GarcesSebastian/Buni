@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <link rel="shortcut icon" href="/logo-buni.png" type="image/x-icon" />
+        <link rel="shortcut icon" href="https://i.ibb.co/K8mMDbP/Logo.png" type="image/x-icon" />
       </head>
       <body className={inter.className}>
           <NotificationProvider>

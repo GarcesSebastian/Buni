@@ -211,12 +211,12 @@ export default function RolesPage() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={() => handleEditClick(role)}>
-                                                            <Edit className="mr-2 h-4 w-4" />
+                                                        <DropdownMenuItem className="text-green-800" onClick={() => handleEditClick(role)}>
+                                                            <Edit className="mr-2 h-4 w-4 text-green-800" />
                                                             Editar
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleDeleteClick(role)}>
-                                                            <Trash className="mr-2 h-4 w-4" />
+                                                        <DropdownMenuItem className="text-red-800" onClick={() => handleDeleteClick(role)}>
+                                                            <Trash className="mr-2 h-4 w-4 text-red-800" />
                                                             Eliminar
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
