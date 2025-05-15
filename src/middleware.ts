@@ -69,7 +69,8 @@ export async function middleware(req: NextRequest): Promise<Response> {
                     response.cookies.delete('token');
                     return response;
                 }
-            } catch (e) {
+            } catch (e: unknown) {
+                console.error(e)
                 return NextResponse.next();
             }
         }
