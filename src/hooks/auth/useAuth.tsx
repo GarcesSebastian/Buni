@@ -102,12 +102,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const logout = () => {
-        Cookies.remove('token');
-        Cookies.remove('events');
         setUser(null);
         setIsAuthenticated(false);
         setIsLoading(false);
-        router.push('/');
+        
+        Cookies.remove('token');
+        
+        setTimeout(() => {
+            router.push('/');
+        }, 50);
     };
 
     return (

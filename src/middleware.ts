@@ -47,6 +47,10 @@ export async function middleware(req: NextRequest) {
     console.log('Middleware - Params:', params);
     console.log('Middleware - Token:', token);
 
+    if (path.includes('/wp-admin/')) {
+        return NextResponse.redirect(new URL('/', req.url));
+    }
+
     if (isPublicPath(path)) {
         if (params[0] === 'forms') {
             return redirectToForms(params, req);
@@ -56,7 +60,18 @@ export async function middleware(req: NextRequest) {
 
     if (path === '/') {
         if (token) {
-            return NextResponse.redirect(new URL('/dashboard', req.url));
+            try {
+                const isValid = await verifyTokenWithBackend(token);
+                if (isValid) {
+                    return NextResponse.redirect(new URL('/dashboard', req.url));
+                } else {
+                    const response = NextResponse.redirect(new URL('/', req.url));
+                    response.cookies.delete('token');
+                    return response;
+                }
+            } catch (e) {
+                return NextResponse.next();
+            }
         }
         return NextResponse.next();
     }
