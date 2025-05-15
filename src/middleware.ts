@@ -43,15 +43,21 @@ export async function middleware(req: NextRequest) {
     const params = path.split('/').filter(Boolean);
     const token = req.cookies.get('token')?.value;
 
-    if (path === '/' && token) {
-        return NextResponse.redirect(new URL('/dashboard', req.url));
-    }
+    console.log('Middleware - Path:', path);
+    console.log('Middleware - Params:', params);
+    console.log('Middleware - Token:', token);
 
     if (isPublicPath(path)) {
         if (params[0] === 'forms') {
             return redirectToForms(params, req);
         }
+        return NextResponse.next();
+    }
 
+    if (path === '/') {
+        if (token) {
+            return NextResponse.redirect(new URL('/dashboard', req.url));
+        }
         return NextResponse.next();
     }
 
