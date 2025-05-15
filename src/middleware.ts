@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { redirectToForms, redirectToDevTools } from './lib/MiddlewareEvents';
 
 const publicPaths = [
-    '/',
     '/forms/assists', 
     '/forms/inscriptions',
 ];
@@ -46,6 +45,7 @@ export async function middleware(req: NextRequest): Promise<Response> {
     console.log('Middleware - Path:', path);
     console.log('Middleware - Params:', params);
     console.log('Middleware - Token:', token);
+    console.log("Middleware - isPublic:", isPublicPath(path))
 
     if (path.includes('/wp-admin/')) {
         return NextResponse.redirect(new URL('/', req.url));
@@ -55,6 +55,7 @@ export async function middleware(req: NextRequest): Promise<Response> {
         if (params[0] === 'forms') {
             return redirectToForms(params, req);
         }
+
         return NextResponse.next();
     }
 

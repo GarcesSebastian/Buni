@@ -604,8 +604,8 @@ export default function FormsPage() {
                       </Button>
                     ) : (
                       <Button type="button" onClick={handleNextSection} className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="ml-2 h-4 w-4" />}
                         Siguiente
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="ml-2 h-4 w-4" />}
                       </Button>
                     )}
                   </CardFooter>
