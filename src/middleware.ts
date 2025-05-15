@@ -42,11 +42,6 @@ export async function middleware(req: NextRequest): Promise<Response> {
     const params = path.split('/').filter(Boolean);
     const token = req.cookies.get('token')?.value;
 
-    console.log('Middleware - Path:', path);
-    console.log('Middleware - Params:', params);
-    console.log('Middleware - Token:', token);
-    console.log("Middleware - isPublic:", isPublicPath(path))
-
     if (path.includes('/wp-admin/')) {
         return NextResponse.redirect(new URL('/', req.url));
     }
