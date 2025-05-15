@@ -38,7 +38,7 @@ async function verifyTokenWithBackend(token: string): Promise<boolean> {
     }
 }
 
-export async function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest): Promise<Response> {
     const path = req.nextUrl.pathname;
     const params = path.split('/').filter(Boolean);
     const token = req.cookies.get('token')?.value;
