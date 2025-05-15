@@ -70,7 +70,7 @@ export async function middleware(req: NextRequest): Promise<Response> {
                     return response;
                 }
             } catch (e: unknown) {
-                console.error(e)
+                console.log(e)
                 return NextResponse.next();
             }
         }
