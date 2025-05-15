@@ -68,7 +68,7 @@ const useScenery = () => {
         }
     }
 
-    const deleteScenery = async (sceneryId: number) => {
+    const deleteScenery = async (sceneryId: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery/${sceneryId}`, {
                 method: "DELETE",

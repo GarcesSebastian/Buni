@@ -21,7 +21,7 @@ const useUsers = () => {
                 return;
             }
 
-            const usersFiltered = data.map((user: { id: number, name: string, email: string, password: string, role_id: number, created_at: string }) => ({
+            const usersFiltered = data.map((user: { id: string, name: string, email: string, password: string, role_id: string, created_at: string }) => ({
                 ...user,
                 roles: {
                     id: user.role_id,
@@ -76,7 +76,7 @@ const useUsers = () => {
         }
     }
 
-    const deleteUser = async (userId: number) => {
+    const deleteUser = async (userId: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
                 method: "DELETE",

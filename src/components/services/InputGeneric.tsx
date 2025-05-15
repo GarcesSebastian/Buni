@@ -5,11 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User } from "@/hooks/auth/useUserData";
 import { useState } from "react";
 import { Button } from "../ui/Button";
+
 interface PropsInputBasic {
     data: {
         form: {
             name: string;
-            type: "text" | "number" | "date" | "time" | "select" | "password" | "email";
+            type: "text" | "number" | "date" | "datetime-local" | "time" | "select" | "password" | "email";
             required?: boolean;
             options?: { value: string; label: string; id?: number }[];
         } & (
@@ -18,7 +19,7 @@ interface PropsInputBasic {
                 options: { value: string; label: string; id?: number }[];
             }
             | {
-                type: "text" | "number" | "date" | "time" | "password" | "email";
+                type: "text" | "number" | "date" | "datetime-local" | "time" | "password" | "email";
             }
         );
         key: string;
@@ -29,19 +30,19 @@ interface PropsInputBasic {
     user?: User
 }
 
-const options = ["text", "number", "date", "time", "email"]
+const options = ["text", "number", "date", "datetime-local", "time", "email"]
 
 export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     const [isUnlimited, setIsUnlimited] = useState(formData[data.key] === "-1");
-    let valueFormatted: string | {id: number, name: string} = "";
+    let valueFormatted: string | {id: string, name: string} = "";
 
-    const getValueFormatted = (user: User, value: string | {id: number, key: string}, key: string): string | {id: number, name: string} => {
+    const getValueFormatted = (user: User, value: string | {id: string, key: string}, key: string): string | {id: string, name: string} => {
         if(typeof value != "object"){
             return value
         }
 
         const keyData = user[key as keyof User];
-        const valueFormatted = keyData?.find((d: { id: number }) => d.id == Number(value.id)) as { id: number, name: string }
+        const valueFormatted = keyData?.find((d: { id: string }) => d.id == value.id) as { id: string, name: string }
 
         if(!valueFormatted){
             return ""
@@ -54,7 +55,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
         const keyFormatted = data.key == "formAssists" || data.key == "formInscriptions" ? "forms" : data.key
         const valueInit = formData[data.key] 
 
-        valueFormatted = getValueFormatted(user, valueInit as string | {id: number, key: string}, keyFormatted)
+        valueFormatted = getValueFormatted(user, valueInit as string | {id: string, key: string}, keyFormatted)
     }
 
     if (options.includes(data.form.type)) {
@@ -93,6 +94,21 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
             )
         }
 
+        if (data.form.type === "datetime-local") {
+            return(
+                <>
+                    <Label>{data.form.name}</Label>
+                    <Input
+                        key={data.index}
+                        type="datetime-local"
+                        value={valueFormatted as string}
+                        onChange={data.onChange}
+                        required={data.form.required}
+                    />
+                </>
+            )
+        }
+
         return(
             <>
                 <Label>{data.form.name}</Label>
@@ -119,7 +135,7 @@ export const InputBasic = ({formData, data, user}: PropsInputBasic) => {
     } else if(data.form.type == "select"){
         return(
             <>
-                <Label htmlFor="faculty">{data.form.name}</Label>
+                <Label htmlFor="programs">{data.form.name}</Label>
                 <Select
                     key={data.index}
                     value={typeof valueFormatted == "object" ? valueFormatted.name + "_" + valueFormatted.id : valueFormatted}

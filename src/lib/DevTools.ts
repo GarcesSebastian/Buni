@@ -1,4 +1,4 @@
-import { generateSampleData } from "@/app/events/[id]/data"
+import { generateSampleData } from "@/lib/DataTesting"
 import { User } from "@/hooks/auth/useUserData"
 import { Event } from "@/types/Events"
 import { Form } from "@/types/Forms"
@@ -10,7 +10,7 @@ export interface TestConfig {
     delay: number
     interval: number
     dataType: string
-    eventId?: number
+    eventId?: string
     dataPerInterval?: number
     currentIteration: number
     status: 'idle' | 'running' | 'paused' | 'cancelled'
@@ -133,7 +133,7 @@ export class DevToolsService {
         await new Promise(resolve => setTimeout(resolve, interval))
     }
 
-    public async generateAssists(interval: number, user: User, eventId: number | undefined, dataPerInterval: number = 1) {
+    public async generateAssists(interval: number, user: User, eventId: string | undefined, dataPerInterval: number = 1) {
         if (this.isCancelled) return
 
         const event = user.events.find((event: Event) => event.id === eventId)
@@ -142,15 +142,14 @@ export class DevToolsService {
             throw new Error("No se encontró el evento")
         }
 
-        const formAssistsUser = user.forms.find((form: Form) => form.id === event.formAssists.id)
+        const formAssistsUser = user.forms.find((form: Form) => form.id === event.formAssists?.id)
 
         if (!formAssistsUser) {
             throw new Error("No se encontró el formulario de asistencias")
         }
 
-        const dataGenerated = await generateSampleData(dataPerInterval, formAssistsUser, (progress: number) => {
+        const dataGenerated = await generateSampleData(dataPerInterval, formAssistsUser, () => {
             if (this.isCancelled) return
-            console.log(`Progreso: ${progress}%`)
         })
 
         if (this.isCancelled) return
@@ -159,7 +158,7 @@ export class DevToolsService {
             if (this.isCancelled) break
 
             const payload = {
-                idEvent: Number(eventId),
+                idEvent: eventId,
                 typeForm: "assists",
                 data: data
             }
@@ -171,7 +170,7 @@ export class DevToolsService {
         }
     }
 
-    public async generateInscriptions(interval: number, user: User, eventId: number | undefined, dataPerInterval: number = 1) {
+    public async generateInscriptions(interval: number, user: User, eventId: string | undefined, dataPerInterval: number = 1) {
         if (this.isCancelled) return
 
         const event = user.events.find((event: Event) => event.id === eventId)
@@ -180,15 +179,14 @@ export class DevToolsService {
             throw new Error("No se encontró el evento")
         }
 
-        const formInscriptionsUser = user.forms.find((form: Form) => form.id === event.formInscriptions.id)
+        const formInscriptionsUser = user.forms.find((form: Form) => form.id === event.formInscriptions?.id)
 
         if (!formInscriptionsUser) {
             throw new Error("No se encontró el formulario de inscripciones")
         }
 
-        const dataGenerated = await generateSampleData(dataPerInterval, formInscriptionsUser, (progress: number) => {
+        const dataGenerated = await generateSampleData(dataPerInterval, formInscriptionsUser, () => {
             if (this.isCancelled) return
-            console.log(`Progreso: ${progress}%`)
         })
 
         if (this.isCancelled) return
@@ -197,7 +195,7 @@ export class DevToolsService {
             if (this.isCancelled) break
 
             const payload = {
-                idEvent: Number(eventId),
+                idEvent: eventId,
                 typeForm: "inscriptions",
                 data: data
             }

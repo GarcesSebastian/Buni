@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { ChevronDown, ChevronRight, Menu, LogOut } from "lucide-react"
 import { ConfigSideBar } from "@/components/config/SideBar"
@@ -10,6 +10,7 @@ import { useUserData } from "@/hooks/auth/useUserData"
 import { useAuth } from "@/hooks/auth/useAuth"
 
 export function SideBar() {
+  const router = useRouter()
   const { states, setStates } = useUserData()
   const { user, logout } = useAuth()
   const pathname = usePathname()
@@ -57,6 +58,17 @@ export function SideBar() {
     })
   }
 
+  const handleItemClick = (href: string, hasChildren?: boolean, title?: string) => {
+    if (hasChildren && title) {
+      toggleItem(title)
+    } else {
+      if (isDeviceMobile) {
+        toggleExpand()
+      }
+      router.push(href)
+    }
+  }
+
   if (isAuthenticated) {
     return <div></div>
   }
@@ -66,9 +78,7 @@ export function SideBar() {
   const openItems = states.sidebarOpenItems || []
 
   return (
-    <div 
-      className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? "w-64 h-screen" : isDeviceMobile ? "w-16 h-fit" : "w-16 h-full"}`}
-    >
+    <div className={`bg-primary text-white transition-all duration-300 ease-in-out max-md:w-full max-md:px-2 md:overflow-y-auto flex flex-col ${isExpanded ? isDeviceMobile ? "w-full h-fit max-h-full" : "w-64 h-full" : isDeviceMobile ? "w-full h-fit" : "w-16 h-full"}`}>
       <div className={`py-4 flex items-center ${isExpanded ? "md:px-4 justify-between" : "px-0 md:justify-center justify-between"}`}>
         <span className={`font-bold text-xl ${isExpanded ? "md:initial" : "md:hidden"}`}>BUNI</span>
         <Button
@@ -83,16 +93,14 @@ export function SideBar() {
         </Button>
       </div>
       <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? "max-md:initial" : "max-md:hidden"}`}>
-        <nav 
-          className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out flex-1 max-md:h-screen`}
-        >
+        <nav className={`overflow-y-auto overflow-x-hidden space-y-2 md:p-2 transition-all duration-300 ease-in-out flex-1 max-md:h-full`}>
           {ConfigSideBar.map((item) => (
             <div key={item.title}>
               <Link key={item.href} href={item.href || pathname}>
                 <Button
                   variant="ghost"
                   className={`w-full justify-left items-center text-white hover:text-white hover:bg-white/10 ${pathname === item.href ? "bg-white/10" : ""}`}
-                  onClick={() => item.children && toggleItem(item.title)}
+                  onClick={() => handleItemClick(item.href || pathname, !!item.children, item.title)}
                 >
                   <span className={`flex-shrink-0 ${isExpanded ? "max-md:flex" : "max-md:hidden"}`}>{item.icon}</span>
                   <div className={`w-full flex justify-left items-center ${isExpanded ? "flex" : "hidden"}`}>
@@ -113,6 +121,7 @@ export function SideBar() {
                       <Button
                         variant="ghost"
                         className={`w-full justify-left text-white hover:text-white hover:bg-white/10 ${pathname === child.href ? "bg-white/10" : ""}`}
+                        onClick={() => handleItemClick(child.href)}
                       >
                         <span className="flex-shrink-0">{child.icon}</span>
                         <span className="ml-2 whitespace-nowrap">{child.title}</span>

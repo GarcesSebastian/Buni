@@ -3,27 +3,24 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-
-type PermissionKey = 
-    | 'create_event' | 'edit_event' | 'delete_event' | 'view_event'
-    | 'create_user' | 'edit_user' | 'delete_user' | 'view_user'
-    | 'create_role' | 'edit_role' | 'delete_role' | 'view_role'
-    | 'create_faculty' | 'edit_faculty' | 'delete_faculty' | 'view_faculty'
-    | 'create_scenery' | 'edit_scenery' | 'delete_scenery' | 'view_scenery';
+import { Permissions } from '@/types/Permissions';
 
 interface User {
-    id: number;
+    id: string;
     name: string;
     email: string;
     role: string;
-    permissions: Record<PermissionKey, boolean>;
+    permissions: Permissions | string;
     created_at: string;
 }
 
-interface AuthState {
+export interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
+    setUser: (user: User | null) => void;
+    setIsAuthenticated: (isAuthenticated: boolean) => void;
+    setIsLoading: (isLoading: boolean) => void;
 }
 
 interface AuthContextType extends AuthState {
@@ -34,23 +31,20 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [authState, setAuthState] = useState<AuthState>({
-        user: null,
-        isAuthenticated: false,
-        isLoading: true
-    });
     const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
 
     useEffect(() => {
         const verifyToken = async () => {
             const token = Cookies.get('token');
             
             if (!token) {
-                setAuthState({
-                    user: null,
-                    isAuthenticated: false,
-                    isLoading: false
-                });
+                setUser(null);
+                setIsAuthenticated(false);
+                setIsLoading(false);
 
                 return;
             }
@@ -69,11 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 logout();
             }
 
-            setAuthState({
-                user: data.user as User,
-                isAuthenticated: true,
-                isLoading: false
-            });
+            setUser(data.user as User);
+            setIsAuthenticated(true);
+            setIsLoading(false);
         };
 
         verifyToken();
@@ -98,11 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             Cookies.set('token', data.token, { expires: 1 });
 
-            setAuthState({
-                user: data.user as User,
-                isAuthenticated: true,
-                isLoading: false
-            });
+            setUser(data.user as User);
+            setIsAuthenticated(true);
+            setIsLoading(false);
 
             router.push('/dashboard');
         } catch (error) {
@@ -112,18 +102,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const logout = () => {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        
         Cookies.remove('token');
-        Cookies.remove('events');
-        setAuthState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false
-        });
-        router.push('/');
+        
+        setTimeout(() => {
+            router.push('/');
+        }, 50);
     };
 
     return (
-        <AuthContext.Provider value={{ ...authState, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, isLoading, setUser, setIsAuthenticated, setIsLoading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

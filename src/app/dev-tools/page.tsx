@@ -20,7 +20,7 @@ interface TestFormConfig {
     delay: number
     interval: number
     dataType: string
-    eventId?: number
+    eventId?: string
     dataPerInterval?: number
 }
 

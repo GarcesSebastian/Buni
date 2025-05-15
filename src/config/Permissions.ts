@@ -1,69 +1,89 @@
-export type PermissionAction = 'create' | 'edit' | 'delete' | 'view';
+import { Permissions, PermissionModule } from "@/types/Permissions";
 
-export interface PermissionModule {
-    id: string;
-    name: string;
-    description: string;
-    actions: PermissionAction[];
-}
+export const permissionsDefault: Permissions = {
+    events: {
+        create: false,
+        edit: false,
+        delete: false,
+        view: false
+    },
+    users: {
+        create: false,
+        edit: false,
+        delete: false,
+        view: false
+    },
+    roles: {
+        create: false,
+        edit: false,
+        delete: false,
+        view: false
+    },
+    programs: {
+        create: false,
+        edit: false,
+        delete: false,
+        view: false
+    },
+    scenery: {
+        create: false,
+        edit: false,
+        delete: false,
+        view: false
+    },
+    forms: {
+        create: false,
+        edit: false,
+        delete: false,
+        view: false
+    },
+    additional: {
+        export: false,
+        import: false
+    }
+};
 
 export const permissionModules: PermissionModule[] = [
     {
-        id: 'event',
+        id: 'events',
         name: 'Eventos',
         description: 'Gestión de eventos y actividades',
-        actions: ['create', 'edit', 'delete', 'view']
+        actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
     },
     {
-        id: 'user',
+        id: 'users',
         name: 'Usuarios',
         description: 'Gestión de usuarios del sistema',
-        actions: ['create', 'edit', 'delete', 'view']
+        actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
     },
     {
-        id: 'role',
+        id: 'roles',
         name: 'Roles',
         description: 'Gestión de roles y permisos',
-        actions: ['create', 'edit', 'delete', 'view']
+        actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
     },
     {
-        id: 'faculty',
+        id: 'programs',
         name: 'Programas',
         description: 'Gestión de programas académicos',
-        actions: ['create', 'edit', 'delete', 'view']
+        actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
     },
     {
         id: 'scenery',
         name: 'Escenarios',
         description: 'Gestión de escenarios y espacios',
-        actions: ['create', 'edit', 'delete', 'view']
+        actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
+    },
+    {
+        id: 'forms',
+        name: 'Formularios',
+        description: 'Gestión de formularios',
+        actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
+    },
+    {
+        id: 'additional',
+        name: 'Adicional',
+        description: 'Permisos adicionales',
+        actions: [{ id: 'export', name: 'Exportar' }, { id: 'import', name: 'Importar' }]
     }
 ];
-
-export type PermissionKey = `${PermissionAction}_${PermissionModule['id']}`;
-
-export const generatePermissionKey = (action: PermissionAction, moduleId: string): PermissionKey => {
-    return `${action}_${moduleId}` as PermissionKey;
-};
-
-export const generateAllPermissions = (): Record<PermissionKey, boolean> => {
-    const permissions: Record<PermissionKey, boolean> = {};
-    
-    permissionModules.forEach(module => {
-        module.actions.forEach(action => {
-            const key = generatePermissionKey(action, module.id);
-            permissions[key] = false;
-        });
-    });
-
-    return permissions;
-};
-
-export const getPermissionGroups = () => {
-    return permissionModules.reduce((groups, module) => {
-        groups[module.name] = module.actions.map(action => 
-            generatePermissionKey(action, module.id)
-        );
-        return groups;
-    }, {} as Record<string, PermissionKey[]>); 
-};

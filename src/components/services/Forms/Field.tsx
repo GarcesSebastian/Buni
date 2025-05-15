@@ -267,6 +267,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                         </tbody>
                     </table>
                 </div>
+                {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
             </div>
         )
 
@@ -319,6 +320,7 @@ const Field = ({field, formValues, setFormValues, errors, setErrors}: Props) => 
                         </tbody>
                     </table>
                 </div>
+                {errors[field.id] && <p className="text-sm text-red-500">{errors[field.id]}</p>}
             </div>
         )
 

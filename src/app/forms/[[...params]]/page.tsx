@@ -12,10 +12,6 @@ import { Badge } from "@/components/ui/Badge"
 import {
   Save,
   CheckCircle2,
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
@@ -32,17 +28,19 @@ import { getDataForm as getDataFormFromBackend } from "@/lib/DataSync"
 import { useNotification } from "@/hooks/client/useNotification"
 import { Form } from "@/types/Forms"
 import { useSocket } from "@/hooks/server/useSocket"
+import { validateForm } from "@/lib/FormsValidation"
+import { Countdown } from "@/components/ui/Countdown"
 
 export type formOptionsType = string | boolean | string[] | number
 
-const getDataForm = async (eventId: number, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery} | undefined> => {
+const getDataForm = async (eventId: string, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date} | undefined> => {
   const form = await getDataFormFromBackend(eventId, typeForm)
   return form
 }
 
 export default function FormsPage() {
   const params = useParams();
-  const { user, setUser } = useUserData()
+  const { user, setUser, isLoaded } = useUserData()
   const { showNotification } = useNotification()
   const { socket } = useSocket()
   const { params: dynamicParams } = params || {}; 
@@ -62,26 +60,98 @@ export default function FormsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
-  useEffect(() => {
-    const fetchEvent = async () => {
-      if (user && idEvent) {
-        const data = await getDataForm(Number(idEvent), keyForm)
-        if (data) {
-          setEvent(data.event)
-          setCurrentForm(data.form)
-          setScenery(data.scenery)
+  const [isLoadingForm, setIsLoadingForm] = useState(true)
+  const [isFormAvailable, setIsFormAvailable] = useState(false)
+  const [isFormClosed, setIsFormClosed] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  })
 
-          setIsActive(data.event.state === "true")
-        }
+  const updateDataForm = async (data: {event: Event, form: Form, scenery: Scenery, date_now: Date}) => {
+    if (data) {
+      setEvent(data.event)
+      setCurrentForm(data.form)
+      setScenery(data.scenery)
+      setIsActive(data.event.state === "true")
+      
+      const startDateTime = new Date(data.event.horarioInicio)
+      const endDateTime = new Date(data.event.horarioFin)
+
+      const now = data.date_now
+      if (now >= startDateTime && now <= endDateTime) {
+        setIsFormAvailable(true)
+      } else {
+        setIsFormAvailable(false)
+      }
+
+      if (now > endDateTime) {
+        setIsFormClosed(true)
+      } else {
+        setIsFormClosed(false)
       }
     }
-    fetchEvent()
+  }
+  
+  useEffect(() => {
+    if (idEvent) {
+      const handleFetchEvent = async () => {
+        setIsLoadingForm(true)
+        const data = await getDataForm(idEvent, keyForm)
+        if (data) {
+          await updateDataForm(data)
+        }
+        setIsLoadingForm(false)
+      }
+
+      handleFetchEvent()
+    }
   }, [user, idEvent])
 
   useEffect(() => {
+    if (event && isFormAvailable && !isFormClosed) {
+      const calculateTimeLeft = () => {
+        const now = new Date()
+        const endDateTime = new Date(event.horarioFin)
+        const difference = endDateTime.getTime() - now.getTime()
+
+        if (difference <= 0) {
+          setIsFormClosed(true)
+          return {
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+          }
+        }
+
+        return {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        }
+      }
+
+      setTimeLeft(calculateTimeLeft())
+      const timer = setInterval(() => {
+        setTimeLeft(calculateTimeLeft())
+      }, 1000)
+
+      return () => clearInterval(timer)
+    }
+  }, [event, isFormAvailable, isFormClosed])
+
+  useEffect(() => {
     if (event && keyForm) {
-      const form = user.forms.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
+      const form = user.forms.find((f) => f.id === (event[keyForm as keyof Event] as { id: string, key: string })?.id)
       if (form) {
         const initialValues: Record<string, (string | boolean)> = {}
         form.fields.forEach((campo) => {
@@ -94,7 +164,7 @@ export default function FormsPage() {
 
   useEffect(() => {
     if (event && keyForm) {
-      const form = user.forms.find((f) => f.id === Number((event[keyForm as keyof Event] as { id: number, key: string })?.id))
+      const form = user.forms.find((f) => f.id === (event[keyForm as keyof Event] as { id: string, key: string })?.id)
       if (form) {
         const totalFields = form.fields.filter((campo) => campo.required).length
         const completedFields = form.fields
@@ -108,6 +178,8 @@ export default function FormsPage() {
         setProgress(calculatedProgress)
       }
     }
+
+    setIsLoading(false)
   }, [formValues, event, keyForm, user.forms])
 
   useEffect(() => {
@@ -116,79 +188,34 @@ export default function FormsPage() {
     }
   }, [event, keyForm])
 
-  if (isLoading) {
+  if (isLoading || !isLoaded || isLoadingForm) {
     return <div className="flex flex-col gap-4 justify-center items-center h-full">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-muted-foreground">Cargando...</p>
     </div>
   }
 
-  if (!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) {
+  if ((!dynamicParams || dynamicParams.length === 0 || !typeForm || !idEvent) && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.INVALID_PARAMS} />
   }
 
-  if (!event) {
+  if (!event && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.EVENT_NOT_FOUND} />
   }
 
-  if (!currentForm) {
+  if (!currentForm && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.FORM_NOT_FOUND} />
   }
 
-  const sceneryId = (event.scenery as { id: number, key: string })?.id
-  if (!sceneryId) {
+  const sceneryId = (event?.scenery as { id: string, key: string })?.id
+  if (!sceneryId && !isLoaded) {
     return <ErrorMessage {...ERROR_MESSAGES.SCENERY_NOT_FOUND} />
   }
 
   const secciones = {
-      personal: currentForm.fields.filter((campo) => campo.section === "personal") || [],
-      academic: currentForm.fields.filter((campo) => campo.section === "academic") || [],
-      additional: currentForm.fields.filter((campo) => campo.section === "additional") || [],
-  }
-
-  const validateForm = (sectionToValidate?: string) => {
-    const newErrors: Record<string, string> = {}
-
-    const camposAValidar = sectionToValidate
-      ? currentForm.fields.filter((campo) => campo.section === sectionToValidate)
-      : currentForm.fields
-
-    camposAValidar.forEach((campo) => {
-      if (campo.required) {
-        if (campo.type === "checkbox" && !formValues[campo.id]) {
-          newErrors[campo.id] = "Este campo es obligatorio"
-        } else if (campo.type === "checklist_single_grid" || campo.type === "checklist_multiple_grid") {
-          const gridValues = formValues[campo.id] as Record<string, string | string[]> || {}
-          const hasAllRowsSelected = campo.options?.every((opcion) => {
-            if (typeof opcion === 'object') {
-              const rowKey = `${campo.id}-${opcion.row}`
-              if (campo.type === "checklist_single_grid") {
-                return gridValues[rowKey] !== undefined && gridValues[rowKey] !== ""
-              } else {
-                return Array.isArray(gridValues[rowKey]) && (gridValues[rowKey] as string[]).length > 0
-              }
-            }
-            return false
-          })
-
-          if (!hasAllRowsSelected) {
-            newErrors[campo.id] = "Debe seleccionar al menos una opción en cada fila"
-          }
-        } else if (
-          campo.type !== "checkbox" &&
-          (!formValues[campo.id] || formValues[campo.id].toString().trim() === "")
-        ) {
-          newErrors[campo.id] = "Este campo es obligatorio"
-        }
-      }
-
-      if (campo.type === "email" && formValues[campo.id] && !/\S+@\S+\.\S+/.test(formValues[campo.id] as string)) {
-        newErrors[campo.id] = "Ingrese un correo electrónico válido"
-      }
-    })
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+      personal: currentForm?.fields.filter((campo) => campo.section === "personal") || [],
+      academic: currentForm?.fields.filter((campo) => campo.section === "academic") || [],
+      additional: currentForm?.fields.filter((campo) => campo.section === "additional") || [],
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -196,7 +223,7 @@ export default function FormsPage() {
     setIsSubmitting(true)
 
     try {
-      if (validateForm()) {
+      if (validateForm({currentForm, formValues, callback: setErrors})) {
         const newFormValues: Record<string, formOptionsType> = {}
         Object.keys(formValues).forEach((key) => {
           const value = formValues[key]
@@ -243,16 +270,16 @@ export default function FormsPage() {
           setSubmitted(true)
 
           const payload = {
-            idEvent: Number(idEvent),
+            idEvent: idEvent,
             typeForm: typeForm,
             data: sanitizedFormValues
           }
 
           const newUser = { ...user }
           newUser.events = newUser.events.map((eventUser) => {
-            if (eventUser.id === Number(idEvent)) {
+            if (eventUser.id === idEvent) {
               const formKey = typeForm as 'assists' | 'inscriptions'
-              return { ...eventUser, [formKey]: [...eventUser[formKey], sanitizedFormValues] };
+              return { ...eventUser, [formKey]: [...(eventUser[formKey] || []), sanitizedFormValues] };
             }
             return eventUser
           })
@@ -279,15 +306,15 @@ export default function FormsPage() {
 
   const handleNextSection = () => {
     if (currentSection === "personal") {
-      if (validateForm("personal")) {
+      if (validateForm({currentForm, formValues, sectionToValidate: "personal", callback: setErrors})) {
         setCurrentSection("academic")
       }
     } else if (currentSection === "academic") {
-      if (validateForm("academic")) {
+      if (validateForm({currentForm, formValues, sectionToValidate: "academic", callback: setErrors})) {
         setCurrentSection("additional")
       }
     } else if (currentSection === "additional") {
-      if (validateForm("additional")) {
+      if (validateForm({currentForm, formValues, sectionToValidate: "additional", callback: setErrors})) {
         setShowPreview(true)
       }
     }
@@ -303,6 +330,27 @@ export default function FormsPage() {
     }
   }
 
+  if (!isFormAvailable && event) {
+    const startDateTime = new Date(event.horarioInicio)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Countdown 
+          targetDate={startDateTime.toISOString()} 
+          onComplete={() => setIsFormAvailable(true)}
+        />
+      </div>
+    )
+  }
+
+  if (isFormClosed) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h2 className="text-2xl font-bold mb-4">El evento ha finalizado</h2>
+        <p className="text-muted-foreground">Lo sentimos, este formulario ya no está disponible.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full">
       <div className="h-full bg-gray-100">
@@ -310,15 +358,32 @@ export default function FormsPage() {
           <div className="max-w-4xl mx-auto">
             <div className="flex max-md:flex-col gap-2 justify-start items-center mb-6">
               <Link href="/events" className="mr-4">
-                  <Button variant="outline" size="icon" className="flex justify-center items-center">
-                      <ArrowLeft className="h-4 w-4" />
-                  </Button>
+                <Button variant="outline" size="icon" className="flex justify-center items-center">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
               </Link>
               <div className="flex flex-col items-start justify-start gap-2 w-full">
-                <h1 className="text-2xl font-bold">{currentForm.name}</h1>
-                <p className="text-muted-foreground">{currentForm.description}</p>
+                <h1 className="text-2xl font-bold">{currentForm?.name}</h1>
+                <p className="text-muted-foreground">{currentForm?.description}</p>
               </div>
             </div>
+
+            {isFormAvailable && !isFormClosed && (
+              <div className="mb-6">
+                <div className="flex items-center justify-center gap-4 text-sm">
+                  <span className="text-muted-foreground">Tiempo restante:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{timeLeft.days}d</span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="font-medium">{timeLeft.hours}h</span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="font-medium">{timeLeft.minutes}m</span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="font-medium">{timeLeft.seconds}s</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <Card className={`${isActive ? "md:col-span-2" : "md:col-span-3"}`}>
@@ -332,23 +397,23 @@ export default function FormsPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-xl">{event?.nombre}</CardTitle>
-                  <CardDescription>{currentForm.description}</CardDescription>
+                  <CardDescription>{currentForm?.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{event?.fecha}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Horario de inicio</Badge>
+                    <span className="text-sm">{new Date(event?.horarioInicio || "").toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{event.hora}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Horario de fin</Badge>
+                    <span className="text-sm">{new Date(event?.horarioFin || "").toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Escenario</Badge>
                     <span className="text-sm">{scenery?.name}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">Cupos</Badge>
                     <span className="text-sm">
                       {event?.cupos == "-1" ? "Cupos ilimitados" : event?.cupos + " Cupos"}
                     </span>
@@ -398,8 +463,8 @@ export default function FormsPage() {
 
             <Card className="mb-8 print:shadow-none">
               <CardHeader className="flex flex-col">
-                <CardTitle>{event.nombre}</CardTitle>
-                <CardDescription>{currentForm.description}</CardDescription>
+                <CardTitle>{event?.nombre}</CardTitle>
+                <CardDescription>{currentForm?.description}</CardDescription>
               </CardHeader>
 
               {isSubmitting && (
@@ -539,8 +604,8 @@ export default function FormsPage() {
                       </Button>
                     ) : (
                       <Button type="button" onClick={handleNextSection} className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="ml-2 h-4 w-4" />}
                         Siguiente
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="ml-2 h-4 w-4" />}
                       </Button>
                     )}
                   </CardFooter>

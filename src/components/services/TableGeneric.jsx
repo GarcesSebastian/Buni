@@ -18,6 +18,7 @@ import CustomLoader from "@/components/ui/CustomLoader"
 export function TableGeneric({structure, structureForm, table}) {
   const { user, isLoaded } = useUserData()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -34,6 +35,10 @@ export function TableGeneric({structure, structureForm, table}) {
   const [openDelete, setOpenDelete] = useState(false)
   const [eventToDelete, setEventToDelete] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const userTableData = useMemo(() => {
     if (!isLoaded) return [];
@@ -84,10 +89,9 @@ export function TableGeneric({structure, structureForm, table}) {
         structureForm[value].options = rest
       }
     })
-
   }, [isLoaded, structureForm, user]);
 
-  if(!isLoaded){
+  if(!mounted || !isLoaded){
     return (
       <CustomLoader />
     )
@@ -164,6 +168,10 @@ export function TableGeneric({structure, structureForm, table}) {
         )
       }
 
+      if (value === "horarioInicio" || value === "horarioFin") {
+        return new Date(data[value]).toLocaleString("es-ES", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
+      }
+
       return data[value]
     }
 
@@ -173,7 +181,7 @@ export function TableGeneric({structure, structureForm, table}) {
       return data[value]
     }
 
-    const dataFind = user[DataEvent.key]?.find((f) => f.id === Number(DataEvent.id))
+    const dataFind = user[DataEvent.key]?.find((f) => f.id === DataEvent.id)
     return dataFind?.name || dataFind?.nombre
   }
 

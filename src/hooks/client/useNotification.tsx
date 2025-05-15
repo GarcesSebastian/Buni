@@ -139,7 +139,7 @@ function NotificationItem({
   }
 
   const baseClasses =
-    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md z-[999] transition-all duration-300 ease-in-out bg-white"
+    "fixed flex w-auto max-w-sm items-center rounded-lg border p-4 shadow-md transition-all duration-300 ease-in-out bg-white"
   const variantClasses = getVariantClasses(type)
   const positionClasses = getPositionClasses(position)
   const visibilityClasses = isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -148,7 +148,7 @@ function NotificationItem({
   const combinedClasses = `${baseClasses} ${variantClasses} ${positionClasses} ${visibilityClasses} ${exitingClasses}`
 
   return (
-    <div className={combinedClasses} role="alert" style={getPositionStyle()}>
+    <div className={combinedClasses} role="alert" style={{zIndex: 99999, ...getPositionStyle()}}>
       <div className="flex gap-2 w-full items-start">
         {getIcon() && <div className="mr-3 flex-shrink-0">{getIcon()}</div>}
         <div className="flex-1">
@@ -176,7 +176,7 @@ function NotificationContainer({
   onClose: (id: string) => void
 }) {
   return (
-    <div className={`fixed z-[9999] ${position}`}>
+    <div className={`fixed ${position}`} style={{zIndex: 99999}}>
       {notifications.map((notification, index) => (
         <NotificationItem
           key={notification.id}

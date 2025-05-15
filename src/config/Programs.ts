@@ -1,17 +1,17 @@
-import { ConfigFaculty, ConfigFormFaculty, TableFaculty } from "@/types/Faculty"
+import { ConfigPrograms, ConfigFormPrograms, TablePrograms } from "@/types/Programs"
 
-export const tableFaculty: TableFaculty = {
+export const tablePrograms: TablePrograms = {
     name: "Programas",
-    key: "faculty",
+    key: "programs",
 }
 
-export const configFaculty: ConfigFaculty[] = [
+export const configPrograms: ConfigPrograms[] = [
     { key: "id", value: "ID", filter: true },
     { key: "name", value: "Nombre", filter: true },
     { key: "state", value: "Estados", filter: true },
 ]
 
-export const configFormFaculty: ConfigFormFaculty = {
+export const configFormPrograms: ConfigFormPrograms = {
     name: {
         name: "Nombre",
         type: "text"

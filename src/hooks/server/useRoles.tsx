@@ -17,7 +17,7 @@ const useRoles = () => {
             const data = await response.json();
 
             if (response.ok) {
-                const rolesFiltered = data.map((role: { id: number, name: string, permissions: Record<string, boolean>, state: string }) => ({
+                const rolesFiltered = data.map((role: { id: string, name: string, permissions: Record<string, boolean>, state: string }) => ({
                         id: role.id,
                         name: role.name,
                         permissions: role.permissions,
@@ -44,14 +44,14 @@ const useRoles = () => {
                 },
                 body: JSON.stringify(role)
             });
-            const data = await response.json();
+            const data_response = await response.json();
 
             if (response.ok) {
-                setRoles(data);
-                return data;
+                setRoles(data_response.data);
+                return data_response.data;
             }
 
-            throw new Error(data.error || 'Error al crear el rol');
+            throw new Error(data_response.error || 'Error al crear el rol');
         } catch (error) {
             throw error;
         }
@@ -81,7 +81,7 @@ const useRoles = () => {
         }
     }
 
-    const deleteRole = async (roleId: number) => {
+    const deleteRole = async (roleId: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/${roleId}`, {
                 method: "DELETE",

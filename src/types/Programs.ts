@@ -1,21 +1,21 @@
-export interface TableFaculty {
+export interface TablePrograms {
   name: string;
   key: string;
 }
 
-export interface Faculty {
-  id: number;
+export interface Programs {
+  id: string;
   name: string;
   state: string;
 }
 
-export interface ConfigFaculty {
+export interface ConfigPrograms {
   key: string;
   value: string;
   filter?: boolean;
 }
 
-export interface ConfigFormFaculty {
+export interface ConfigFormPrograms {
   name: {
     name: string;
     type: string;

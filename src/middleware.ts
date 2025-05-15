@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { redirectToForms, redirectToDevTools } from './lib/MiddlewareEvents';
 
 const publicPaths = [
-    '/',
     '/forms/assists', 
     '/forms/inscriptions',
 ];
@@ -38,13 +37,13 @@ async function verifyTokenWithBackend(token: string): Promise<boolean> {
     }
 }
 
-export async function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest): Promise<Response> {
     const path = req.nextUrl.pathname;
     const params = path.split('/').filter(Boolean);
     const token = req.cookies.get('token')?.value;
 
-    if (path === '/' && token) {
-        return NextResponse.redirect(new URL('/dashboard', req.url));
+    if (path.includes('/wp-admin/')) {
+        return NextResponse.redirect(new URL('/', req.url));
     }
 
     if (isPublicPath(path)) {
@@ -52,6 +51,25 @@ export async function middleware(req: NextRequest) {
             return redirectToForms(params, req);
         }
 
+        return NextResponse.next();
+    }
+
+    if (path === '/') {
+        if (token) {
+            try {
+                const isValid = await verifyTokenWithBackend(token);
+                if (isValid) {
+                    return NextResponse.redirect(new URL('/dashboard', req.url));
+                } else {
+                    const response = NextResponse.redirect(new URL('/', req.url));
+                    response.cookies.delete('token');
+                    return response;
+                }
+            } catch (e: unknown) {
+                console.log(e)
+                return NextResponse.next();
+            }
+        }
         return NextResponse.next();
     }
 
@@ -74,5 +92,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)', '/dashboard', "/forms/:path*"],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)', '/events/:path*'],
 };

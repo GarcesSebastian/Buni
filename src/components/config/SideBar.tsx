@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Users, BookOpen, UserCog } from "lucide-react"
+import { LayoutDashboard, Calendar, Users, BookOpen, UserCog, FileText, GraduationCap } from "lucide-react"
 
 type SideBar = {
     title: string
@@ -42,11 +42,11 @@ export const ConfigSideBar: SideBar[] = [
     {
         title: "Programas",
         href: "/programs",
-        icon: <LayoutDashboard className="h-4 w-4" />,
+        icon: <GraduationCap className="h-4 w-4" />,
     },
     {
         title: "Formularios",
         href: "/formularios",
-        icon: <LayoutDashboard className="h-4 w-4" />,
+        icon: <FileText className="h-4 w-4" />,
     },
 ]

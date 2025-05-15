@@ -217,16 +217,16 @@ export default function FormulariosPage() {
         },
       })
 
-      const data = await response.json()
+      const data_response = await response.json()
 
       if (response.ok) {
         const newData = {
           ...user,
-          forms: [...user.forms, { ...nuevoFormulario, id: data.id }]
+          forms: [...user.forms, data_response.data]
         }
         
         setUser(newData)
-        setCurrentForm({ ...nuevoFormulario, id: data.id })
+        setCurrentForm(data_response.data)
         socket?.emit("UPDATE_DATA", newData)
         showNotification({
           title: "Éxito",
@@ -238,7 +238,7 @@ export default function FormulariosPage() {
       
       showNotification({
         title: "Error",
-        message: data.error || "Error al crear el formulario",
+        message: data_response.error || "Error al crear el formulario",
         type: "error"
       })
     } catch (error) {
@@ -257,7 +257,7 @@ export default function FormulariosPage() {
     setCurrentForm({ ...formulario })
   }
 
-  const deleteForm = async (id: number) => {
+  const deleteForm = async (id: string) => {
     setIsDeleting(true)
 
     try {
@@ -273,7 +273,7 @@ export default function FormulariosPage() {
         },
       })
 
-      const data = await response.json()
+      const data_response = await response.json()
 
       if (response.ok) {
           setUser(newData)
@@ -293,7 +293,7 @@ export default function FormulariosPage() {
           return;
       }
 
-      throw new Error(data.error || "Error al eliminar el formulario")
+      throw new Error(data_response.error || "Error al eliminar el formulario")
     } catch (error) {
       console.error("Error al eliminar el formulario:", error)
       showNotification({
@@ -385,7 +385,7 @@ export default function FormulariosPage() {
     setDialogAddField(true)
   }
 
-  const toggleStateForm = async (id: number) => {
+  const toggleStateForm = async (id: string) => {
     setIsUpdating(true)
 
     try {
@@ -731,7 +731,7 @@ export default function FormulariosPage() {
                   <AlertDialogFooter>
                     <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>Cancelar</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => deleteForm(formToDelete?.id || 0)}
+                      onClick={() => deleteForm(formToDelete?.id ?? "")}
                       className="bg-primary hover:bg-primary/90"
                       disabled={isDeleting}
                     >

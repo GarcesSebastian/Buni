@@ -16,7 +16,7 @@ const redirectToForms = async (params: string[], req: NextRequest) => {
 
     try {
         const events = await getEvents();
-        const event = events.find((e) => Number(e.id) === Number(eventId));
+        const event = events.find((e) => e.id === eventId);
 
         if (!event) {
             return NextResponse.redirect(new URL('/', req.url));

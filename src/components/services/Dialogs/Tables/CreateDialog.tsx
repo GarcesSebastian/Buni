@@ -35,7 +35,7 @@ interface Props {
 }
 
 interface UpdatedFormData {
-  [key: string]: string | number | { value: string; data: Form | { id: number; nombre: string } } | DataExtraValue;
+  [key: string]: string | number | { value: string; data: Form | { id: string; nombre: string } } | DataExtraValue;
 }
 
 export function CreateEventDialog({ data, open, onOpenChange }: Props) {
@@ -65,8 +65,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       }
 
       const keyData = user[data.table.key as keyof typeof user];
-      const id = (Array.isArray(keyData) ? keyData.length : 0) + 1;
-      const updatedFormData: UpdatedFormData = { ...formData, id };
+      const updatedFormData: UpdatedFormData = { ...formData, id: (Array.isArray(keyData) ? keyData.length : 0) + 1 };
       
       Object.keys(updatedFormData).forEach((key: string) => {
         if (typeof updatedFormData[key] == "string"){
@@ -75,7 +74,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
           const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "forms" : key
           const dataId = dataSplit[dataSplit.length - 1]
-          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: number; nombre: string })[]).find(d => d.id == Number(dataId))
+          const findDataUser = (user[keyFormatted as keyof User] as (Form | { id: string; nombre: string })[]).find(d => d.id == dataId)
           if(findDataUser){
             updatedFormData[key] = {
               id: findDataUser.id,
@@ -94,10 +93,6 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       }
 
       const key = data.table.key as keyof User;
-      const newData = {
-        ...user,
-        [key]: [...user[key], updatedFormData],
-      }
 
       const body_response = JSON.parse(JSON.stringify(updatedFormData))
 
@@ -114,6 +109,11 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
       if (!response.ok) {
         throw new Error(data_response.error || 'Error al crear el registro'); 
+      }
+
+      const newData = {
+        ...user,
+        [key]: [...user[key], data_response.data],
       }
 
       setUser(newData);
@@ -141,13 +141,14 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
+      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] overflow-hidden">
+        <form className="grid grid-rows-[auto_1fr] max-h-[90vh] overflow-hidden" onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Crear {data.table.name}</DialogTitle>
             <DialogDescription>Complete los datos para crear un nuevo {data.table.name}</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4 px-2 max-h-[100vh] overflow-y-auto">
             {Object.keys(data.structureForm).map((value, index) => (
               <div key={index}>
                 <InputBasic
@@ -167,6 +168,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
               </div>
             ))}
           </div>
+
           <DialogFooter className="flex flex-row mt-4">
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancelar

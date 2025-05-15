@@ -10,31 +10,32 @@ export interface Assists {
 }
 
 export interface Event {
-  id: number
+  id: string
   nombre: string
   organizador: string
-  scenery: {
-    id: number
+  scenery?: {
+    id: string
     key: string
   }
-  faculty: {
-    id: number
+  programs?: {
+    id: string
     key: string
   }
-  cupos: string
-  fecha: string
-  hora: string
+  cupos: string | number
+  availableCupos: string | number
+  horarioInicio: string
+  horarioFin: string
   state: string
-  formAssists: {
-    id: number
+  formAssists?: {
+    id: string
     key: string
   }
-  formInscriptions: {
-    id: number
+  formInscriptions?: {
+    id: string
     key: string
   }
-  assists: Assists[]
-  inscriptions: Assists[]
+  assists?: Assists[]
+  inscriptions?: Assists[]
 }
 
 export interface ConfigEvent {
@@ -56,33 +57,33 @@ export interface ConfigEventForm {
     name: string
     type: string
   }
-  hora: {
+  horarioInicio: {
     name: string
     type: string
-  }
-  fecha: {
+  },
+  horarioFin: {
     name: string
     type: string
-  }
-  faculty: {
+  },
+  programs: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   scenery: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   formAssists: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   formInscriptions: {
     name: string
     type: string
-    options: { value: string, label: string, id: number }[] | []
+    options: { value: string, label: string, id: string }[] | []
   }
   state: {
     name: string
@@ -97,7 +98,7 @@ export interface TableScenery {
 }
 
 export interface Scenery {
-  id: number;
+  id: string;
   name: string;
   state: string;
 }

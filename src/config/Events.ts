@@ -12,9 +12,9 @@ export const configEvent: ConfigEvent[] = [
     { key: "nombre", value: "Nombre", filter: true },
     { key: "organizador", value: "Organizador", filter: true },
     { key: "cupos", value: "Cupos", filter: true },
-    { key: "hora", value: "Hora", filter: true },
-    { key: "fecha", value: "Fecha", filter: true },
-    { key: "faculty", value: "Programas", filter: true },
+    { key: "horarioInicio", value: "Horario de Inicio", filter: true },
+    { key: "horarioFin", value: "Horario de Fin", filter: true },
+    { key: "programs", value: "Programas", filter: true },
     { key: "scenery", value: "Escenario", filter: true },
     { key: "formAssists", value: "Formulario de Asistencias", filter: true },
     { key: "formInscriptions", value: "Formulario de Inscripciones", filter: true },
@@ -34,15 +34,15 @@ export const configFormEvent: ConfigEventForm = {
         name: "Cupos",
         type: "number"
     },
-    hora: {
-        name: "Hora",
-        type: "time"
+    horarioInicio: {
+        name: "Horario de Inicio",
+        type: "datetime-local"
     },
-    fecha: {
-        name: "Fecha",
-        type: "date"
+    horarioFin: {
+        name: "Horario de Fin",
+        type: "datetime-local"
     },
-    faculty: {
+    programs: {
         name: "Programa",
         type: "select",
         options: []

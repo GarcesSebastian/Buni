@@ -4,7 +4,7 @@ export type sectionFieldForm = "personal" | "academic" | "additional";
 export type typeFieldForm = "text" | "number" | "email" | "date" | "time" | "checkbox" | "qualification" | "select" | "checklist_single" | "checklist_multiple" | "checklist_single_grid" | "checklist_multiple_grid";
 
 export interface Form {
-  id: number
+  id: string
   name: string
   description: string
   fields: FormField[]
@@ -24,7 +24,7 @@ export interface FormField {
 }
 
 export interface Qualification {
-  id: number
+  id: string
   name: string
   description: string
   options: string[]

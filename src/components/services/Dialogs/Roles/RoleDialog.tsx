@@ -13,14 +13,15 @@ import {
 } from "@/components/ui/Dialog"
 import { Input } from "@/components/ui/Input"
 import { permissionModules } from "@/config/Permissions"
+import { PermissionType } from "@/types/Permissions"
 
 interface RoleDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     roleName: string
     setRoleName: (name: string) => void
-    selectedPermissions: string[]
-    setSelectedPermissions: React.Dispatch<React.SetStateAction<string[]>>
+    selectedPermissions: Record<string, PermissionType>
+    setSelectedPermissions: React.Dispatch<React.SetStateAction<Record<string, PermissionType>>>
     onSubmit: () => void
     isEditing?: boolean
     isLoading?: boolean
@@ -41,27 +42,37 @@ export function RoleDialog({
         permissionModules.map((module) => module.id)
     )
 
-    const togglePermission = (permissionId: string) => {
-        setSelectedPermissions((prev: string[]) =>
-            prev.includes(permissionId) ? prev.filter((id: string) => id !== permissionId) : [...prev, permissionId]
-        )
+    const togglePermission = (permissionId: string, action: string) => {
+        setSelectedPermissions((prev: Record<string, PermissionType>) => {
+            const newPermissions = { ...prev }
+            newPermissions[permissionId] = {
+                ...newPermissions[permissionId],
+                [action as keyof PermissionType]: !newPermissions[permissionId][action as keyof PermissionType]
+            }
+            return newPermissions
+        })
     }
 
     const toggleCategoryPermissions = (moduleId: string) => {
         const moduleData = permissionModules.find(m => m.id === moduleId)
         if (!moduleData) return
 
-        const modulePermissionIds = moduleData.actions.map(action => `${action}_${moduleId}`)
-        const allSelected = modulePermissionIds.every((id) => selectedPermissions.includes(id))
+        const allSelected = moduleData.actions.every((action) => selectedPermissions[moduleId][action.id as keyof PermissionType])
 
         if (allSelected) {
-            setSelectedPermissions((prev: string[]) => prev.filter((id: string) => !modulePermissionIds.includes(id)))
+            setSelectedPermissions((prev: Record<string, PermissionType>) => {
+                const newPermissions = { ...prev }
+                moduleData.actions.forEach((action) => {
+                    newPermissions[moduleId][action.id as keyof PermissionType] = false
+                })
+                return newPermissions
+            })
         } else {
-            setSelectedPermissions((prev: string[]) => {
-                const newPermissions = [...prev]
-                modulePermissionIds.forEach((id) => {
-                    if (!newPermissions.includes(id)) {
-                        newPermissions.push(id)
+            setSelectedPermissions((prev: Record<string, PermissionType>) => {
+                const newPermissions = { ...prev }
+                moduleData.actions.forEach((action) => {
+                    if (!newPermissions[moduleId][action.id as keyof PermissionType]) {
+                        newPermissions[moduleId][action.id as keyof PermissionType] = true
                     }
                 })
                 return newPermissions
@@ -78,13 +89,20 @@ export function RoleDialog({
     const isCategoryFullySelected = (moduleId: string) => {
         const moduleData = permissionModules.find(m => m.id === moduleId)
         if (!moduleData) return false
-        return moduleData.actions.every(action => selectedPermissions.includes(`${action}_${moduleId}`))
+
+        try {
+            return moduleData.actions.every(action => selectedPermissions[moduleId][action.id as keyof PermissionType])
+        } catch (error) {
+            console.error(error)
+            return false
+        }
     }
 
     const isCategoryPartiallySelected = (moduleId: string) => {
         const moduleData = permissionModules.find(m => m.id === moduleId)
         if (!moduleData) return false
-        const hasSelected = moduleData.actions.some(action => selectedPermissions.includes(`${action}_${moduleId}`))
+        if (!selectedPermissions[moduleId]) return false
+        const hasSelected = moduleData.actions.some(action => selectedPermissions[moduleId]?.[action.id as keyof PermissionType])
         return hasSelected && !isCategoryFullySelected(moduleId)
     }
 
@@ -171,22 +189,21 @@ export function RoleDialog({
                                                 <div className="col-span-2 p-4">
                                                     {isExpanded && (
                                                         <div className="grid grid-cols-2 gap-2">
-                                                            {module.actions.map((action) => {
-                                                                const permissionId = `${action}_${module.id}`
-                                                                const isSelected = selectedPermissions.includes(permissionId)
+                                                            {module.actions.map((action, index) => {
+                                                                const isSelected = selectedPermissions[module.id][action.id as keyof PermissionType]
 
                                                                 return (
                                                                     <button
-                                                                        key={permissionId}
+                                                                        key={index}
                                                                         type="button"
-                                                                        onClick={() => togglePermission(permissionId)}
+                                                                        onClick={() => togglePermission(module.id, action.id)}
                                                                         className={
                                                                             isSelected
                                                                                 ? "flex items-center justify-between px-4 py-2 text-sm rounded-md transition-colors bg-primary text-white hover:bg-primary/90"
                                                                                 : "flex items-center justify-between px-4 py-2 text-sm rounded-md transition-colors bg-white border border-gray-200 text-gray-800 hover:bg-gray-50"
                                                                         }
                                                                     >
-                                                                        <span className="truncate">{action.charAt(0).toUpperCase() + action.slice(1)} {module.name}</span>
+                                                                        <span className="truncate">{action.name} {module.name}</span>
                                                                         {isSelected && <Check size={16} />}
                                                                     </button>
                                                                 )
@@ -236,22 +253,21 @@ export function RoleDialog({
                                                 {isExpanded && (
                                                     <div className="p-4 bg-gray-50">
                                                         <div className="grid grid-cols-1 gap-2">
-                                                            {module.actions.map((action) => {
-                                                                const permissionId = `${action}_${module.id}`
-                                                                const isSelected = selectedPermissions.includes(permissionId)
+                                                            {module.actions.map((action, index) => {
+                                                                const isSelected = selectedPermissions[module.id][action.id as keyof PermissionType]
 
                                                                 return (
                                                                     <button
-                                                                        key={permissionId}
+                                                                        key={index}
                                                                         type="button"
-                                                                        onClick={() => togglePermission(permissionId)}
+                                                                        onClick={() => togglePermission(module.id, action.id)}
                                                                         className={
                                                                             isSelected
                                                                                 ? "flex items-center justify-between px-4 py-2 text-sm rounded-md transition-colors bg-primary text-white hover:bg-primary/90"
                                                                                 : "flex items-center justify-between px-4 py-2 text-sm rounded-md transition-colors bg-white border border-gray-200 text-gray-800 hover:bg-gray-50"
                                                                         }
                                                                     >
-                                                                        <span className="truncate">{action.charAt(0).toUpperCase() + action.slice(1)} {module.name}</span>
+                                                                        <span className="truncate">{action.name} {module.name}</span>
                                                                         {isSelected && <Check size={16} />}
                                                                     </button>
                                                                 )
