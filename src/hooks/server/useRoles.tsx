@@ -18,10 +18,10 @@ const useRoles = () => {
 
             if (response.ok) {
                 const rolesFiltered = data.map((role: { id: string, name: string, permissions: Record<string, boolean>, state: string }) => ({
-                        id: role.id,
-                        name: role.name,
-                        permissions: role.permissions,
-                        state: "true"
+                    id: role.id,
+                    name: role.name,
+                    permissions: role.permissions,
+                    state: "true"
                 }));
         
                 setRoles(rolesFiltered);
@@ -46,9 +46,14 @@ const useRoles = () => {
             });
             const data_response = await response.json();
 
+            const payload = {
+                ...data_response.data,
+                state: "true"
+            }
+
             if (response.ok) {
-                setRoles(data_response.data);
-                return data_response.data;
+                setRoles(prevRoles => [...prevRoles, payload]);
+                return payload;
             }
 
             throw new Error(data_response.error || 'Error al crear el rol');

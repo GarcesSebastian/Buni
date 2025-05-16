@@ -25,7 +25,7 @@ export interface Views {
     events: boolean;
     programs: boolean;
     scenery: boolean;
-    formularios: boolean;
+    forms: boolean;
     users: boolean;
     roles: boolean;
 }
@@ -54,7 +54,7 @@ const viewsDefault = {
     events: true,
     programs: true,
     scenery: true,
-    formularios: true,
+    forms: true,
     users: true,
     roles: true,
 }
@@ -85,8 +85,6 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         if(isLoading){
             return;
         }
-
-        console.log("authUser", authUser)
 
         if(authUser?.permissions && typeof authUser.permissions === "object"){
             Object.entries(viewsDefault).forEach(([key]) => {

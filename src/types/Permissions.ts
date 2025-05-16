@@ -26,5 +26,5 @@ export type Permissions = {
     programs: PermissionType;
     scenery: PermissionType;
     forms: PermissionType;
-    additional: PermissionType;
+    // additional: PermissionType;
 };

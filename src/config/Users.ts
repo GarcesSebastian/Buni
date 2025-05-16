@@ -9,7 +9,6 @@ export const configUser: ConfigUser[] = [
     { key: "id", value: "ID", filter: false },
     { key: "name", value: "Nombre", filter: true },
     { key: "email", value: "Correo", filter: true },
-    { key: "password", value: "Contraseña", filter: false },
     { key: "roles", value: "Rol", filter: false },
 ]
 

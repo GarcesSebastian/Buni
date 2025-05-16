@@ -67,7 +67,6 @@ export const useDataSync = () => {
     };
 
     useEffect(() => {
-        console.log("fetching data", isAuthenticated);
         fetchAllData();
     }, [isAuthenticated]);
 

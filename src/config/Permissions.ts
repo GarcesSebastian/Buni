@@ -37,10 +37,10 @@ export const permissionsDefault: Permissions = {
         delete: false,
         view: false
     },
-    additional: {
-        export: false,
-        import: false
-    }
+    // additional: {
+    //     export: false,
+    //     import: false
+    // }
 };
 
 export const permissionModules: PermissionModule[] = [
@@ -79,11 +79,11 @@ export const permissionModules: PermissionModule[] = [
         name: 'Formularios',
         description: 'Gestión de formularios',
         actions: [{ id: 'create',  name: 'Crear' }, { id: 'edit', name: 'Editar' }, { id: 'delete', name: 'Eliminar' }, { id: 'view', name: 'Ver' }]
-    },
-    {
-        id: 'additional',
-        name: 'Adicional',
-        description: 'Permisos adicionales',
-        actions: [{ id: 'export', name: 'Exportar' }, { id: 'import', name: 'Importar' }]
     }
+    // {
+    //     id: 'additional',
+    //     name: 'Adicional',
+    //     description: 'Permisos adicionales',
+    //     actions: [{ id: 'export', name: 'Exportar' }, { id: 'import', name: 'Importar' }]
+    // }
 ];
