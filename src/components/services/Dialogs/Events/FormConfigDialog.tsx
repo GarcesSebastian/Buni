@@ -25,7 +25,6 @@ import { Form } from "@/types/Forms"
 interface FormConfigDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  eventId: string
   eventName: string
   formAssists: Form
   formInscriptions: Form
@@ -50,7 +49,6 @@ export interface FormConfigData {
 export function FormConfigDialog({
   open,
   onOpenChange,
-  eventId,
   eventName,
   formAssists,
   formInscriptions,

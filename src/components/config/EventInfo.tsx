@@ -1,4 +1,4 @@
-import { Calendar, ClipboardCheck, Import, MapPin, Users } from "lucide-react"
+import { Calendar, ClipboardCheck, MapPin, Users } from "lucide-react"
 import { Badge } from "@/components/ui/Badge"
 import { Event, Scenery } from "@/types/Events"
 import { Programs } from "@/types/Programs"

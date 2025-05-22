@@ -104,6 +104,7 @@ export const DialogRecovery = ({ open, eventToRecovery, sendedCode, setSendedCod
             try {
                 onSubmit(completeCode);
             } catch (error) {
+                console.error(error)
                 setError('Error al procesar el código. Inténtelo de nuevo.');
             } finally {
                 setIsLoadingVerify(false);
@@ -153,6 +154,7 @@ export const DialogRecovery = ({ open, eventToRecovery, sendedCode, setSendedCod
             setSendedCode(true)
             setIsVerify(true)
         } catch (error) {
+            console.error(error)
             setError('Error al procesar el código. Inténtelo de nuevo.');
         } finally {
             setIsLoadingSend(false)
@@ -194,6 +196,7 @@ export const DialogRecovery = ({ open, eventToRecovery, sendedCode, setSendedCod
             setIsChange(true)
             setIsLoadingChange(false)
         } catch (error) {
+            console.error(error)
             setError('Error al procesar el código. Inténtelo de nuevo.');
         }
     }

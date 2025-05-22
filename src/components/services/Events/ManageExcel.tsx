@@ -38,11 +38,11 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
       return;
     }
   
-    let transformedData: Record<string, any>[] = [];
-    let headers: Record<string, any>[] = [];
+    const transformedData: Record<string, string | number | boolean | string[] | unknown>[] = [];
+    const headers: Record<string, string>[] = [];
   
-    DataTest.forEach((item, index) => {
-      const transformedRow: Record<string, any> = {};
+    DataTest.forEach((item) => {
+      const transformedRow: Record<string, string | number | boolean | unknown> = {};
   
       Object.entries(item).forEach(([key, value]) => {
         if (typeof value === "string") {
@@ -50,13 +50,13 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             const parsed = JSON.parse(value);
             if (typeof parsed === "object" && !Array.isArray(parsed)) {
               Object.entries(parsed).forEach(([subKey, subVal]) => {
-                transformedRow[`${getColumLabel(key, columns)} [${subKey.split("-")[1]}]`] = Array.isArray(subVal)
-                  ? subVal.join(", ")
+                transformedRow[`${getColumLabel(key, columns)} [${subKey.split("-")[1]}]`] = Array.isArray(subVal) as boolean
+                  ? (subVal as string[]).join(", ")
                   : subVal;
                   headers.push({
                     key: subKey,
                     parentKey: key,
-                    data: subVal
+                    data: subVal as unknown as string
                   });
               });
             } else {
@@ -64,7 +64,7 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
               headers.push({
                 key: key,
                 parentKey: key,
-                data: item[key]
+                data: item[key] as unknown as string
               });
             }
           } catch {
@@ -72,7 +72,7 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             headers.push({
               key: key,
               parentKey: key,
-              data: item[key]
+              data: item[key] as unknown as string
             });
           }
         } else {
@@ -80,7 +80,7 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
           headers.push({
             key: key,
             parentKey: key,
-            data: item[key]
+            data: item[key] as unknown as string
           });
         }
       });
@@ -363,17 +363,29 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
 
           const jsonData: { [key: string]: string }[] = [];
           const headers: string[] = [];
-          const headerMetadata: { [key: string]: any } = {};
+          const headerMetadata: { [key: string]: { key: string } } = {};
 
           worksheet.eachRow((row, rowNumber) => {
             if (rowNumber === 1) {
-              row.eachCell((cell, colNumber) => {
+              row.eachCell((cell) => {
                 const headerValue = String(cell.value || '').trim();
                 headers.push(headerValue);
+
+                interface newComment extends ExcelJS.Comment {
+                  texts: { text: string }[]
+                }
+
+                const note: newComment = cell.note as unknown as newComment;
                 
-                if (cell.note && cell.note.texts && cell.note.texts.length > 0) {
-                  const noteText = cell.note.texts[0].text;
-                  const metadata: any = {};
+                if (note && note.texts && note.texts.length > 0) {
+                  const noteText = note.texts[0].text;
+                  const metadata: { parentKey: string, type: string, data: string, key: string, column: string } = {
+                    parentKey: "",
+                    type: "",
+                    data: "",
+                    key: "",
+                    column: ""
+                  }
 
                   console.log(noteText)
                   const parentKeyMatch = noteText.match(/Parent:\s*([^\n]+)/u);
@@ -408,10 +420,11 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             }
           });
 
-          let templateData: { [key: string]: any } = [];
+          type data = { [key: string]: string }
+          const templateData: data[] = [];
 
           jsonData.forEach(item => {
-            let data: { [key: string]: any } = {};
+            const data: data = {};
             Object.keys(headerMetadata).forEach((key) => {
               console.log(item[key], headerMetadata[key])
               data[headerMetadata[key].key] = item[key];
@@ -446,15 +459,22 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             return;
           }
 
+          type MetadataKey<K extends string> = `__metadata_${K}`;
+
+          type ProcessedRow<K extends string> = {
+            id: string;
+          } & Record<K, string> & Partial<Record<MetadataKey<K>, string>>;
+
           const processedData = jsonData.map((item: Record<string, string>, index) => {
-            const processedRow: any = {
+            const keys = Object.keys(item) as string[];
+            const processedRow: ProcessedRow<string> = {
               id: String(item.id || index + 1),
               ...item,
             };
 
-            Object.keys(item).forEach(key => {
+            keys.forEach(key => {
               if (headerMetadata[key]) {
-                processedRow[`__metadata_${key}`] = headerMetadata[key];
+                processedRow[`__metadata_${key}` as `__metadata_${string}`] = headerMetadata[key].key;
               }
             });
 

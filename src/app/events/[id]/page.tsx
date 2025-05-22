@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { AlertTriangle, ArrowLeft, Calendar, ClipboardCheck, Loader, MapPin, Users } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Calendar, Loader, Users } from "lucide-react"
 import Link from "next/link"
 import Cookies from "js-cookie"
 import type { Assists, Event, Scenery } from "@/types/Events"
@@ -36,7 +36,7 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    const {user, setUser, updateEvent} = useUserData()
+    const {user, updateEvent} = useUserData()
     const { showNotification } = useNotification()
     const { socket } = useSocket()
     const [event, setEvent] = useState<Event | undefined>()
@@ -183,6 +183,7 @@ export default function EventDetailPage() {
                 duration: 5000,
             })
         }catch(error){
+            console.error(error)
             showNotification({
                 title: "Error",
                 message: "No se pudo guardar la configuración",
@@ -402,7 +403,6 @@ export default function EventDetailPage() {
                             </div>
 
                             <FormConfigButton
-                                eventId={event.id}
                                 eventName={event.nombre}
                                 formAssists={formAssists!}
                                 formInscriptions={formInscriptions!}
@@ -411,10 +411,10 @@ export default function EventDetailPage() {
                                 isChangeFormConfig={isChangeFormConfig}
                             />
 
-                            {/* <Button 
+                            <Button 
                                 onClick={handleGenerateData}
                                 disabled={isGenerating}
-                                className="bg-primary hover:bg-primary/90"
+                                className="bg-primary hover:bg-primary/90 hidden"
                             >
                                 {isGenerating ? (
                                     <>
@@ -424,7 +424,7 @@ export default function EventDetailPage() {
                                 ) : (
                                     "Generar datos aleatorios"
                                 )}
-                            </Button> */}
+                            </Button>
                         </div>
 
                         <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as TabsEvent)} className="w-full">

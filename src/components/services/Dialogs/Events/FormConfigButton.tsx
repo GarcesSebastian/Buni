@@ -8,7 +8,6 @@ import { useNotification } from "@/hooks/client/useNotification"
 import { Form } from "@/types/Forms"
 
 interface FormConfigButtonProps {
-  eventId: string
   eventName: string
   formAssists: Form
   formInscriptions: Form
@@ -18,7 +17,6 @@ interface FormConfigButtonProps {
 }
 
 export function FormConfigButton({
-  eventId,
   eventName,
   formAssists,
   formInscriptions,
@@ -33,6 +31,7 @@ export function FormConfigButton({
     try {
       onConfigSaved(config)
     } catch (error) {
+      console.error(error)
       showNotification({
         title: "Error",
         message: "No se pudo guardar la configuración",
@@ -60,7 +59,6 @@ export function FormConfigButton({
       <FormConfigDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        eventId={eventId}
         eventName={eventName}
         formAssists={formAssists}
         formInscriptions={formInscriptions}
