@@ -8,7 +8,6 @@ import { Role, User as UserType } from "@/types/User";
 import { useDataSync } from "./useDataSync";
 import { useUserState } from "./useUserState";
 import { useUserSettings } from "./useUserSettings";
-import { TemplateData } from "@/config/TemplateData";
 import { useAuth } from "./useAuth";
 
 

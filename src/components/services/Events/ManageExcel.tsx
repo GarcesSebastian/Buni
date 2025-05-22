@@ -421,8 +421,6 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             }
           });
 
-          type data = Record<string, string>;
-
           interface MetadataItem {
             key: string;
             parentKey: string;
