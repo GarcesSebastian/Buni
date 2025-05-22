@@ -411,7 +411,7 @@ export default function EventDetailPage() {
                                 isChangeFormConfig={isChangeFormConfig}
                             />
 
-                            <Button 
+                            {/* <Button 
                                 onClick={handleGenerateData}
                                 disabled={isGenerating}
                                 className="bg-primary hover:bg-primary/90"
@@ -424,7 +424,7 @@ export default function EventDetailPage() {
                                 ) : (
                                     "Generar datos aleatorios"
                                 )}
-                            </Button>
+                            </Button> */}
                         </div>
 
                         <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as TabsEvent)} className="w-full">
