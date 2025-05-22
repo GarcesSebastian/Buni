@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Badge } from "@/components/ui/Badge"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { AlertTriangle, ArrowLeft, Calendar, Loader, MapPin, Users } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Calendar, ClipboardCheck, Loader, MapPin, Users } from "lucide-react"
 import Link from "next/link"
+import Cookies from "js-cookie"
 import type { Assists, Event, Scenery } from "@/types/Events"
 import type { User } from "@/hooks/auth/useUserData"
 
@@ -25,6 +25,10 @@ import { generateSampleData } from "@/lib/DataTesting"
 import { Programs } from "@/types/Programs"
 import { fieldsDistribution } from "@/config/Forms"
 import { useSocket } from "@/hooks/server/useSocket"
+import { EventInfo } from "@/components/config/EventInfo"
+import { FormConfigButton } from "@/components/services/Dialogs/Events/FormConfigButton"
+import { FormConfigData } from "@/components/services/Dialogs/Events/FormConfigDialog"
+import { useNotification } from "@/hooks/client/useNotification"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 
@@ -32,7 +36,8 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    const {user, updateEvent} = useUserData()
+    const {user, setUser, updateEvent} = useUserData()
+    const { showNotification } = useNotification()
     const { socket } = useSocket()
     const [event, setEvent] = useState<Event | undefined>()
     const [formAssists, setFormAssists] = useState<Form | undefined>()
@@ -43,6 +48,9 @@ export default function EventDetailPage() {
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
     const [hasDistributionAssists, setHasDistributionAssists] = useState(false)
     const [hasDistributionInscriptions, setHasDistributionInscriptions] = useState(false)
+
+    const [formConfig, setFormConfig] = useState<FormConfigData | undefined>(event?.formConfig)
+    const [isChangeFormConfig, setIsChangeFormConfig] = useState(false)
     
     const [selectedAssistsDistribution, setSelectedAssistsDistribution] = useState<string | undefined>()
     const [selectedInscriptionsDistribution, setSelectedInscriptionsDistribution] = useState<string | undefined>()
@@ -80,6 +88,7 @@ export default function EventDetailPage() {
             setFormInscriptions(user.forms.find((f) => f.id == idFormInscriptions) ?? undefined)
             setProgram(user.programs.find((p) => p.id == idProgram) ?? undefined)
             setScenery(user.scenery.find((s) => s.id == idScenery) ?? undefined)
+            setFormConfig(foundEvent.formConfig)
             
             const assistsField = formAssists?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
             const inscriptionsField = formInscriptions?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
@@ -100,8 +109,7 @@ export default function EventDetailPage() {
     }, [eventId, router, user.events, formAssists, formInscriptions, program, scenery, user.forms, user.programs, user.scenery])
 
     useEffect(() => {
-        socket?.on("UPDATE_DATA", (data: { users: User }) => {
-            const updatedUser = data.users;
+        socket?.on("UPDATE_DATA", (updatedUser: User) => {
             const updatedEvent = updatedUser.events.find((e: Event) => e.id === eventId);
             
             if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
@@ -130,6 +138,58 @@ export default function EventDetailPage() {
             })
         }
     }, [event])
+
+    const handleFormConfigSave = async (config: FormConfigData) => {
+        setFormConfig(config)
+        setIsChangeFormConfig(true)
+
+        try{
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}/form-config`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get("token")}`,
+                },
+                body: JSON.stringify(config),
+            })
+    
+            const data = await response.json()
+    
+            if (!response.ok) {
+                throw new Error(data.error || "Error al guardar la configuración")
+            }
+
+            const newData = {
+                ...user,
+                events: user.events.map((e) => {
+                    if (e.id === eventId) {
+                        return {
+                            ...e,
+                            formConfig: config
+                        }
+                    }
+                    return e
+                })
+            }
+
+            console.log(newData.events, user.events)
+            socket?.emit("UPDATE_DATA", newData)
+    
+            setIsChangeFormConfig(false)
+            showNotification({
+                title: "Configuración actualizada",
+                message: "Los intervalos de fechas para los formularios han sido actualizados",
+                type: "success",
+                duration: 5000,
+            })
+        }catch(error){
+            showNotification({
+                title: "Error",
+                message: "No se pudo guardar la configuración",
+                type: "error",
+            })
+        }
+    }
 
     const filteredAssists = event?.assists?.filter((assists) => {
         return Object.entries(assistsFilters).every(([key, value]) => {
@@ -340,6 +400,17 @@ export default function EventDetailPage() {
                                     <p className="text-sm sm:text-base text-muted-foreground">{event.organizador || "Sin organizador"}</p>
                                 </div>
                             </div>
+
+                            <FormConfigButton
+                                eventId={event.id}
+                                eventName={event.nombre}
+                                formAssists={formAssists!}
+                                formInscriptions={formInscriptions!}
+                                initialConfig={event.formConfig}
+                                onConfigSaved={handleFormConfigSave}
+                                isChangeFormConfig={isChangeFormConfig}
+                            />
+
                             <Button 
                                 onClick={handleGenerateData}
                                 disabled={isGenerating}
@@ -370,62 +441,7 @@ export default function EventDetailPage() {
                                         <CardDescription className="text-sm">Detalles generales del evento</CardDescription>
                                     </CardHeader>
                                     <CardContent className="p-4 sm:p-6">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                                            <div className="space-y-3 sm:space-y-4">
-                                                <div className="flex items-center">
-                                                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <p className="text-sm font-medium">Fecha de Inicio</p>
-                                                        <p className="text-sm sm:text-base">{new Date(event.horarioInicio).toLocaleString()}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center">
-                                                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <p className="text-sm font-medium">Fecha de Fin</p>
-                                                        <p className="text-sm sm:text-base">{new Date(event.horarioFin).toLocaleString()}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center">
-                                                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <p className="text-sm font-medium">Escenario</p>
-                                                        <p className="text-sm sm:text-base">{scenery?.name || "Sin escenario"}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-3 sm:space-y-4">
-                                                <div className="flex items-center">
-                                                    <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <Badge variant="outline" className="text-xs sm:text-sm">
-                                                            {event.cupos === "-1" ? "Cupos ilimitados" : `${event.cupos} cupos`}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-start">
-                                                    <div>
-                                                        <p className="text-sm font-medium">Programa</p>
-                                                        <Badge variant="outline" className="text-xs sm:text-sm">
-                                                            {program?.name || "Sin programa"}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-start">
-                                                    <div>
-                                                        <p className="text-sm font-medium">Estado</p>
-                                                        <Badge variant={event.state === "true" ? "default" : "secondary"} className="text-xs sm:text-sm">
-                                                            {event.state === "true" ? "Activo" : "Inactivo"}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <EventInfo event={event} scenery={scenery as Scenery} program={program as Programs} formConfig={formConfig!} />
                                     </CardContent>
                                 </Card>
 

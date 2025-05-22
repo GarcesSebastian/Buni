@@ -5,7 +5,7 @@ import type React from "react"
 import { useRef } from "react"
 import { Button } from "@/components/ui/Button"
 import { FileSpreadsheet, Upload } from "lucide-react"
-import * as XLSX from "xlsx"
+import ExcelJS from "exceljs"
 import { useNotification } from "@/hooks/client/useNotification"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
@@ -19,94 +19,456 @@ interface DataImportExportProps {
   onImport: (data: Assists[]) => void
 }
 
-export function DataImportExport({ type, data, columns, fileName, onImport }: DataImportExportProps) {
+const getColumLabel = (key: string, columns: Assists[]) => {
+  const column = columns.find((col) => col.key === key);
+  return column?.label as string;
+}
+
+export function DataImportExport({ type, data: DataTest, columns, fileName, onImport }: DataImportExportProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { showNotification } = useNotification()
 
-  const exportToExcel = () => {
-    if (data.length === 0) {
+  const exportToExcel = async () => {
+    if (DataTest.length === 0) {
       showNotification({
         title: "Datos vacíos",
         message: `No hay datos de ${type === "assists" ? "asistencias" : "inscripciones"} para exportar.`,
         type: "error"
-      })
-      return
+      });
+      return;
     }
+  
+    let transformedData: Record<string, any>[] = [];
+    let headers: Record<string, any>[] = [];
+  
+    DataTest.forEach((item, index) => {
+      const transformedRow: Record<string, any> = {};
+  
+      Object.entries(item).forEach(([key, value]) => {
+        if (typeof value === "string") {
+          try {
+            const parsed = JSON.parse(value);
+            if (typeof parsed === "object" && !Array.isArray(parsed)) {
+              Object.entries(parsed).forEach(([subKey, subVal]) => {
+                transformedRow[`${getColumLabel(key, columns)} [${subKey.split("-")[1]}]`] = Array.isArray(subVal)
+                  ? subVal.join(", ")
+                  : subVal;
+                  headers.push({
+                    key: subKey,
+                    parentKey: key,
+                    data: subVal
+                  });
+              });
+            } else {
+              transformedRow[getColumLabel(key, columns)] = value;
+              headers.push({
+                key: key,
+                parentKey: key,
+                data: item[key]
+              });
+            }
+          } catch {
+            transformedRow[getColumLabel(key, columns)] = value;
+            headers.push({
+              key: key,
+              parentKey: key,
+              data: item[key]
+            });
+          }
+        } else {
+          transformedRow[getColumLabel(key, columns)] = value;
+          headers.push({
+            key: key,
+            parentKey: key,
+            data: item[key]
+          });
+        }
+      });
+  
+      transformedData.push(transformedRow);
+    });
+  
+    const uniqueKeys = Array.from(
+      new Set(transformedData.flatMap(obj => Object.keys(obj)))
+    );
 
-    const worksheet = XLSX.utils.json_to_sheet(data)
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Datos")
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Sistema de Eventos';
+    workbook.created = new Date();
 
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    const worksheet = workbook.addWorksheet('Datos', {
+      pageSetup: { 
+        paperSize: 9, 
+        orientation: 'landscape',
+        margins: { left: 0.7, right: 0.7, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 }
+      }
+    });
 
-    const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+    worksheet.columns = uniqueKeys.map(key => {
+      const headerLen = key.length;
+      const maxCellLen = transformedData.reduce((max, row) => {
+        const cell = row[key] != null ? String(row[key]) : "";
+        return Math.max(max, cell.length);
+      }, 0);
+      
+      return {
+        header: key,
+        key: key,
+        width: Math.min(Math.max(headerLen, maxCellLen) + 6, 60)
+      };
+    });
 
-    const url = URL.createObjectURL(blob)
+    transformedData.forEach(row => {
+      worksheet.addRow(row);
+    });
 
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `${fileName}.xlsx`
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 35;
+    
+    console.log(headers)
+    headerRow.eachCell((cell, colNumber) => {
+      const cellData = headers[colNumber - 1]
 
-    document.body.appendChild(link)
-    link.click()
+      const text = `Parent:${cellData.parentKey}\nType:${type}\nData:${cellData.data}\nKey:${cellData.key}\nColumn:${colNumber}`
 
+      console.log(text)
+      cell.note = {
+        texts: [{
+          'font': { 'size': 10, 'name': 'Segoe UI', 'color': { 'argb': 'FF000000' } },
+          'text': text
+        }]
+      };
+
+      cell.fill = {
+        type: 'gradient',
+        gradient: 'angle',
+        degree: 45,
+        stops: [
+          { position: 0, color: { argb: 'FFDE2626' } },
+          { position: 1, color: { argb: 'FFDC1A1A' } }
+        ]
+      };
+      
+      cell.font = {
+        color: { argb: 'FFFFFFFF' },
+        bold: true,
+        size: 12,
+        name: 'Segoe UI'
+      };
+      
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center',
+        wrapText: true
+      };
+      
+      cell.border = {
+        top: { style: 'medium', color: { argb: 'FFDE2626' } },
+        bottom: { style: 'medium', color: { argb: 'FFDE2626' } },
+        left: { style: 'medium', color: { argb: 'FFDE2626' } },
+        right: { style: 'medium', color: { argb: 'FFDE2626' } }
+      };
+    });
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return;
+      
+      row.height = 28;
+      
+      const isEvenRow = rowNumber % 2 === 0;
+      const baseColor = isEvenRow ? 'FFF1F5F9' : 'FFFFFFFF';
+      
+      row.eachCell((cell, colNumber) => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: baseColor }
+        };
+        
+        cell.font = {
+          size: 10,
+          name: 'Segoe UI',
+          color: { argb: 'FF021117' }
+        };
+        
+        cell.alignment = {
+          vertical: 'middle',
+          horizontal: colNumber === 1 ? 'left' : 'center',
+          indent: colNumber === 1 ? 2 : 0
+        };
+        
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+        };
+
+        if (typeof cell.value === 'number' && cell.value > 999) {
+          cell.numFmt = '#,##0';
+        }
+        
+        if (cell.value && typeof cell.value === 'string') {
+          const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+          if (dateRegex.test(cell.value)) {
+            cell.value = new Date(cell.value);
+            cell.numFmt = 'dd/mm/yyyy';
+          } else {
+            const lowerValue = cell.value.toLowerCase();
+            if (lowerValue === 'true' || lowerValue === 'false') {
+              const booleanValue = lowerValue === 'true' ? 'SÍ' : 'NO';
+              cell.value = booleanValue;
+              cell.font = {
+                ...cell.font,
+                bold: true,
+                color: { argb: booleanValue === 'SÍ' ? 'FF059669' : 'FFDC2626' }
+              };
+            } else if (cell.value.includes('@')) {
+              cell.font = {
+                ...cell.font,
+                color: { argb: 'FFDE2626' }
+              };
+            }
+          }
+        }
+      });
+      
+      if (rowNumber % 10 === 0) {
+        row.eachCell(cell => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFEF3C7' }
+          };
+          cell.border = {
+            ...cell.border,
+            bottom: { style: 'medium', color: { argb: 'FFDE2626' } }
+          };
+        });
+      }
+    });
+
+    const lastColumn = String.fromCharCode(64 + uniqueKeys.length);
+    worksheet.autoFilter = `A1:${lastColumn}1`;
+
+    worksheet.views = [
+      { state: 'frozen', xSplit: 0, ySplit: 1 }
+    ];
+
+    const summarySheet = workbook.addWorksheet('Resumen');
+    
+    const titleCell = summarySheet.getCell('A1');
+    titleCell.value = `Resumen de ${type === "assists" ? "Asistencias" : "Inscripciones"}`;
+    titleCell.font = { bold: true, size: 16, color: { argb: 'FFDE2626' } };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFFEF2F2' }
+    };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.border = {
+      top: { style: 'medium', color: { argb: 'FFDE2626' } },
+      bottom: { style: 'medium', color: { argb: 'FFDE2626' } },
+      left: { style: 'medium', color: { argb: 'FFDE2626' } },
+      right: { style: 'medium', color: { argb: 'FFDE2626' } }
+    };
+    
+    summarySheet.mergeCells('A1:C1');
+    summarySheet.getRow(1).height = 40;
+
+    const summaryData = [
+      ['Estadística', 'Valor', 'Porcentaje'],
+      ['Total de registros', transformedData.length, '100%'],
+      ['Fecha de exportación', new Date().toLocaleDateString('es-ES'), '-'],
+      ['Archivo generado por', 'Sistema de Eventos', '-']
+    ];
+
+    summaryData.slice(1).forEach((rowData, index) => {
+      const row = summarySheet.addRow(rowData);
+      row.height = 25;
+      
+      row.eachCell((cell, colNumber) => {
+        if (index === 0) {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFDE2626' }
+          };
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        } else {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: index % 2 === 0 ? 'FFF1F5F9' : 'FFFFFFFF' }
+          };
+          cell.font = { color: { argb: 'FF021117' } };
+        }
+        
+        cell.alignment = { 
+          horizontal: colNumber === 1 ? 'left' : 'center',
+          vertical: 'middle'
+        };
+        
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+        };
+      });
+    });
+
+    summarySheet.columns = [
+      { width: 25 },
+      { width: 20 },
+      { width: 15 }
+    ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+  
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${fileName}.xlsx`;
+  
+    document.body.appendChild(link);
+    link.click();
+  
     showNotification({
       title: "Datos exportados",
       message: `Datos de ${type === "assists" ? "asistencias" : "inscripciones"} exportados correctamente.`,
       type: "success",
-    })
-
+    });
+  
     setTimeout(() => {
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-    }, 100)
-  }
-
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
+  };
+  
   const importFromExcel = (file: File) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: "binary" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json<{ [key: string]: string }>(worksheet);
+        const workbook = new ExcelJS.Workbook();
+        
+        workbook.xlsx.load(data as ArrayBuffer).then(() => {
+          const worksheet = workbook.getWorksheet(1);
+          if (!worksheet) throw new Error("No se pudo leer la hoja de cálculo.");
 
-        const requiredKeys = columns?.map((col) => {
-          const key = col.key;
-          return typeof key === 'string' ? key.toLowerCase() : String(key).toLowerCase();
-        });
+          const jsonData: { [key: string]: string }[] = [];
+          const headers: string[] = [];
+          const headerMetadata: { [key: string]: any } = {};
 
-        if (jsonData.length === 0) {
-          throw new Error("El archivo no contiene datos.");
-        }
+          worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) {
+              row.eachCell((cell, colNumber) => {
+                const headerValue = String(cell.value || '').trim();
+                headers.push(headerValue);
+                
+                if (cell.note && cell.note.texts && cell.note.texts.length > 0) {
+                  const noteText = cell.note.texts[0].text;
+                  const metadata: any = {};
 
-        const importedKeys = Object.keys(jsonData[0]).map((key) => key.toLowerCase());
+                  console.log(noteText)
+                  const parentKeyMatch = noteText.match(/Parent:\s*([^\n]+)/u);
+                  const typeMatch = noteText.match(/Type:\s*([^\n]+)/u);
+                  const dataMatch = noteText.match(/Data:\s*([^\n]+)/u);
+                  const keyMatch = noteText.match(/Key:\s*([^\n]+)/u);
+                  const columnMatch = noteText.match(/Column:\s*([^\n]+)/u);
+                  
+                  if (parentKeyMatch && typeMatch && dataMatch && keyMatch && columnMatch) {
+                    metadata.parentKey = parentKeyMatch[1];
+                    metadata.type = typeMatch[1];
+                    metadata.data = dataMatch[1];
+                    metadata.key = keyMatch[1];
+                    metadata.column = columnMatch[1];
+                  }
 
-        const hasAllRequiredKeys = requiredKeys.every((reqKey) =>
-          importedKeys.includes(reqKey)
-        );
-
-        if (!hasAllRequiredKeys) {
-          showNotification({
-            title: "Error en la estructura",
-            message: `El archivo no tiene la estructura requerida para ${ type === "assists" ? "asistencias" : "inscripciones" }.`,
-            type: "error",
+                  console.log(metadata)
+                  headerMetadata[headerValue] = metadata;
+                }
+              });
+            } else {
+              const rowData: { [key: string]: string } = {};
+              row.eachCell((cell, colNumber) => {
+                const header = headers[colNumber - 1];
+                if (header) {
+                  rowData[header] = String(cell.value || '').trim();
+                }
+              });
+              if (Object.values(rowData).some(val => val !== '')) {
+                jsonData.push(rowData);
+              }
+            }
           });
-          return;
-        }
 
-        const processedData = jsonData.map((item: Record<string, string>, index) => ({
-          id: String(item.id || index + 1),
-          ...item,
-        }));
+          let templateData: { [key: string]: any } = [];
 
-        onImport(processedData);
-        showNotification({
-          title: "Datos importados",
-          message: `Datos de ${ type === "assists" ? "asistencias" : "inscripciones" } importados correctamente.`,
-          type: "success",
+          jsonData.forEach(item => {
+            let data: { [key: string]: any } = {};
+            Object.keys(headerMetadata).forEach((key) => {
+              console.log(item[key], headerMetadata[key])
+              data[headerMetadata[key].key] = item[key];
+            })
+
+            templateData.push(data)
+          })
+
+          console.log(templateData)
+
+          const requiredKeys = columns?.map((col) => {
+            const key = col.key;
+            return typeof key === 'string' ? key.toLowerCase() : String(key).toLowerCase();
+          });
+
+          if (jsonData.length === 0) {
+            throw new Error("El archivo no contiene datos.");
+          }
+
+          const importedKeys = Object.keys(jsonData[0]).map((key) => key.toLowerCase());
+
+          const hasAllRequiredKeys = requiredKeys.every((reqKey) =>
+            importedKeys.includes(reqKey)
+          );
+
+          if (!hasAllRequiredKeys) {
+            showNotification({
+              title: "Error en la estructura",
+              message: `El archivo no tiene la estructura requerida para ${ type === "assists" ? "asistencias" : "inscripciones" }.`,
+              type: "error",
+            });
+            return;
+          }
+
+          const processedData = jsonData.map((item: Record<string, string>, index) => {
+            const processedRow: any = {
+              id: String(item.id || index + 1),
+              ...item,
+            };
+
+            Object.keys(item).forEach(key => {
+              if (headerMetadata[key]) {
+                processedRow[`__metadata_${key}`] = headerMetadata[key];
+              }
+            });
+
+            return processedRow;
+          });
+
+          console.log('Datos procesados con metadatos:', processedData);
+
+          onImport(processedData);
+          showNotification({
+            title: "Datos importados",
+            message: `Datos de ${ type === "assists" ? "asistencias" : "inscripciones" } importados correctamente con metadatos.`,
+            type: "success",
+          });
         });
       } catch (error: unknown) {
         console.error("Error al importar el archivo:", error);
@@ -119,7 +481,7 @@ export function DataImportExport({ type, data, columns, fileName, onImport }: Da
       }
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
   
 

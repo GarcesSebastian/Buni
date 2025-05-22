@@ -18,7 +18,7 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react"
-import { Event, Scenery } from "@/types/Events"
+import { Event, FormConfig, Scenery } from "@/types/Events"
 import Field from "@/components/services/Forms/Field"
 import { useUserData } from "@/hooks/auth/useUserData"
 import Link from "next/link"
@@ -63,6 +63,8 @@ export default function FormsPage() {
   const [isLoadingForm, setIsLoadingForm] = useState(true)
   const [isFormAvailable, setIsFormAvailable] = useState(false)
   const [isFormClosed, setIsFormClosed] = useState(false)
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -82,8 +84,12 @@ export default function FormsPage() {
       setScenery(data.scenery)
       setIsActive(data.event.state === "true")
       
-      const startDateTime = new Date(data.event.horarioInicio)
-      const endDateTime = new Date(data.event.horarioFin)
+      const formConfig = data.event.formConfig?.[typeForm as keyof FormConfig]
+      const formStartDate = formConfig?.enabled ? formConfig.startDate : data.event.horarioInicio
+      const formEndDate = formConfig?.enabled ? formConfig.endDate : data.event.horarioFin
+
+      const startDateTime = new Date(formStartDate)
+      const endDateTime = new Date(formEndDate)
 
       const now = data.date_now
       if (now >= startDateTime && now <= endDateTime) {
@@ -97,6 +103,9 @@ export default function FormsPage() {
       } else {
         setIsFormClosed(false)
       }
+
+      setStartDate(startDateTime)
+      setEndDate(endDateTime) 
     }
   }
   
@@ -119,7 +128,8 @@ export default function FormsPage() {
     if (event && isFormAvailable && !isFormClosed) {
       const calculateTimeLeft = () => {
         const now = new Date()
-        const endDateTime = new Date(event.horarioFin)
+
+        const endDateTime = new Date(endDate || event.horarioFin)
         const difference = endDateTime.getTime() - now.getTime()
 
         if (difference <= 0) {
@@ -331,11 +341,10 @@ export default function FormsPage() {
   }
 
   if (!isFormAvailable && event) {
-    const startDateTime = new Date(event.horarioInicio)
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Countdown 
-          targetDate={startDateTime.toISOString()} 
+          targetDate={startDate?.toISOString() || ""} 
           onComplete={() => setIsFormAvailable(true)}
         />
       </div>
@@ -402,11 +411,11 @@ export default function FormsPage() {
                 <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">Horario de inicio</Badge>
-                    <span className="text-sm">{new Date(event?.horarioInicio || "").toLocaleString()}</span>
+                    <span className="text-sm">{new Date(startDate || event?.horarioInicio || "").toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">Horario de fin</Badge>
-                    <span className="text-sm">{new Date(event?.horarioFin || "").toLocaleString()}</span>
+                    <span className="text-sm">{new Date(endDate || event?.horarioFin || "").toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">Escenario</Badge>
@@ -466,6 +475,20 @@ export default function FormsPage() {
                 <CardTitle>{event?.nombre}</CardTitle>
                 <CardDescription>{currentForm?.description}</CardDescription>
               </CardHeader>
+
+              {!isActive && (
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <div className="rounded-full bg-blue-100 p-3 mb-4">
+                      <AlertCircle className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">El evento no está activo</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Por favor, espere a que el evento esté activo para poder registrarse.
+                    </p>
+                  </div>
+                </CardContent>
+              )}
 
               {isSubmitting && (
                 <CardContent className="pt-6">
@@ -559,18 +582,30 @@ export default function FormsPage() {
                               {secciones.personal.map((campo) => (
                                 <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
                               ))}
+
+                              {secciones.personal.length === 0 && (
+                                <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
+                              )}
                             </TabsContent>
 
                             <TabsContent value="academic" className="space-y-4">
                               {secciones.academic.map((campo) => (
                                 <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
                               ))}
+
+                              {secciones.academic.length === 0 && (
+                                <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
+                              )}
                             </TabsContent>
 
                             <TabsContent value="additional" className="space-y-4">
                               {secciones.additional.map((campo) => (
                                 <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
                               ))}
+
+                              {secciones.additional.length === 0 && (
+                                <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
+                              )}
                             </TabsContent>
                           </Tabs>
 

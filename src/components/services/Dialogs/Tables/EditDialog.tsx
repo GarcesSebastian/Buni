@@ -155,20 +155,24 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
             <DialogDescription>Complete los datos para editar el {data.table.name}</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4">
-            {Object.keys(data.structureForm).map((value, index) => (
-              <div key={index} className="grid gap-2">
-                <InputBasic
-                  formData={formData}
-                  data={{
-                    form: data.structureForm[value],
-                    onChange: handleChange(value),
-                    key: value,
-                    index: index
-                  }}
-                  user={user}
-                />
-              </div>
-            ))}
+            {Object.keys(data.structureForm).map((value, index) => {
+              if(data.structureForm[value].noEdit) return;
+              
+              return(
+                <div key={index} className="grid gap-2">
+                  <InputBasic
+                    formData={formData}
+                    data={{
+                      form: data.structureForm[value],
+                      onChange: handleChange(value),
+                      key: value,
+                      index: index
+                    }}
+                    user={user}
+                  />
+                </div>
+              )
+            })}
           </div>
           <DialogFooter>
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>

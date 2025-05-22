@@ -5,6 +5,7 @@ export function handleUpdateUserData(data: User, setUser: (users: User) => void)
 }
 
 export function handleUpdateEventForm(data: { idEvent: string, typeForm: string, data: Record<string, string | number> }, setUser: (user: User | ((prevUser: User) => User)) => void) {
+  console.log(data)
   setUser((prevUser: User) => {
     const updatedUser = { ...prevUser }
     const updatedEvents = [...updatedUser.events]

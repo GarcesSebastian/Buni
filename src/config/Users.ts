@@ -3,6 +3,7 @@ import { ConfigFormUser, ConfigUser, TableUser } from "@/types/User"
 export const tableUser: TableUser = {
     name: "Usuarios",
     key: "users",
+    isUser: true
 }
 
 export const configUser: ConfigUser[] = [
@@ -26,7 +27,8 @@ export const configFormUser: ConfigFormUser = {
     password: {
         name: "Contraseña",
         type: "password",
-        required: true
+        required: true,
+        noEdit: true
     },
     roles: {
         name: "Rol",
