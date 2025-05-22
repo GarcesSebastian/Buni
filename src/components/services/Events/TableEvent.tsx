@@ -217,7 +217,7 @@ export function DataTable({
           <TableBody>
             {paginatedData.length > 0 ? (
               paginatedData.map((item, index) => (
-                <TableRow key={`row-${item.id || index}`}>
+                <TableRow key={`row-${item.id || index}-${Math.random()}`}>
                   {columns.map((column) => {
                     const fieldInfo = form?.fields.find(field => field.id.split("_")[0] === column.key)
                     return (

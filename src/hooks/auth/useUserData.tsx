@@ -68,10 +68,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const initializeData = async () => {
-            if (!isAuthenticated) {
-                setUser(TemplateData);
-                setIsLoaded(true);
-            } else {
+            if (isAuthenticated) {
                 setIsLoaded(false);
                 await fetchAllData();
                 setIsLoaded(true);

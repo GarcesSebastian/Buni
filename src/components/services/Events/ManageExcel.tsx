@@ -7,12 +7,16 @@ import { Button } from "@/components/ui/Button"
 import { FileSpreadsheet, Upload } from "lucide-react"
 import ExcelJS from "exceljs"
 import { useNotification } from "@/hooks/client/useNotification"
+import { useUserData } from "@/hooks/auth/useUserData"
+import { useSocket } from "@/hooks/server/useSocket"
+import Cookies from "js-cookie"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
 
 interface DataImportExportProps {
   type: TabsEvent
+  eventId: string,
   data: Assists[]
   columns: Assists[]
   fileName: string
@@ -24,9 +28,11 @@ const getColumLabel = (key: string, columns: Assists[]) => {
   return column?.label as string;
 }
 
-export function DataImportExport({ type, data: DataTest, columns, fileName, onImport }: DataImportExportProps) {
+export function DataImportExport({ type, eventId, data: DataTest, columns, fileName, onImport }: DataImportExportProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { showNotification } = useNotification()
+  const { user, setUser } = useUserData()
+  const { socket } = useSocket()
 
   const exportToExcel = async () => {
     if (DataTest.length === 0) {
@@ -63,7 +69,6 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
               transformedRow[getColumLabel(key, columns)] = value;
               headers.push({
                 key: key,
-                parentKey: key,
                 data: item[key] as unknown as string
               });
             }
@@ -71,7 +76,6 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             transformedRow[getColumLabel(key, columns)] = value;
             headers.push({
               key: key,
-              parentKey: key,
               data: item[key] as unknown as string
             });
           }
@@ -79,7 +83,6 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
           transformedRow[getColumLabel(key, columns)] = value;
           headers.push({
             key: key,
-            parentKey: key,
             data: item[key] as unknown as string
           });
         }
@@ -349,15 +352,15 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
     }, 100);
   };
   
-  const importFromExcel = (file: File) => {
+  const importFromExcel = async (file: File) => {
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = e.target?.result;
         const workbook = new ExcelJS.Workbook();
         
-        workbook.xlsx.load(data as ArrayBuffer).then(() => {
+        workbook.xlsx.load(data as ArrayBuffer).then( async () => {
           const worksheet = workbook.getWorksheet(1);
           if (!worksheet) throw new Error("No se pudo leer la hoja de cálculo.");
 
@@ -387,7 +390,6 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
                     column: ""
                   }
 
-                  console.log(noteText)
                   const parentKeyMatch = noteText.match(/Parent:\s*([^\n]+)/u);
                   const typeMatch = noteText.match(/Type:\s*([^\n]+)/u);
                   const dataMatch = noteText.match(/Data:\s*([^\n]+)/u);
@@ -402,7 +404,6 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
                     metadata.column = columnMatch[1];
                   }
 
-                  console.log(metadata)
                   headerMetadata[headerValue] = metadata;
                 }
               });
@@ -420,31 +421,66 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             }
           });
 
-          type data = { [key: string]: string }
-          const templateData: data[] = [];
+          type data = Record<string, string>;
+
+          interface MetadataItem {
+            key: string;
+            parentKey: string;
+            [key: string]: string; 
+          }
+          
+          const templateData: Assists[] = [];
+
+          function isProbablyDateString(value: unknown): boolean {
+            if (typeof value !== 'string') return false;
+          
+            const datePattern = /\b(19|20)\d\d\b.*\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{1,2})\b/i;
+          
+            if (!datePattern.test(value)) return false;
+          
+            const date = new Date(value);
+            return !isNaN(date.getTime());
+          }
 
           jsonData.forEach(item => {
-            const data: data = {};
+            const data: Record<string, string | Record<string, string>> = {};
             Object.keys(headerMetadata).forEach((key) => {
-              console.log(item[key], headerMetadata[key])
-              data[headerMetadata[key].key] = item[key];
+              const metaData = headerMetadata[key] as MetadataItem;
+
+              if(isProbablyDateString(metaData.data)){
+                data[metaData.key] = new Date(item[key]).toISOString().split("T")[0];
+                return;
+              }
+
+              if(metaData.parentKey == "undefined"){
+                data[metaData.key] = item[key];
+                return;
+              }
+
+              const keySplited = metaData.key.split("_")[0]
+              if(keySplited == metaData.parentKey){
+                if(!data[metaData.parentKey]) data[metaData.parentKey] = {};
+                
+                const parentValue = data[metaData.parentKey];
+                if (typeof parentValue === 'object' && parentValue !== null) {
+                  (parentValue as Record<string, string>)[metaData.key] = item[key];
+                }
+              }
             })
 
-            templateData.push(data)
+            templateData.push(data as Assists)
           })
-
-          console.log(templateData)
 
           const requiredKeys = columns?.map((col) => {
             const key = col.key;
             return typeof key === 'string' ? key.toLowerCase() : String(key).toLowerCase();
           });
 
-          if (jsonData.length === 0) {
+          if (templateData.length === 0) {
             throw new Error("El archivo no contiene datos.");
           }
 
-          const importedKeys = Object.keys(jsonData[0]).map((key) => key.toLowerCase());
+          const importedKeys = Object.keys(templateData[0]).map((key) => key.toLowerCase());
 
           const hasAllRequiredKeys = requiredKeys.every((reqKey) =>
             importedKeys.includes(reqKey)
@@ -465,7 +501,7 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             id: string;
           } & Record<K, string> & Partial<Record<MetadataKey<K>, string>>;
 
-          const processedData = jsonData.map((item: Record<string, string>, index) => {
+          const processedData = templateData.map((item: Assists, index) => {
             const keys = Object.keys(item) as string[];
             const processedRow: ProcessedRow<string> = {
               id: String(item.id || index + 1),
@@ -481,8 +517,45 @@ export function DataImportExport({ type, data: DataTest, columns, fileName, onIm
             return processedRow;
           });
 
-          console.log('Datos procesados con metadatos:', processedData);
+          const eventFinded = user.events.find(event => event.id == eventId)
+          if(!eventFinded){
+            throw new Error("No se encontro el evento")
+          }
 
+          if(type === 'assists' || type === 'inscriptions') {
+            eventFinded[type] = [...(eventFinded[type] || []), ...templateData]
+          }
+
+          const newData = {
+            ...user,
+            events: user.events.map(event => {
+              if(event.id == eventId){
+                return eventFinded
+              }
+
+              return event
+            })
+          }
+
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Cookies.get("token")}`
+            },
+            body: JSON.stringify(eventFinded)
+          })
+
+          const data_response = await response.json()
+
+          if (!response.ok) {
+            throw new Error(data_response.error || "Error al actualizar el usuario")
+          }
+
+          setUser(newData)
+          socket?.emit("UPDATE_DATA", newData)
+          console.log('Datos procesados con metadatos:', processedData);
+          
           onImport(processedData);
           showNotification({
             title: "Datos importados",

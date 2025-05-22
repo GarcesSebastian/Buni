@@ -280,7 +280,7 @@ export function TableGeneric({structure, structureForm, table}) {
                   {structure.map((column) => {
                     if (column.key === "id") return null;
                     return (
-                      <TableCell key={column.key}>
+                      <TableCell key={`${column.key}_${index}`}>
                         {normalizeData(data, column.key)}
                       </TableCell>
                     );

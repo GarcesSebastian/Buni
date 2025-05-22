@@ -36,7 +36,7 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    const {user, updateEvent} = useUserData()
+    const {user, isLoaded, updateEvent} = useUserData()
     const { showNotification } = useNotification()
     const { socket } = useSocket()
     const [event, setEvent] = useState<Event | undefined>()
@@ -44,7 +44,6 @@ export default function EventDetailPage() {
     const [formInscriptions, setFormInscriptions] = useState<Form | undefined>()
     const [scenery, setScenery] = useState<Scenery | undefined>()
     const [program, setProgram] = useState<Programs | undefined>()
-    const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
     const [hasDistributionAssists, setHasDistributionAssists] = useState(false)
     const [hasDistributionInscriptions, setHasDistributionInscriptions] = useState(false)
@@ -73,7 +72,7 @@ export default function EventDetailPage() {
     const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
-        setLoading(true)
+        if(!isLoaded) return;
         const foundEvent = user.events.find((e) => e.id === eventId)
 
         if (foundEvent) {
@@ -100,13 +99,11 @@ export default function EventDetailPage() {
 
             setSelectedAssistsDistribution(defaultAssistsField)
             setSelectedInscriptionsDistribution(defaultInscriptionsField)
-
-        } else {
+        }else{
             router.push("/events")
         }
 
-        setLoading(false)
-    }, [eventId, router, user.events, formAssists, formInscriptions, program, scenery, user.forms, user.programs, user.scenery])
+    }, [eventId, router, user.events, formAssists, formInscriptions, program, scenery, user.forms, user.programs, user.scenery, isLoaded])
 
     useEffect(() => {
         socket?.on("UPDATE_DATA", (updatedUser: User) => {
@@ -172,7 +169,6 @@ export default function EventDetailPage() {
                 })
             }
 
-            console.log(newData.events, user.events)
             socket?.emit("UPDATE_DATA", newData)
     
             setIsChangeFormConfig(false)
@@ -349,8 +345,8 @@ export default function EventDetailPage() {
 
         setIsGenerating(false);
     };
-
-    if (loading) {
+    
+    if(!isLoaded){
         return (
             <div className="h-full">
                 <div className="h-full bg-gray-100">
@@ -365,7 +361,7 @@ export default function EventDetailPage() {
         )
     }
 
-    if (!event) {
+    if (!event && isLoaded) {
         return (
             <div className="h-full">
                 <div className="h-full bg-gray-100">
@@ -397,16 +393,16 @@ export default function EventDetailPage() {
                                     </Button>
                                 </Link>
                                 <div>
-                                    <h1 className="text-xl sm:text-2xl font-bold">{event.nombre || "Sin nombre"}</h1>
-                                    <p className="text-sm sm:text-base text-muted-foreground">{event.organizador || "Sin organizador"}</p>
+                                    <h1 className="text-xl sm:text-2xl font-bold">{event!.nombre || "Sin nombre"}</h1>
+                                    <p className="text-sm sm:text-base text-muted-foreground">{event!.organizador || "Sin organizador"}</p>
                                 </div>
                             </div>
 
                             <FormConfigButton
-                                eventName={event.nombre}
+                                eventName={event!.nombre}
                                 formAssists={formAssists!}
                                 formInscriptions={formInscriptions!}
-                                initialConfig={event.formConfig}
+                                initialConfig={event!.formConfig}
                                 onConfigSaved={handleFormConfigSave}
                                 isChangeFormConfig={isChangeFormConfig}
                             />
@@ -441,11 +437,11 @@ export default function EventDetailPage() {
                                         <CardDescription className="text-sm">Detalles generales del evento</CardDescription>
                                     </CardHeader>
                                     <CardContent className="p-4 sm:p-6">
-                                        <EventInfo event={event} scenery={scenery as Scenery} program={program as Programs} formConfig={formConfig!} />
+                                        <EventInfo event={event!} scenery={scenery as Scenery} program={program as Programs} formConfig={formConfig!} />
                                     </CardContent>
                                 </Card>
 
-                                {event.assists?.length || 0 > 0 || event.inscriptions?.length || 0 > 0 ? (
+                                {event!.assists?.length || 0 > 0 || event!.inscriptions?.length || 0 > 0 ? (
                                     <Card className="overflow-hidden">
                                         <CardContent className="p-3 sm:p-4 md:p-8">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
@@ -469,12 +465,12 @@ export default function EventDetailPage() {
                                                                 <div>
                                                                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">Inscripciones</p>
                                                                     <h3 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                                                                        {event.inscriptions?.length || 0}
+                                                                        {event!.inscriptions?.length || 0}
                                                                     </h3>
                                                                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                                                                        {event.cupos === "-1" 
+                                                                        {event!.cupos === "-1" 
                                                                             ? "Cupos ilimitados" 
-                                                                            : `${event.inscriptions?.length || 0} de ${event.cupos} cupos ocupados`}
+                                                                            : `${event!.inscriptions?.length || 0} de ${event!.cupos} cupos ocupados`}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -488,11 +484,11 @@ export default function EventDetailPage() {
                                                                 <div>
                                                                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">Asistencias</p>
                                                                     <h3 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                                                        {event.assists?.length || 0}
+                                                        {event!.assists?.length || 0}
                                                     </h3>
                                                                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                                                                        {event.inscriptions?.length 
-                                                                            ? `${Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)}% de los inscritos asistieron`
+                                                                        {event!.inscriptions?.length 
+                                                                            ? `${Math.round((event!.assists?.length || 0) / event!.inscriptions.length * 100)}% de los inscritos asistieron`
                                                                             : "Sin asistencias registradas"}
                                                                     </p>
                                                                 </div>
@@ -505,8 +501,8 @@ export default function EventDetailPage() {
                                                     <div className="flex flex-col items-center justify-center h-full">
                                                         <div className="text-center">
                                                             <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
-                                                                {event.inscriptions?.length 
-                                                                    ? Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)
+                                                                {event!.inscriptions?.length 
+                                                                    ? Math.round((event!.assists?.length || 0) / event!.inscriptions.length * 100)
                                                                     : 0}%
                                                             </div>
                                                             <p className="text-xs sm:text-sm text-muted-foreground">Tasa de Asistencia</p>
@@ -514,8 +510,8 @@ export default function EventDetailPage() {
                                                                 <div 
                                                                     className="h-full bg-foreground rounded-full transition-all duration-500"
                                                                     style={{
-                                                                        width: `${event.inscriptions?.length 
-                                                                            ? (event.assists?.length || 0) / event.inscriptions.length * 100
+                                                                        width: `${event!.inscriptions?.length 
+                                                                            ? (event!.assists?.length || 0) / event!.inscriptions.length * 100
                                                                             : 0}%`
                                                                     }}
                                                                 />
@@ -532,13 +528,13 @@ export default function EventDetailPage() {
                                                 </div>
                                                 <div className="space-y-1 sm:space-y-2">
                                                     <p className="text-xs sm:text-sm text-muted-foreground">
-                                                        {event.inscriptions?.length 
-                                                            ? `Este evento tiene ${event.inscriptions.length} personas inscritas y ${event.assists?.length || 0} han confirmado su asistencia. `
+                                                        {event!.inscriptions?.length 
+                                                            ? `Este evento tiene ${event!.inscriptions.length} personas inscritas y ${event!.assists?.length || 0} han confirmado su asistencia. `
                                                             : 'Aún no hay inscripciones registradas. '}
                                                     </p>
                                                     <p className="text-xs sm:text-sm text-muted-foreground">
-                                                        {event.inscriptions?.length 
-                                                            ? `La tasa de asistencia actual es del ${Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)}%.`
+                                                        {event!.inscriptions?.length 
+                                                            ? `La tasa de asistencia actual es del ${Math.round((event!.assists?.length || 0) / event!.inscriptions.length * 100)}%.`
                                                             : 'Las estadísticas se actualizarán cuando haya inscripciones.'}
                                                     </p>
                                                 </div>
@@ -572,9 +568,10 @@ export default function EventDetailPage() {
                                         <div className="mt-4 sm:mt-0">
                                         <DataImportExport
                                             type="assists"
+                                            eventId={eventId}
                                             data={filteredAssists}
                                             columns={getColumnsForm(formAssists) as Assists[]}
-                                            fileName={`asistencias_evento_${event.id}`}
+                                            fileName={`asistencias_evento_${event!.id}`}
                                             onImport={(data) => handleImportData("assists", data)}
                                         />
                                         </div>
@@ -639,9 +636,10 @@ export default function EventDetailPage() {
                                         <div className="mt-4 sm:mt-0 max-sm:w-full">
                                             <DataImportExport
                                                 type="inscriptions"
+                                                eventId={eventId}
                                                 data={filteredInscriptions}
                                                 columns={getColumnsForm(formInscriptions) as Assists[]}
-                                                fileName={`inscripciones_evento_${event.id}`}
+                                                fileName={`inscripciones_evento_${event!.id}`}
                                                 onImport={(data) => handleImportData("inscriptions", data)}
                                             />
                                         </div>
