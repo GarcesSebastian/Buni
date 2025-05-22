@@ -9,6 +9,7 @@ import ExcelJS from "exceljs"
 import { useNotification } from "@/hooks/client/useNotification"
 import { useUserData } from "@/hooks/auth/useUserData"
 import { useSocket } from "@/hooks/server/useSocket"
+import Cookies from "js-cookie"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
@@ -539,20 +540,20 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             })
           }
 
-          // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
-          //   method: "PUT",
-          //   headers: {
-          //     "Content-Type": "application/json",
-          //     "Authorization": `Bearer ${Cookies.get("token")}`
-          //   },
-          //   body: JSON.stringify(eventFinded)
-          // })
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Cookies.get("token")}`
+            },
+            body: JSON.stringify(eventFinded)
+          })
 
-          // const data_response = await response.json()
+          const data_response = await response.json()
 
-          // if (!response.ok) {
-          //   throw new Error(data_response.error || "Error al actualizar el usuario")
-          // }
+          if (!response.ok) {
+            throw new Error(data_response.error || "Error al actualizar el usuario")
+          }
 
           setUser(newData)
           socket?.emit("UPDATE_DATA", newData)
