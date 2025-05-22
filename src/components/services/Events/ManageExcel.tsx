@@ -128,7 +128,6 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
     const headerRow = worksheet.getRow(1);
     headerRow.height = 35;
     
-    console.log(headers)
     headerRow.eachCell((cell, colNumber) => {
       const cellData = headers[colNumber - 1]
 
@@ -421,6 +420,7 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             }
           });
 
+
           interface MetadataItem {
             key: string;
             parentKey: string;
@@ -441,33 +441,38 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
           }
 
           jsonData.forEach(item => {
-            const data: Record<string, string | Record<string, string>> = {};
+            const data: Record<string, string> = {};
+            const parentKeyGroups: Record<string, Record<string, string>> = {};
+            
             Object.keys(headerMetadata).forEach((key) => {
               const metaData = headerMetadata[key] as MetadataItem;
-
+              
               if(isProbablyDateString(metaData.data)){
                 data[metaData.key] = new Date(item[key]).toISOString().split("T")[0];
                 return;
               }
-
-              if(metaData.parentKey == "undefined"){
+              
+              if(metaData.parentKey === "undefined"){
                 data[metaData.key] = item[key];
                 return;
               }
-
-              const keySplited = metaData.key.split("_")[0]
-              if(keySplited == metaData.parentKey){
-                if(!data[metaData.parentKey]) data[metaData.parentKey] = {};
-                
-                const parentValue = data[metaData.parentKey];
-                if (typeof parentValue === 'object' && parentValue !== null) {
-                  (parentValue as Record<string, string>)[metaData.key] = item[key];
+              
+              const keySplited = metaData.key.split("_")[0];
+              if(keySplited === metaData.parentKey){
+                if(!parentKeyGroups[metaData.parentKey]) {
+                  parentKeyGroups[metaData.parentKey] = {};
                 }
+                
+                parentKeyGroups[metaData.parentKey][metaData.key] = item[key];
               }
-            })
-
-            templateData.push(data as Assists)
-          })
+            });
+            
+            Object.entries(parentKeyGroups).forEach(([parentKey, values]) => {
+              data[parentKey] = JSON.stringify(values);
+            });
+            
+            templateData.push(data as Assists);
+          });
 
           const requiredKeys = columns?.map((col) => {
             const key = col.key;
@@ -535,20 +540,20 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             })
           }
 
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${Cookies.get("token")}`
-            },
-            body: JSON.stringify(eventFinded)
-          })
+          // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
+          //   method: "PUT",
+          //   headers: {
+          //     "Content-Type": "application/json",
+          //     "Authorization": `Bearer ${Cookies.get("token")}`
+          //   },
+          //   body: JSON.stringify(eventFinded)
+          // })
 
-          const data_response = await response.json()
+          // const data_response = await response.json()
 
-          if (!response.ok) {
-            throw new Error(data_response.error || "Error al actualizar el usuario")
-          }
+          // if (!response.ok) {
+          //   throw new Error(data_response.error || "Error al actualizar el usuario")
+          // }
 
           setUser(newData)
           socket?.emit("UPDATE_DATA", newData)

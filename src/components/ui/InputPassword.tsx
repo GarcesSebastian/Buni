@@ -29,7 +29,7 @@ export const InputPassword = ({ data }: PropsInputBasic) => {
         
         const allChars = lowercase + uppercase + numbers + symbols;
         
-        const length = Math.floor(Math.random() * 3) + 10;
+        const length = Math.floor(Math.random() * 3) + 10; // 10, 11 o 12
         
         let password = '';
         
