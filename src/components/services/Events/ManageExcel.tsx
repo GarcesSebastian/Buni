@@ -9,7 +9,6 @@ import ExcelJS from "exceljs"
 import { useNotification } from "@/hooks/client/useNotification"
 import { useUserData } from "@/hooks/auth/useUserData"
 import { useSocket } from "@/hooks/server/useSocket"
-import Cookies from "js-cookie"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
