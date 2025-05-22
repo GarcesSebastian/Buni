@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Badge } from "@/components/ui/Badge"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { AlertTriangle, ArrowLeft, Calendar, Loader, MapPin, Users } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Calendar, Loader, Users } from "lucide-react"
 import Link from "next/link"
+import Cookies from "js-cookie"
 import type { Assists, Event, Scenery } from "@/types/Events"
 import type { User } from "@/hooks/auth/useUserData"
 
@@ -25,6 +25,10 @@ import { generateSampleData } from "@/lib/DataTesting"
 import { Programs } from "@/types/Programs"
 import { fieldsDistribution } from "@/config/Forms"
 import { useSocket } from "@/hooks/server/useSocket"
+import { EventInfo } from "@/components/config/EventInfo"
+import { FormConfigButton } from "@/components/services/Dialogs/Events/FormConfigButton"
+import { FormConfigData } from "@/components/services/Dialogs/Events/FormConfigDialog"
+import { useNotification } from "@/hooks/client/useNotification"
 
 export type TabsEvent = "summary" | "assists" | "inscriptions"
 
@@ -32,17 +36,20 @@ export default function EventDetailPage() {
     const params = useParams()
     const router = useRouter()
     const eventId = params.id as string
-    const {user, updateEvent} = useUserData()
+    const {user, isLoaded, updateEvent} = useUserData()
+    const { showNotification } = useNotification()
     const { socket } = useSocket()
     const [event, setEvent] = useState<Event | undefined>()
     const [formAssists, setFormAssists] = useState<Form | undefined>()
     const [formInscriptions, setFormInscriptions] = useState<Form | undefined>()
     const [scenery, setScenery] = useState<Scenery | undefined>()
     const [program, setProgram] = useState<Programs | undefined>()
-    const [loading, setLoading] = useState(true)
     const [currentTab, setCurrentTab] = useState<TabsEvent>("summary")
     const [hasDistributionAssists, setHasDistributionAssists] = useState(false)
     const [hasDistributionInscriptions, setHasDistributionInscriptions] = useState(false)
+
+    const [formConfig, setFormConfig] = useState<FormConfigData | undefined>(event?.formConfig)
+    const [isChangeFormConfig, setIsChangeFormConfig] = useState(false)
     
     const [selectedAssistsDistribution, setSelectedAssistsDistribution] = useState<string | undefined>()
     const [selectedInscriptionsDistribution, setSelectedInscriptionsDistribution] = useState<string | undefined>()
@@ -65,7 +72,7 @@ export default function EventDetailPage() {
     const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
-        setLoading(true)
+        if(!isLoaded) return;
         const foundEvent = user.events.find((e) => e.id === eventId)
 
         if (foundEvent) {
@@ -80,6 +87,7 @@ export default function EventDetailPage() {
             setFormInscriptions(user.forms.find((f) => f.id == idFormInscriptions) ?? undefined)
             setProgram(user.programs.find((p) => p.id == idProgram) ?? undefined)
             setScenery(user.scenery.find((s) => s.id == idScenery) ?? undefined)
+            setFormConfig(foundEvent.formConfig)
             
             const assistsField = formAssists?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
             const inscriptionsField = formInscriptions?.fields.find(field => field.type === "select")?.id.split("_")[0] || "carrera"
@@ -91,17 +99,14 @@ export default function EventDetailPage() {
 
             setSelectedAssistsDistribution(defaultAssistsField)
             setSelectedInscriptionsDistribution(defaultInscriptionsField)
-
-        } else {
+        }else{
             router.push("/events")
         }
 
-        setLoading(false)
-    }, [eventId, router, user.events, formAssists, formInscriptions, program, scenery, user.forms, user.programs, user.scenery])
+    }, [eventId, router, user.events, formAssists, formInscriptions, program, scenery, user.forms, user.programs, user.scenery, isLoaded])
 
     useEffect(() => {
-        socket?.on("UPDATE_DATA", (data: { users: User }) => {
-            const updatedUser = data.users;
+        socket?.on("UPDATE_DATA", (updatedUser: User) => {
             const updatedEvent = updatedUser.events.find((e: Event) => e.id === eventId);
             
             if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
@@ -130,6 +135,58 @@ export default function EventDetailPage() {
             })
         }
     }, [event])
+
+    const handleFormConfigSave = async (config: FormConfigData) => {
+        setFormConfig(config)
+        setIsChangeFormConfig(true)
+
+        try{
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}/form-config`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get("token")}`,
+                },
+                body: JSON.stringify(config),
+            })
+    
+            const data = await response.json()
+    
+            if (!response.ok) {
+                throw new Error(data.error || "Error al guardar la configuración")
+            }
+
+            const newData = {
+                ...user,
+                events: user.events.map((e) => {
+                    if (e.id === eventId) {
+                        return {
+                            ...e,
+                            formConfig: config
+                        }
+                    }
+                    return e
+                })
+            }
+
+            socket?.emit("UPDATE_DATA", newData)
+    
+            setIsChangeFormConfig(false)
+            showNotification({
+                title: "Configuración actualizada",
+                message: "Los intervalos de fechas para los formularios han sido actualizados",
+                type: "success",
+                duration: 5000,
+            })
+        }catch(error){
+            console.error(error)
+            showNotification({
+                title: "Error",
+                message: "No se pudo guardar la configuración",
+                type: "error",
+            })
+        }
+    }
 
     const filteredAssists = event?.assists?.filter((assists) => {
         return Object.entries(assistsFilters).every(([key, value]) => {
@@ -288,8 +345,8 @@ export default function EventDetailPage() {
 
         setIsGenerating(false);
     };
-
-    if (loading) {
+    
+    if(!isLoaded){
         return (
             <div className="h-full">
                 <div className="h-full bg-gray-100">
@@ -304,7 +361,7 @@ export default function EventDetailPage() {
         )
     }
 
-    if (!event) {
+    if (!event && isLoaded) {
         return (
             <div className="h-full">
                 <div className="h-full bg-gray-100">
@@ -336,14 +393,24 @@ export default function EventDetailPage() {
                                     </Button>
                                 </Link>
                                 <div>
-                                    <h1 className="text-xl sm:text-2xl font-bold">{event.nombre || "Sin nombre"}</h1>
-                                    <p className="text-sm sm:text-base text-muted-foreground">{event.organizador || "Sin organizador"}</p>
+                                    <h1 className="text-xl sm:text-2xl font-bold">{event!.nombre || "Sin nombre"}</h1>
+                                    <p className="text-sm sm:text-base text-muted-foreground">{event!.organizador || "Sin organizador"}</p>
                                 </div>
                             </div>
+
+                            <FormConfigButton
+                                eventName={event!.nombre}
+                                formAssists={formAssists!}
+                                formInscriptions={formInscriptions!}
+                                initialConfig={event!.formConfig}
+                                onConfigSaved={handleFormConfigSave}
+                                isChangeFormConfig={isChangeFormConfig}
+                            />
+
                             <Button 
                                 onClick={handleGenerateData}
                                 disabled={isGenerating}
-                                className="bg-primary hover:bg-primary/90"
+                                className="bg-primary hover:bg-primary/90 hidden"
                             >
                                 {isGenerating ? (
                                     <>
@@ -370,66 +437,11 @@ export default function EventDetailPage() {
                                         <CardDescription className="text-sm">Detalles generales del evento</CardDescription>
                                     </CardHeader>
                                     <CardContent className="p-4 sm:p-6">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                                            <div className="space-y-3 sm:space-y-4">
-                                                <div className="flex items-center">
-                                                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <p className="text-sm font-medium">Fecha de Inicio</p>
-                                                        <p className="text-sm sm:text-base">{new Date(event.horarioInicio).toLocaleString()}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center">
-                                                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <p className="text-sm font-medium">Fecha de Fin</p>
-                                                        <p className="text-sm sm:text-base">{new Date(event.horarioFin).toLocaleString()}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center">
-                                                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <p className="text-sm font-medium">Escenario</p>
-                                                        <p className="text-sm sm:text-base">{scenery?.name || "Sin escenario"}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-3 sm:space-y-4">
-                                                <div className="flex items-center">
-                                                    <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-muted-foreground" />
-                                                    <div>
-                                                        <Badge variant="outline" className="text-xs sm:text-sm">
-                                                            {event.cupos === "-1" ? "Cupos ilimitados" : `${event.cupos} cupos`}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-start">
-                                                    <div>
-                                                        <p className="text-sm font-medium">Programa</p>
-                                                        <Badge variant="outline" className="text-xs sm:text-sm">
-                                                            {program?.name || "Sin programa"}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-start">
-                                                    <div>
-                                                        <p className="text-sm font-medium">Estado</p>
-                                                        <Badge variant={event.state === "true" ? "default" : "secondary"} className="text-xs sm:text-sm">
-                                                            {event.state === "true" ? "Activo" : "Inactivo"}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <EventInfo event={event!} scenery={scenery as Scenery} program={program as Programs} formConfig={formConfig!} />
                                     </CardContent>
                                 </Card>
 
-                                {event.assists?.length || 0 > 0 || event.inscriptions?.length || 0 > 0 ? (
+                                {event!.assists?.length || 0 > 0 || event!.inscriptions?.length || 0 > 0 ? (
                                     <Card className="overflow-hidden">
                                         <CardContent className="p-3 sm:p-4 md:p-8">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
@@ -453,12 +465,12 @@ export default function EventDetailPage() {
                                                                 <div>
                                                                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">Inscripciones</p>
                                                                     <h3 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                                                                        {event.inscriptions?.length || 0}
+                                                                        {event!.inscriptions?.length || 0}
                                                                     </h3>
                                                                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                                                                        {event.cupos === "-1" 
+                                                                        {event!.cupos === "-1" 
                                                                             ? "Cupos ilimitados" 
-                                                                            : `${event.inscriptions?.length || 0} de ${event.cupos} cupos ocupados`}
+                                                                            : `${event!.inscriptions?.length || 0} de ${event!.cupos} cupos ocupados`}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -472,11 +484,11 @@ export default function EventDetailPage() {
                                                                 <div>
                                                                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">Asistencias</p>
                                                                     <h3 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                                                        {event.assists?.length || 0}
+                                                        {event!.assists?.length || 0}
                                                     </h3>
                                                                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                                                                        {event.inscriptions?.length 
-                                                                            ? `${Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)}% de los inscritos asistieron`
+                                                                        {event!.inscriptions?.length 
+                                                                            ? `${Math.round((event!.assists?.length || 0) / event!.inscriptions.length * 100)}% de los inscritos asistieron`
                                                                             : "Sin asistencias registradas"}
                                                                     </p>
                                                                 </div>
@@ -489,8 +501,8 @@ export default function EventDetailPage() {
                                                     <div className="flex flex-col items-center justify-center h-full">
                                                         <div className="text-center">
                                                             <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
-                                                                {event.inscriptions?.length 
-                                                                    ? Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)
+                                                                {event!.inscriptions?.length 
+                                                                    ? Math.round((event!.assists?.length || 0) / event!.inscriptions.length * 100)
                                                                     : 0}%
                                                             </div>
                                                             <p className="text-xs sm:text-sm text-muted-foreground">Tasa de Asistencia</p>
@@ -498,8 +510,8 @@ export default function EventDetailPage() {
                                                                 <div 
                                                                     className="h-full bg-foreground rounded-full transition-all duration-500"
                                                                     style={{
-                                                                        width: `${event.inscriptions?.length 
-                                                                            ? (event.assists?.length || 0) / event.inscriptions.length * 100
+                                                                        width: `${event!.inscriptions?.length 
+                                                                            ? (event!.assists?.length || 0) / event!.inscriptions.length * 100
                                                                             : 0}%`
                                                                     }}
                                                                 />
@@ -516,13 +528,13 @@ export default function EventDetailPage() {
                                                 </div>
                                                 <div className="space-y-1 sm:space-y-2">
                                                     <p className="text-xs sm:text-sm text-muted-foreground">
-                                                        {event.inscriptions?.length 
-                                                            ? `Este evento tiene ${event.inscriptions.length} personas inscritas y ${event.assists?.length || 0} han confirmado su asistencia. `
+                                                        {event!.inscriptions?.length 
+                                                            ? `Este evento tiene ${event!.inscriptions.length} personas inscritas y ${event!.assists?.length || 0} han confirmado su asistencia. `
                                                             : 'Aún no hay inscripciones registradas. '}
                                                     </p>
                                                     <p className="text-xs sm:text-sm text-muted-foreground">
-                                                        {event.inscriptions?.length 
-                                                            ? `La tasa de asistencia actual es del ${Math.round((event.assists?.length || 0) / event.inscriptions.length * 100)}%.`
+                                                        {event!.inscriptions?.length 
+                                                            ? `La tasa de asistencia actual es del ${Math.round((event!.assists?.length || 0) / event!.inscriptions.length * 100)}%.`
                                                             : 'Las estadísticas se actualizarán cuando haya inscripciones.'}
                                                     </p>
                                                 </div>
@@ -556,9 +568,10 @@ export default function EventDetailPage() {
                                         <div className="mt-4 sm:mt-0">
                                         <DataImportExport
                                             type="assists"
+                                            eventId={eventId}
                                             data={filteredAssists}
                                             columns={getColumnsForm(formAssists) as Assists[]}
-                                            fileName={`asistencias_evento_${event.id}`}
+                                            fileName={`asistencias_evento_${event!.id}`}
                                             onImport={(data) => handleImportData("assists", data)}
                                         />
                                         </div>
@@ -623,9 +636,10 @@ export default function EventDetailPage() {
                                         <div className="mt-4 sm:mt-0 max-sm:w-full">
                                             <DataImportExport
                                                 type="inscriptions"
+                                                eventId={eventId}
                                                 data={filteredInscriptions}
                                                 columns={getColumnsForm(formInscriptions) as Assists[]}
-                                                fileName={`inscripciones_evento_${event.id}`}
+                                                fileName={`inscripciones_evento_${event!.id}`}
                                                 onImport={(data) => handleImportData("inscriptions", data)}
                                             />
                                         </div>

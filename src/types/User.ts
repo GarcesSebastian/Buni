@@ -1,6 +1,7 @@
 export interface TableUser {
   name: string;
   key: string;
+  isUser?: boolean;
 }
 
 export interface ConfigUser {
@@ -24,6 +25,7 @@ export interface ConfigFormUser {
     name: string;
     type: "password";
     required?: boolean;
+    noEdit?: boolean;
   };
   roles: {
     name: string;

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/Dropdown"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
-import { Edit, Filter, MoreVertical, Plus, QrCode, Trash, Eye } from "lucide-react"
+import { Edit, Filter, MoreVertical, Plus, QrCode, Trash, Eye, Lock } from "lucide-react"
 import { CreateEventDialog } from "./Dialogs/Tables/CreateDialog"
 import { QRDialog } from "./Dialogs/QRDialog"
 import { FilterDialog } from "./Dialogs/Tables/FilterDialog"
@@ -14,10 +14,14 @@ import { useUserData } from "@/hooks/auth/useUserData"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/Input"
 import CustomLoader from "@/components/ui/CustomLoader"
+import { DialogRecovery } from "./Dialogs/User/DialogRecovery"
+import Cookies from "js-cookie"
+import { useNotification } from "@/hooks/client/useNotification"
 
 export function TableGeneric({structure, structureForm, table}) {
   const { user, isLoaded } = useUserData()
   const router = useRouter()
+  const { showNotification } = useNotification();
   const [mounted, setMounted] = useState(false)
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
@@ -35,6 +39,9 @@ export function TableGeneric({structure, structureForm, table}) {
   const [openDelete, setOpenDelete] = useState(false)
   const [eventToDelete, setEventToDelete] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [sendedCode, setSendedCode] = useState(false)
+  const [openRecovery, setOpenRecovery] = useState(false)
+  const [eventToRecovery, setEventToRecovery] = useState(null)
 
   useEffect(() => {
     setMounted(true)
@@ -189,6 +196,38 @@ export function TableGeneric({structure, structureForm, table}) {
     router.push(`/${table.key}/${data.id}`)
   }
 
+  const handleRecoverPassword = async (data) => {
+    setOpenRecovery(true)
+    setEventToRecovery(data)
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${data.id}/recovery`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Cookies.get("token")}`
+        },
+      })
+
+      const data_response = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data_response.error || "Error al enviar el código de recuperación")
+      }
+
+      setSendedCode(true)
+    } catch (error) {
+      console.error(error)
+      setOpenRecovery(false)
+
+      showNotification({
+        type: "error",
+        message: error.message || "Error al enviar el código de recuperación"
+      })
+    }
+
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-row justify-between gap-4 max-md:flex-col">
@@ -241,7 +280,7 @@ export function TableGeneric({structure, structureForm, table}) {
                   {structure.map((column) => {
                     if (column.key === "id") return null;
                     return (
-                      <TableCell key={column.key}>
+                      <TableCell key={`${column.key}_${index}`}>
                         {normalizeData(data, column.key)}
                       </TableCell>
                     );
@@ -279,11 +318,19 @@ export function TableGeneric({structure, structureForm, table}) {
                               <QrCode className="mr-2 h-4 w-4" />
                               QR Asistencia
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-800" onClick={() => router.push(`forms/assists/${data.id}`)}>
-                              Prueba de Asistencia
+                            <DropdownMenuItem className="text-green-800" onClick={() => router.push(`forms/assists/${data.id}`)}>
+                              Registro de Asistencia
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-800" onClick={() => router.push(`forms/inscriptions/${data.id}`)}>
-                              Prueba de Inscripcion
+                            <DropdownMenuItem className="text-green-800" onClick={() => router.push(`forms/inscriptions/${data.id}`)}>
+                              Registro de Inscripcion
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {table.isUser && (
+                          <>
+                            <DropdownMenuItem onClick={() => handleRecoverPassword(data)}>
+                              <Lock className="mr-2 h-4 w-4" />
+                              Recuperar contraseña
                             </DropdownMenuItem>
                           </>
                         )}
@@ -320,6 +367,16 @@ export function TableGeneric({structure, structureForm, table}) {
           open={openEdit}
           onOpenChange={setOpenEdit}
           initialData={eventToEdit}
+        />
+      )}
+
+      {openRecovery && (
+        <DialogRecovery
+          open={openRecovery}
+          eventToRecovery={eventToRecovery}
+          sendedCode={sendedCode}
+          setSendedCode={setSendedCode}
+          onOpenChange={setOpenRecovery}
         />
       )}
 

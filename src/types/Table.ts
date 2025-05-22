@@ -3,6 +3,7 @@ export interface GeneralStructureForm {
       name: string;
       type: "text" | "number" | "date" | "time" | "select" | "email" | "password";
       required?: boolean;
+      noEdit?: boolean;
       options?: { value: string; label: string; id?: number }[];
     } & (
       | {

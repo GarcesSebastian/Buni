@@ -8,7 +8,6 @@ import { Role, User as UserType } from "@/types/User";
 import { useDataSync } from "./useDataSync";
 import { useUserState } from "./useUserState";
 import { useUserSettings } from "./useUserSettings";
-import { TemplateData } from "@/config/TemplateData";
 import { useAuth } from "./useAuth";
 
 
@@ -25,7 +24,7 @@ export interface Views {
     events: boolean;
     programs: boolean;
     scenery: boolean;
-    formularios: boolean;
+    forms: boolean;
     users: boolean;
     roles: boolean;
 }
@@ -54,7 +53,7 @@ const viewsDefault = {
     events: true,
     programs: true,
     scenery: true,
-    formularios: true,
+    forms: true,
     users: true,
     roles: true,
 }
@@ -68,10 +67,7 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const initializeData = async () => {
-            if (!isAuthenticated) {
-                setUser(TemplateData);
-                setIsLoaded(true);
-            } else {
+            if (isAuthenticated) {
                 setIsLoaded(false);
                 await fetchAllData();
                 setIsLoaded(true);
@@ -85,8 +81,6 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
         if(isLoading){
             return;
         }
-
-        console.log("authUser", authUser)
 
         if(authUser?.permissions && typeof authUser.permissions === "object"){
             Object.entries(viewsDefault).forEach(([key]) => {

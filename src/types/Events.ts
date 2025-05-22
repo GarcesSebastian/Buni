@@ -5,6 +5,19 @@ export interface TableEvent {
   isView: boolean
 }
 
+export interface FormConfig {
+    inscriptions: {
+        enabled: boolean,
+        startDate: string,
+        endDate: string
+    },
+    assists: {
+        enabled: boolean,
+        startDate: string,
+        endDate: string
+    }
+}
+
 export interface Assists {
   [key: string]: string | number | Record<string, string | string[]>;
 }
@@ -36,6 +49,7 @@ export interface Event {
   }
   assists?: Assists[]
   inscriptions?: Assists[]
+  formConfig?: FormConfig
 }
 
 export interface ConfigEvent {

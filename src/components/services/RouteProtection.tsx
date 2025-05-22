@@ -5,11 +5,12 @@ import { useUserData, Views } from "@/hooks/auth/useUserData"
 import { AlertCircle, ArrowLeft } from "lucide-react"
 import { Button } from "../ui/Button"
 import { useAuth } from "@/hooks/auth/useAuth"
+
 const getRouteToViewMap = (): Record<string, keyof Views> => ({
   "/events": "events",
   "/programs": "programs",
   "/events/scenerys": "scenery",
-  "/formularios": "formularios",
+  "/formularios": "forms",
   "/users": "users",
   "/users/roles": "roles"
 })

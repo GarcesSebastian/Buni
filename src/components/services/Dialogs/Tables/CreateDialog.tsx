@@ -109,7 +109,7 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
       if (!response.ok) {
         throw new Error(data_response.error || 'Error al crear el registro'); 
-      }
+      } 
 
       const newData = {
         ...user,
