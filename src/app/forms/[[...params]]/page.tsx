@@ -33,7 +33,7 @@ import { Countdown } from "@/components/ui/Countdown"
 
 export type formOptionsType = string | boolean | string[] | number
 
-const getDataForm = async (eventId: string, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date} | undefined> => {
+const getDataForm = async (eventId: string, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date, current: number} | undefined> => {
   const form = await getDataFormFromBackend(eventId, typeForm)
   return form
 }
@@ -57,6 +57,7 @@ export default function FormsPage() {
   const [progress, setProgress] = useState(0)
   const [showPreview, setShowPreview] = useState(false)
   const [isActive, setIsActive] = useState<boolean>(true)
+  const [isFull, setIsFull] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -115,6 +116,10 @@ export default function FormsPage() {
         setIsLoadingForm(true)
         const data = await getDataForm(idEvent, keyForm)
         if (data) {
+          const maxCp = Number(data.event.cupos)
+          const currCp = data.current;
+          setIsFull(currCp >= maxCp)
+
           await updateDataForm(data)
         }
         setIsLoadingForm(false)
@@ -338,6 +343,15 @@ export default function FormsPage() {
     } else if (showPreview) {
       setShowPreview(false)
     }
+  }
+
+  if(isFull){
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h2 className="text-2xl font-bold mb-4">El evento esta lleno</h2>
+        <p className="text-muted-foreground">Lo sentimos, este evento ya no tiene cupos disponibles.</p>
+      </div>
+    )
   }
 
   if (!isFormAvailable && event) {
