@@ -110,5 +110,30 @@ Asegúrate de tener instalado lo siguiente:
 
 Una vez instaladas las dependencias, puedes iniciar el servidor de desarrollo:
 
+#### Iniciar el Servidor
+
 ```bash
 npm run dev
+```
+
+Esto iniciará la aplicación en `http://localhost:3000` por defecto.
+
+## Contribuyendo
+
+Las contribuciones son lo que hacen de la comunidad de código abierto un lugar tan increíble para aprender, inspirar y crear. Cualquier contribución que hagas es muy apreciada.
+
+Si tienes alguna sugerencia para mejorar esto, por favor haz un fork del repositorio y crea un pull request. También puedes simplemente abrir un issue con la etiqueta "enhancement" (mejora).
+
+¡No olvides darle una estrella al proyecto! ¡Gracias de nuevo!
+
+### Pasos para Contribuir
+
+1.  **Haz Fork del Proyecto**
+2.  **Crea tu Rama de Característica** (`git checkout -b feature/AmazingFeature`)
+3.  **Confirma tus Cambios** (`git commit -m 'Add some AmazingFeature'`)
+4.  **Empuja a la Rama** (`git push origin feature/AmazingFeature`)
+5.  **Abre un Pull Request**
+
+## Licencia
+
+Distribuido bajo la Licencia MIT. Consulta `LICENSE.txt` para más información. (Nota: Es posible que necesites crear un archivo LICENSE.txt si no existe).
