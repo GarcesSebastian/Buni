@@ -55,9 +55,11 @@ export async function middleware(req: NextRequest): Promise<Response> {
     }
 
     if (path === '/') {
+        console.log("token", token)
         if (token) {
             try {
                 const isValid = await verifyTokenWithBackend(token);
+                console.log("isValid", isValid)
                 if (isValid) {
                     return NextResponse.redirect(new URL('/dashboard', req.url));
                 } else {
@@ -74,6 +76,7 @@ export async function middleware(req: NextRequest): Promise<Response> {
     }
 
     if (!token) {
+        console.log("token no encontrado")
         return NextResponse.redirect(new URL('/', req.url));
     }
 
