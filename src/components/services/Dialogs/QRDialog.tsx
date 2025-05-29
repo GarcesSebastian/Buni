@@ -17,7 +17,7 @@ interface QRDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   event: Event
-  type: "inscripcion" | "asistencia"
+  type: "inscriptions" | "assists"
 }
 
 export function QRDialog({ open, onOpenChange, event, type }: QRDialogProps) {
@@ -40,9 +40,9 @@ export function QRDialog({ open, onOpenChange, event, type }: QRDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Código QR - {type === "inscripcion" ? "Inscripción" : "Asistencia"}</DialogTitle>
+          <DialogTitle>Código QR - {type === "inscriptions" ? "Inscripción" : "Asistencia"}</DialogTitle>
           <DialogDescription>
-            {type === "inscripcion"
+            {type === "inscriptions"
               ? "Use este código QR para que los participantes se inscriban al evento"
               : "Use este código QR para registrar la asistencia de los participantes"}
           </DialogDescription>
