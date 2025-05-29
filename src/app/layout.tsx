@@ -34,13 +34,13 @@ export default function RootLayout({
               <TopNav/>
               <div className="flex overflow-hidden">
                 <UserDataProvider>
-                  <RouteProtection>
-                    <SocketProvider>
+                  <SocketProvider>
+                    <RouteProtection>
                       <div className="flex-1 overflow-hidden md:h-[calc(100vh-4.05rem)] h-screen">
                         {children}
                       </div>
-                    </SocketProvider>
-                  </RouteProtection>
+                    </RouteProtection>
+                  </SocketProvider>
                 </UserDataProvider>
               </div>
             </AuthProvider>

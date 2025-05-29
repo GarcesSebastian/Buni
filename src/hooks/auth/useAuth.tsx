@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { Permissions } from '@/types/Permissions';
 
-interface User {
+export interface User {
     id: string;
     name: string;
     email: string;
@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-
 
     useEffect(() => {
         const verifyToken = async () => {

@@ -22,9 +22,12 @@ import CreateDialog from "@/components/services/Dialogs/Roles/CreateDialog";
 import { useUserData } from "@/hooks/auth/useUserData"
 import useRoles from "@/hooks/server/useRoles";
 import CustomLoader from "@/components/ui/CustomLoader";
+import { useSocket } from "@/hooks/server/useSocket"
+import { User } from "@/hooks/auth/useAuth"
 
 export default function RolesPage() {
     const { user, setUser, isLoaded } = useUserData();
+    const { socket } = useSocket();
     const { createRole, deleteRole, updateRole } = useRoles();
     const { showNotification } = useNotification();
     const [isCreating, setIsCreating] = useState(false);
@@ -59,7 +62,14 @@ export default function RolesPage() {
                 type: "success"
             });
 
-            setUser({ ...user, roles: [...user.roles, createdRole] });
+            const newData = {
+                ...user,
+                roles: [...user.roles, createdRole]
+            }
+            
+            socket?.emit("UPDATE_DATA", newData);
+
+            setUser(newData);
             setIsCreating(false);
         } catch (error) {
             showNotification({
@@ -94,7 +104,31 @@ export default function RolesPage() {
                 type: "success"
             });
 
-            setUser({ ...user, roles: user.roles.map(r => r.id === roleToEdit.id ? updatedRole as unknown as Role : r) });
+            const newData = {
+                ...user,
+                roles: user.roles.map(r => r.id === roleToEdit.id ? updatedRole as unknown as Role : r)
+            }
+
+            socket?.emit("UPDATE_DATA", newData);
+
+            const usersChanged = newData.users.filter(u => u.roles.id === roleToEdit.id)
+
+            usersChanged.forEach(u => {
+                const userRol = newData.roles.find(r => r.id === u.roles.id)!
+
+                const newUser: User = {
+                    id: u.id,
+                    name: u.name,
+                    email: u.email,
+                    role: userRol.name,
+                    permissions: userRol.permissions as unknown as Permissions,
+                    created_at: u.created_at
+                }
+
+                socket?.emit("UPDATE_USER", newUser);                
+            })
+
+            setUser(newData);
             setRoleToEdit(null);
             setIsEditing(false);
         } catch (error) {
@@ -123,7 +157,14 @@ export default function RolesPage() {
                 type: "success"
             });
 
-            setUser({ ...user, roles: user.roles.filter(r => r.id !== roleToDelete.id) });
+            const newData = {
+                ...user,
+                roles: user.roles.filter(r => r.id !== roleToDelete.id)
+            }
+
+            socket?.emit("UPDATE_DATA", newData);
+
+            setUser(newData);
             setRoleToDelete(null);
             setIsDeleting(false);
         } catch (error) {

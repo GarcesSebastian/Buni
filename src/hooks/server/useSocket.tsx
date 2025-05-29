@@ -2,7 +2,7 @@
 
 import { io, Socket } from "socket.io-client";
 import { useEffect, useState, createContext, useContext, ReactNode } from "react";
-import { handleUpdateUserData, handleUpdateEventForm } from "@/controllers/socket.controller";
+import { handleUpdateUserData, handleUpdateEventForm, handleUpdateUser } from "@/controllers/socket.controller";
 import { User, useUserData } from "@/hooks/auth/useUserData";
 import { useAuth } from "../auth/useAuth";
 import Cookies from "js-cookie";
@@ -24,7 +24,7 @@ export const useSocket = () => {
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const { setUser } = useUserData();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, setUser: setUserAuth } = useAuth();
 
     useEffect(() => {
         const newSocket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL, {
@@ -48,6 +48,10 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
         newSocket.on("UPDATE_DATA", (data) => {
             handleUpdateUserData(data, setUser);
+        });
+
+        newSocket.on("UPDATE_USER", (data) => {
+            handleUpdateUser(data, setUserAuth);
         });
 
         newSocket.on("UPDATE_EVENT_FORMS", (data) => {

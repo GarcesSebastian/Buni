@@ -1,11 +1,15 @@
 import { User } from "@/hooks/auth/useUserData";
+import { User as AuthUser } from "@/hooks/auth/useAuth";
 
 export function handleUpdateUserData(data: User, setUser: (users: User) => void) {
-    setUser(data)
+  setUser(data)
+}
+
+export function handleUpdateUser(data: AuthUser, setUser: (user: AuthUser) => void) {
+  setUser(data)
 }
 
 export function handleUpdateEventForm(data: { idEvent: string, typeForm: string, data: Record<string, string | number> }, setUser: (user: User | ((prevUser: User) => User)) => void) {
-  console.log(data)
   setUser((prevUser: User) => {
     const updatedUser = { ...prevUser }
     const updatedEvents = [...updatedUser.events]
