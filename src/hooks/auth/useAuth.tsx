@@ -4,6 +4,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { Permissions } from '@/types/Permissions';
+import { useLogout } from '@/contexts/LogoutContext';
 
 export interface User {
     id: string;
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
+    const {startLogout} = useLogout();
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -107,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(false);
         setIsLoading(false);
         
-        window.location.href = '/';
+        startLogout();
     };
 
     return (
