@@ -93,7 +93,7 @@ Asegúrate de tener instalado lo siguiente:
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone https://github.com/GarcesSebastian/Buni
+    git clone https://github.com/---/---
     # Reemplaza con la URL real del repositorio
     cd Buni
     ```
