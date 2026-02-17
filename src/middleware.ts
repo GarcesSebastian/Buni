@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { redirectToForms, redirectToDevTools } from './lib/MiddlewareEvents';
 
 const publicPaths = [
-    '/forms/assists', 
+    '/forms/assists',
     '/forms/inscriptions',
 ];
 
@@ -95,5 +95,5 @@ export async function middleware(req: NextRequest): Promise<Response> {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)', '/events/:path*'],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|webmanifest)$).*)', '/events/:path*'],
 };

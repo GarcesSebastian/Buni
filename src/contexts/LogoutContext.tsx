@@ -15,16 +15,16 @@ const LogoutContext = createContext<LogoutContextType | null>(null);
 export function LogoutProvider({ children }: { children: ReactNode }) {
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [redirectUrl, setRedirectUrl] = useState<string>('/');
-  
+
   useEffect(() => {
     let redirectTimeout: NodeJS.Timeout;
-    
+
     if (isLoggingOut) {
       redirectTimeout = setTimeout(() => {
         window.location.href = redirectUrl;
       }, 1500);
     }
-    
+
     return () => {
       clearTimeout(redirectTimeout);
     };
@@ -47,9 +47,9 @@ export function LogoutProvider({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-95">
           <div className="flex flex-col items-center">
             <div className="relative mb-6 flex flex-col items-center">
-              <Image 
-                src={process.env.NEXT_PUBLIC_LOGO_URL!} 
-                alt="BUNI Logo" 
+              <Image
+                src={"/logo.png"}
+                alt="BUNI Logo"
                 width={180}
                 height={50}
                 className="mb-4"
@@ -58,7 +58,7 @@ export function LogoutProvider({ children }: { children: ReactNode }) {
                 Cerrando sesión
               </h2>
             </div>
-            
+
             <div className="mb-6">
               <div className="relative">
                 <div className="w-16 h-16 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
@@ -67,7 +67,7 @@ export function LogoutProvider({ children }: { children: ReactNode }) {
                 </div>
               </div>
             </div>
-            
+
             <p className="text-muted-foreground text-center max-w-md">
               Estamos finalizando tu sesión.
             </p>

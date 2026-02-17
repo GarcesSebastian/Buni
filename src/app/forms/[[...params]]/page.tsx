@@ -33,7 +33,7 @@ import { Countdown } from "@/components/ui/Countdown"
 
 export type formOptionsType = string | boolean | string[] | number
 
-const getDataForm = async (eventId: string, typeForm: string): Promise<{event: Event, form: Form, scenery: Scenery, date_now: Date, current: number} | undefined> => {
+const getDataForm = async (eventId: string, typeForm: string): Promise<{ event: Event, form: Form, scenery: Scenery, date_now: Date, current: number } | undefined> => {
   const form = await getDataFormFromBackend(eventId, typeForm)
   return form
 }
@@ -43,7 +43,7 @@ export default function FormsPage() {
   const { user, setUser, isLoaded } = useUserData()
   const { showNotification } = useNotification()
   const { socket } = useSocket()
-  const { params: dynamicParams } = params || {}; 
+  const { params: dynamicParams } = params || {};
   const typeForm: string | undefined = dynamicParams?.[0] ?? undefined
   const idEvent: string | undefined = dynamicParams?.[1] ?? undefined
   const keyForm = typeForm ? `form${typeForm.charAt(0).toUpperCase().concat(typeForm.slice(1))}` : '';
@@ -78,13 +78,13 @@ export default function FormsPage() {
     seconds: 0
   })
 
-  const updateDataForm = async (data: {event: Event, form: Form, scenery: Scenery, date_now: Date}) => {
+  const updateDataForm = async (data: { event: Event, form: Form, scenery: Scenery, date_now: Date }) => {
     if (data) {
       setEvent(data.event)
       setCurrentForm(data.form)
       setScenery(data.scenery)
       setIsActive(data.event.state === "true")
-      
+
       const formConfig = data.event.formConfig?.[typeForm as keyof FormConfig]
       const formStartDate = formConfig?.enabled ? formConfig.startDate : data.event.horarioInicio
       const formEndDate = formConfig?.enabled ? formConfig.endDate : data.event.horarioFin
@@ -106,10 +106,10 @@ export default function FormsPage() {
       }
 
       setStartDate(startDateTime)
-      setEndDate(endDateTime) 
+      setEndDate(endDateTime)
     }
   }
-  
+
   useEffect(() => {
     if (idEvent) {
       const handleFetchEvent = async () => {
@@ -118,7 +118,7 @@ export default function FormsPage() {
         if (data) {
           const maxCp = Number(data.event.cupos)
           const currCp = data.current;
-          setIsFull(currCp >= maxCp)
+          setIsFull(maxCp !== -1 && currCp >= maxCp)
 
           await updateDataForm(data)
         }
@@ -228,9 +228,9 @@ export default function FormsPage() {
   }
 
   const secciones = {
-      personal: currentForm?.fields.filter((campo) => campo.section === "personal") || [],
-      academic: currentForm?.fields.filter((campo) => campo.section === "academic") || [],
-      additional: currentForm?.fields.filter((campo) => campo.section === "additional") || [],
+    personal: currentForm?.fields.filter((campo) => campo.section === "personal") || [],
+    academic: currentForm?.fields.filter((campo) => campo.section === "academic") || [],
+    additional: currentForm?.fields.filter((campo) => campo.section === "additional") || [],
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -238,7 +238,7 @@ export default function FormsPage() {
     setIsSubmitting(true)
 
     try {
-      if (validateForm({currentForm, formValues, callback: setErrors})) {
+      if (validateForm({ currentForm, formValues, callback: setErrors })) {
         const newFormValues: Record<string, formOptionsType> = {}
         Object.keys(formValues).forEach((key) => {
           const value = formValues[key]
@@ -321,15 +321,15 @@ export default function FormsPage() {
 
   const handleNextSection = () => {
     if (currentSection === "personal") {
-      if (validateForm({currentForm, formValues, sectionToValidate: "personal", callback: setErrors})) {
+      if (validateForm({ currentForm, formValues, sectionToValidate: "personal", callback: setErrors })) {
         setCurrentSection("academic")
       }
     } else if (currentSection === "academic") {
-      if (validateForm({currentForm, formValues, sectionToValidate: "academic", callback: setErrors})) {
+      if (validateForm({ currentForm, formValues, sectionToValidate: "academic", callback: setErrors })) {
         setCurrentSection("additional")
       }
     } else if (currentSection === "additional") {
-      if (validateForm({currentForm, formValues, sectionToValidate: "additional", callback: setErrors})) {
+      if (validateForm({ currentForm, formValues, sectionToValidate: "additional", callback: setErrors })) {
         setShowPreview(true)
       }
     }
@@ -345,7 +345,7 @@ export default function FormsPage() {
     }
   }
 
-  if(isFull){
+  if (isFull) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h2 className="text-2xl font-bold mb-4">El evento esta lleno</h2>
@@ -357,8 +357,8 @@ export default function FormsPage() {
   if (!isFormAvailable && event) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <Countdown 
-          targetDate={startDate?.toISOString() || ""} 
+        <Countdown
+          targetDate={startDate?.toISOString() || ""}
           onComplete={() => setIsFormAvailable(true)}
         />
       </div>
@@ -447,7 +447,7 @@ export default function FormsPage() {
               {isActive && (
                 <Card>
                   <CardHeader>
-                      <CardTitle className="text-lg">Progreso del registro</CardTitle>
+                    <CardTitle className="text-lg">Progreso del registro</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <Progress value={progress} className="h-2" />
@@ -565,74 +565,74 @@ export default function FormsPage() {
 
               {!submitted && (
                 <form onSubmit={handleSubmit}>
-                    {!showPreview && isActive && (
-                      <CardContent>
-                          <Tabs value={currentSection} className="w-full">
-                            <TabsList className="grid w-full grid-cols-3 mb-8">
-                              <TabsTrigger
-                                value="personal"
-                                onClick={() => setCurrentSection("personal")}
-                                disabled={currentSection === "additional"}
-                              >
-                                Personal
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="academic"
-                                onClick={() => setCurrentSection("academic")}
-                                disabled={currentSection === "personal" || currentSection === "additional"}
-                              >
-                                Académica
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="additional"
-                                onClick={() => setCurrentSection("additional")}
-                                disabled={currentSection === "personal" || currentSection === "academic"}
-                              >
-                                Adicional
-                              </TabsTrigger>
-                            </TabsList>
+                  {!showPreview && isActive && (
+                    <CardContent>
+                      <Tabs value={currentSection} className="w-full">
+                        <TabsList className="grid w-full grid-cols-3 mb-8">
+                          <TabsTrigger
+                            value="personal"
+                            onClick={() => setCurrentSection("personal")}
+                            disabled={currentSection === "additional"}
+                          >
+                            Personal
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="academic"
+                            onClick={() => setCurrentSection("academic")}
+                            disabled={currentSection === "personal" || currentSection === "additional"}
+                          >
+                            Académica
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="additional"
+                            onClick={() => setCurrentSection("additional")}
+                            disabled={currentSection === "personal" || currentSection === "academic"}
+                          >
+                            Adicional
+                          </TabsTrigger>
+                        </TabsList>
 
-                            <TabsContent value="personal" className="space-y-4">
-                              {secciones.personal.map((campo) => (
-                                <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
-                              ))}
+                        <TabsContent value="personal" className="space-y-4">
+                          {secciones.personal.map((campo) => (
+                            <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
+                          ))}
 
-                              {secciones.personal.length === 0 && (
-                                <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
-                              )}
-                            </TabsContent>
+                          {secciones.personal.length === 0 && (
+                            <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
+                          )}
+                        </TabsContent>
 
-                            <TabsContent value="academic" className="space-y-4">
-                              {secciones.academic.map((campo) => (
-                                <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
-                              ))}
+                        <TabsContent value="academic" className="space-y-4">
+                          {secciones.academic.map((campo) => (
+                            <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
+                          ))}
 
-                              {secciones.academic.length === 0 && (
-                                <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
-                              )}
-                            </TabsContent>
+                          {secciones.academic.length === 0 && (
+                            <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
+                          )}
+                        </TabsContent>
 
-                            <TabsContent value="additional" className="space-y-4">
-                              {secciones.additional.map((campo) => (
-                                <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
-                              ))}
+                        <TabsContent value="additional" className="space-y-4">
+                          {secciones.additional.map((campo) => (
+                            <Field key={campo.id} field={campo} formValues={formValues} setFormValues={setFormValues} errors={errors} setErrors={setErrors} />
+                          ))}
 
-                              {secciones.additional.length === 0 && (
-                                <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
-                              )}
-                            </TabsContent>
-                          </Tabs>
+                          {secciones.additional.length === 0 && (
+                            <p className="text-center text-muted-foreground text-sm">No hay campos para esta sección</p>
+                          )}
+                        </TabsContent>
+                      </Tabs>
 
-                        {!isActive && (
-                          <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <h3 className="text-xl font-semibold mb-2">¡Formulario cerrado!</h3>
-                            <p className="text-muted-foreground mb-6">
-                              El registro para este evento ha sido cerrado.
-                            </p>
-                          </div>
-                        )}
-                      </CardContent>
-                    )}
+                      {!isActive && (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                          <h3 className="text-xl font-semibold mb-2">¡Formulario cerrado!</h3>
+                          <p className="text-muted-foreground mb-6">
+                            El registro para este evento ha sido cerrado.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  )}
 
                   {isActive && (
                     <CardFooter className="flex justify-between border-t px-6 py-4">
@@ -646,18 +646,18 @@ export default function FormsPage() {
                         Anterior
                       </Button>
 
-                    {showPreview ? (
-                      <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Enviar formulario
-                      </Button>
-                    ) : (
-                      <Button type="button" onClick={handleNextSection} className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
-                        Siguiente
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="ml-2 h-4 w-4" />}
-                      </Button>
-                    )}
-                  </CardFooter>
+                      {showPreview ? (
+                        <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+                          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          Enviar formulario
+                        </Button>
+                      ) : (
+                        <Button type="button" onClick={handleNextSection} className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+                          Siguiente
+                          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="ml-2 h-4 w-4" />}
+                        </Button>
+                      )}
+                    </CardFooter>
                   )}
                 </form>
               )}

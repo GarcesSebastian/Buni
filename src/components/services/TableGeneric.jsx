@@ -18,7 +18,7 @@ import { DialogRecovery } from "./Dialogs/User/DialogRecovery"
 import Cookies from "js-cookie"
 import { useNotification } from "@/hooks/client/useNotification"
 
-export function TableGeneric({structure, structureForm, table}) {
+export function TableGeneric({ structure, structureForm, table }) {
   const { user, isLoaded } = useUserData()
   const router = useRouter()
   const { showNotification } = useNotification();
@@ -54,7 +54,7 @@ export function TableGeneric({structure, structureForm, table}) {
 
   const sortedAndFilteredEvents = useMemo(() => {
     if (!isLoaded) return [];
-    
+
     const filteredEvents = userTableData.filter(
       (event) => {
         return Object.keys(filters).every((key) => {
@@ -84,7 +84,7 @@ export function TableGeneric({structure, structureForm, table}) {
     if (!isLoaded) return;
     Object.keys(structureForm).forEach(value => {
       const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "forms" : value
-      if(structureForm[value].type == "select" && user[valueFormatted]){
+      if (structureForm[value].type == "select" && user[valueFormatted]) {
         const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {
           const name = s.name || s.nombre
           return {
@@ -98,7 +98,7 @@ export function TableGeneric({structure, structureForm, table}) {
     })
   }, [isLoaded, structureForm, user]);
 
-  if(!mounted || !isLoaded){
+  if (!mounted || !isLoaded) {
     return (
       <CustomLoader />
     )
@@ -138,16 +138,15 @@ export function TableGeneric({structure, structureForm, table}) {
   }
 
   const normalizeData = (data, value) => {
-    if(typeof data[value] != "object"){
+    if (typeof data[value] != "object") {
       if (value === "cupos" && data[value] === "-1") {
         return "Ilimitado"
       }
 
       if (value === "state") {
         return (
-          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            data[value] === "true" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }`}>
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${data[value] === "true" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+            }`}>
             {data[value] === "true" ? "Activo" : "Inactivo"}
           </span>
         );
@@ -156,12 +155,12 @@ export function TableGeneric({structure, structureForm, table}) {
       if (value === "password") {
         return (
           <div className="flex flex-row gap-2">
-            <Input 
-              disabled 
-              type={showPassword ? "text" : "password"} 
-              className="w-full border-none" 
-              value={data[value]} 
-              style={{ 
+            <Input
+              disabled
+              type={showPassword ? "text" : "password"}
+              className="w-full border-none"
+              value={data[value]}
+              style={{
                 cursor: 'default',
                 color: 'var(--foreground)',
                 WebkitTextFillColor: 'var(--foreground)',
@@ -184,7 +183,7 @@ export function TableGeneric({structure, structureForm, table}) {
 
     const DataEvent = data[value]
 
-    if(!DataEvent || !DataEvent.key){
+    if (!DataEvent || !DataEvent.key) {
       return data[value]
     }
 
@@ -202,10 +201,10 @@ export function TableGeneric({structure, structureForm, table}) {
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${data.id}/recovery`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${Cookies.get("token")}`
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`
         },
       })
 
@@ -254,7 +253,7 @@ export function TableGeneric({structure, structureForm, table}) {
                     </span>
 
                     {column.filter && (
-                      <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%"}}>
+                      <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "right", width: "1%" }}>
                         <Button variant="ghost" onClick={() => setOpenFilter(column.key)} className="hover:bg-transparent !p-1 !h-fit align-middle">
                           <Filter className="h-4 w-4" />
                         </Button>
@@ -290,7 +289,7 @@ export function TableGeneric({structure, structureForm, table}) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-fit w-fit p-0">
                           <span className="sr-only">Abrir menú</span>
-                          <MoreVertical className="h-4 w-4 p-0"/>
+                          <MoreVertical className="h-4 w-4 p-0" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -319,10 +318,10 @@ export function TableGeneric({structure, structureForm, table}) {
                               QR Asistencia
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-green-800" onClick={() => router.push(`forms/assists/${data.id}`)}>
-                              Registro de Asistencia
+                              Registro de Asistencia (Debug)
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-green-800" onClick={() => router.push(`forms/inscriptions/${data.id}`)}>
-                              Registro de Inscripcion
+                              Registro de Inscripcion (Debug)
                             </DropdownMenuItem>
                           </>
                         )}
@@ -343,11 +342,11 @@ export function TableGeneric({structure, structureForm, table}) {
           </TableBody>
         </Table>
       </div>
-      
-      <CreateEventDialog 
-        data = {{table: table, structureForm: structureForm}}
-        open={openCreate} 
-        onOpenChange={setOpenCreate} 
+
+      <CreateEventDialog
+        data={{ table: table, structureForm: structureForm }}
+        open={openCreate}
+        onOpenChange={setOpenCreate}
       />
 
       {selectedEvent && <QRDialog open={openQR} onOpenChange={setOpenQR} event={selectedEvent} type={qrType} />}

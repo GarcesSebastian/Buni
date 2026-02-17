@@ -26,28 +26,28 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <link rel="shortcut icon" href={process.env.NEXT_PUBLIC_LOGO_URL!} type="image/x-icon" />
+        <link rel="shortcut icon" href={"/logo.png"} type="image/x-icon" />
       </head>
       <body className={inter.className}>
-          <NotificationProvider>
-            <LogoutProvider>
-              <div className="h-screen overflow-hidden">
-                <AuthProvider>
-                  <TopNav/>
-                  <div className="flex overflow-hidden">
-                    <UserDataProvider>
-                      <SocketProvider>
-                        <RouteProtection>
-                          <div className="flex-1 overflow-hidden md:h-[calc(100vh-4.05rem)] h-screen">
-                            {children}
-                          </div>
-                        </RouteProtection>
-                      </SocketProvider>
-                    </UserDataProvider>
-                  </div>
-                </AuthProvider>
-              </div>
-          </LogoutProvider>          
+        <NotificationProvider>
+          <LogoutProvider>
+            <div className="h-screen overflow-hidden">
+              <AuthProvider>
+                <TopNav />
+                <div className="flex overflow-hidden">
+                  <UserDataProvider>
+                    <SocketProvider>
+                      <RouteProtection>
+                        <div className="flex-1 overflow-hidden md:h-[calc(100vh-4.05rem)] h-screen">
+                          {children}
+                        </div>
+                      </RouteProtection>
+                    </SocketProvider>
+                  </UserDataProvider>
+                </div>
+              </AuthProvider>
+            </div>
+          </LogoutProvider>
         </NotificationProvider>
       </body>
     </html>

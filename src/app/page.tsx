@@ -43,7 +43,7 @@ export default function SignInPage() {
       <Card className="w-full h-fit max-w-md flex flex-col">
         <CardHeader className="flex flex-col">
           <div className="flex justify-center">
-            <Image src={process.env.NEXT_PUBLIC_LOGO_URL!} alt="Description" width={160} height={40}/>
+            <Image src={"/logo.png"} alt="Description" width={160} height={40} />
           </div>
           <CardTitle className="text-2xl font-bold text-center">Iniciar sesión</CardTitle>
           <CardDescription className="text-center">
@@ -81,8 +81,8 @@ export default function SignInPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full justify-center bg-primary hover:bg-primary/90"
               disabled={isLoading}
             >
