@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { AlertTriangle, ArrowLeft, Calendar, Loader, Users } from "lucide-react"
 import Link from "next/link"
-import Cookies from "js-cookie"
+import { apiFetch, ApiError } from "@/lib/api/client"
 import type { Assists, Event, Scenery } from "@/types/Events"
 import type { User } from "@/hooks/auth/useUserData"
 
@@ -106,7 +106,8 @@ export default function EventDetailPage() {
     }, [eventId, router, user.events, formAssists, formInscriptions, program, scenery, user.forms, user.programs, user.scenery, isLoaded])
 
     useEffect(() => {
-        socket?.on("UPDATE_DATA", (updatedUser: User) => {
+        socket?.on("UPDATE_DATA", (payload) => {
+            const updatedUser = payload as unknown as User;
             const updatedEvent = updatedUser.events.find((e: Event) => e.id === eventId);
             
             if (updatedEvent && (!event || JSON.stringify(event) !== JSON.stringify(updatedEvent))) {
@@ -141,19 +142,16 @@ export default function EventDetailPage() {
         setIsChangeFormConfig(true)
 
         try{
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}/form-config`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`,
-                },
-                body: JSON.stringify(config),
-            })
-    
-            const data = await response.json()
-    
-            if (!response.ok) {
-                throw new Error(data.error || "Error al guardar la configuración")
+            try {
+                await apiFetch<unknown>(`/events/${eventId}/form-config`, {
+                    method: "PUT",
+                    body: JSON.stringify(config),
+                })
+            } catch (err) {
+                if (err instanceof ApiError) {
+                    throw new Error((err.body as { error?: string } | null)?.error || "Error al guardar la configuración")
+                }
+                throw err
             }
 
             const newData = {
@@ -192,7 +190,7 @@ export default function EventDetailPage() {
         return Object.entries(assistsFilters).every(([key, value]) => {
             if (!value) return true
             if (Array.isArray(value)) {
-                return value.includes(assists[key]?.toString())
+                return value.includes(assists[key]?.toString() ?? "")
             }
             return assists[key]?.toString().toLowerCase().includes(value.toLowerCase())
         })
@@ -202,7 +200,7 @@ export default function EventDetailPage() {
         return Object.entries(inscriptionsFilters).every(([key, value]) => {
             if (!value) return true
             if (Array.isArray(value)) {
-                return value.includes(inscription[key]?.toString())
+                return value.includes(inscription[key]?.toString() ?? "")
             }
             return inscription[key]?.toString().toLowerCase().includes(value.toLowerCase())
         })
@@ -268,7 +266,7 @@ export default function EventDetailPage() {
             setAssistsFilters({})
             setAssistsPagination({
                 currentPage: 1,
-                rowsPerPage: assistsPagination.rowsPerPage,
+                rowsPerPage: assistsPagination.rowsPerPage ?? 5,
             })
         } else {
             setEvent({
@@ -278,7 +276,7 @@ export default function EventDetailPage() {
             setInscriptionsFilters({})
             setInscriptionsPagination({
                 currentPage: 1,
-                rowsPerPage: inscriptionsPagination.rowsPerPage,
+                rowsPerPage: inscriptionsPagination.rowsPerPage ?? 5,
             })
         }
     }
@@ -290,7 +288,7 @@ export default function EventDetailPage() {
 
         formUse.fields.forEach((field) => {
             structure.push({
-                key: field.id.split("_")[0],
+                key: field.id.split("_")[0] ?? field.id,
                 label: field.name,
                 filterable: true,
             })
@@ -318,7 +316,7 @@ export default function EventDetailPage() {
 
             return hasOptions && isSelectableType
         }).map(field => ({
-            value: field.id.split("_")[0],
+            value: field.id.split("_")[0] ?? field.id,
             label: field.name
         }))
     }
@@ -619,7 +617,7 @@ export default function EventDetailPage() {
                                                 title="Distribución por Campo" 
                                                 data={assistData} 
                                                 type="bar" 
-                                                colors={[COLORS[0]]}
+                                                colors={[COLORS[0] ?? "#0088FE"]}
                                             />
                                         </div>
                                     </div>
@@ -687,7 +685,7 @@ export default function EventDetailPage() {
                                                 title="Distribución por Campo" 
                                                 data={inscriptionData} 
                                                 type="bar" 
-                                                colors={[COLORS[3]]}
+                                                colors={[COLORS[3] ?? "#FF8042"]}
                                             />
                                         </div>
                                     </div>

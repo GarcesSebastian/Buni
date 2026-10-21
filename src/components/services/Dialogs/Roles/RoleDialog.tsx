@@ -45,9 +45,10 @@ export function RoleDialog({
     const togglePermission = (permissionId: string, action: string) => {
         setSelectedPermissions((prev: Record<string, PermissionType>) => {
             const newPermissions = { ...prev }
+            const current = newPermissions[permissionId] ?? {}
             newPermissions[permissionId] = {
-                ...newPermissions[permissionId],
-                [action as keyof PermissionType]: !newPermissions[permissionId][action as keyof PermissionType]
+                ...current,
+                [action as keyof PermissionType]: !current[action as keyof PermissionType]
             }
             return newPermissions
         })
@@ -57,24 +58,28 @@ export function RoleDialog({
         const moduleData = permissionModules.find(m => m.id === moduleId)
         if (!moduleData) return
 
-        const allSelected = moduleData.actions.every((action) => selectedPermissions[moduleId][action.id as keyof PermissionType])
+        const allSelected = moduleData.actions.every((action) => selectedPermissions[moduleId]?.[action.id as keyof PermissionType])
 
         if (allSelected) {
             setSelectedPermissions((prev: Record<string, PermissionType>) => {
                 const newPermissions = { ...prev }
+                const modulePerms = { ...(newPermissions[moduleId] ?? {}) }
                 moduleData.actions.forEach((action) => {
-                    newPermissions[moduleId][action.id as keyof PermissionType] = false
+                    modulePerms[action.id as keyof PermissionType] = false
                 })
+                newPermissions[moduleId] = modulePerms
                 return newPermissions
             })
         } else {
             setSelectedPermissions((prev: Record<string, PermissionType>) => {
                 const newPermissions = { ...prev }
+                const modulePerms = { ...(newPermissions[moduleId] ?? {}) }
                 moduleData.actions.forEach((action) => {
-                    if (!newPermissions[moduleId][action.id as keyof PermissionType]) {
-                        newPermissions[moduleId][action.id as keyof PermissionType] = true
+                    if (!modulePerms[action.id as keyof PermissionType]) {
+                        modulePerms[action.id as keyof PermissionType] = true
                     }
                 })
+                newPermissions[moduleId] = modulePerms
                 return newPermissions
             })
         }
@@ -91,7 +96,7 @@ export function RoleDialog({
         if (!moduleData) return false
 
         try {
-            return moduleData.actions.every(action => selectedPermissions[moduleId][action.id as keyof PermissionType])
+            return moduleData.actions.every(action => selectedPermissions[moduleId]?.[action.id as keyof PermissionType])
         } catch (error) {
             console.error(error)
             return false
@@ -190,7 +195,7 @@ export function RoleDialog({
                                                     {isExpanded && (
                                                         <div className="grid grid-cols-2 gap-2">
                                                             {module.actions.map((action, index) => {
-                                                                const isSelected = selectedPermissions[module.id][action.id as keyof PermissionType]
+                                                                const isSelected = selectedPermissions[module.id]?.[action.id as keyof PermissionType]
 
                                                                 return (
                                                                     <button
@@ -254,7 +259,7 @@ export function RoleDialog({
                                                     <div className="p-4 bg-gray-50">
                                                         <div className="grid grid-cols-1 gap-2">
                                                             {module.actions.map((action, index) => {
-                                                                const isSelected = selectedPermissions[module.id][action.id as keyof PermissionType]
+                                                                const isSelected = selectedPermissions[module.id]?.[action.id as keyof PermissionType]
 
                                                                 return (
                                                                     <button

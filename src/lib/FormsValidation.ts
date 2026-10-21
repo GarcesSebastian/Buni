@@ -39,7 +39,7 @@ export const validateForm = ({currentForm, formValues, sectionToValidate, callba
           if (!hasAllRowsSelected) {
             newErrors[campo.id] = "Debe seleccionar al menos una opción en cada fila"
           }
-        } else if ( campo.type !== "checkbox" && (!formValues[campo.id] || formValues[campo.id].toString().trim() === "")) {
+        } else if ( campo.type !== "checkbox" && (!formValues[campo.id] || (formValues[campo.id] ?? "").toString().trim() === "")) {
           newErrors[campo.id] = "Este campo es obligatorio"
         }
       }

@@ -1,20 +1,13 @@
 import { Programs } from "@/types/Programs";
 import { useState } from "react";
-import Cookies from "js-cookie";
+import { apiFetch, unwrap, type Envelope } from "@/lib/api/client";
 
 const usePrograms = () => {
     const [programs, setPrograms] = useState<Programs[]>([]);
 
-    const getPrograms = async () => {  
+    const getPrograms = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                }
-            });
-            const data = await response.json();
+            const data = await apiFetch<Programs[]>("/programs");
 
             if (!data || !Array.isArray(data)) {
                 setPrograms([]);
@@ -29,40 +22,20 @@ const usePrograms = () => {
     }
 
     const createPrograms = async (programs: Programs) => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                },
-                body: JSON.stringify(programs)
-            });
-            const data = await response.json();
-
-            if (response.ok) {  
-                setPrograms(data);
-                return data;
-            }
-
-            throw new Error(data.error || 'Error al crear el programa');
-        } catch (error) {
-            throw error;
-        }
+        const data = await apiFetch<Envelope<Programs>>("/programs", {
+            method: "POST",
+            body: JSON.stringify(programs),
+        });
+        return unwrap(data);
     }
 
     const updatePrograms = async (programs: Programs) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${programs.id}`, {
+            const data = await apiFetch<Envelope<Programs>>(`/programs/${programs.id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                },
-                body: JSON.stringify(programs)
+                body: JSON.stringify(programs),
             });
-            const data = await response.json();
-            setPrograms(data);
+            return unwrap(data);
         } catch (error) {
             console.error(error);
         }
@@ -70,14 +43,9 @@ const usePrograms = () => {
 
     const deletePrograms = async (programsId: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${programsId}`, {
+            const data = await apiFetch<unknown>(`/programs/${programsId}`, {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                }
             });
-            const data = await response.json();
             return data;
         } catch (error) {
             console.error(error);

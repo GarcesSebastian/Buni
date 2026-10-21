@@ -27,7 +27,7 @@ export async function generateSampleData(count: number, form: Form | undefined, 
                     if (typeof opt === 'object' && 'row' in opt && 'data' in opt) {
                         const rowKey = `${field.id}-${opt.row}`
                         if (field.type === "checklist_single_grid") {
-                            gridValue[rowKey] = opt.data[Math.floor(Math.random() * opt.data.length)]
+                            gridValue[rowKey] = opt.data[Math.floor(Math.random() * opt.data.length)] ?? ""
                         } else {
                             const numSelections = Math.min(3, Math.floor(Math.random() * opt.data.length) + 1)
                             gridValue[rowKey] = opt.data.slice(0, numSelections)
@@ -44,7 +44,7 @@ export async function generateSampleData(count: number, form: Form | undefined, 
             case "date":
                 const date = new Date();
                 date.setDate(date.getDate() - Math.floor(Math.random() * 365));
-                return date.toISOString().split('T')[0];
+                return date.toISOString().split('T')[0] ?? "";
             case "time":
                 return `${Math.floor(Math.random() * 24).toString().padStart(2, '0')}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
             case "checkbox":
@@ -66,7 +66,7 @@ export async function generateSampleData(count: number, form: Form | undefined, 
         for (let i = 0; i < batchSize; i++) {
             const registro: Registro = {};
             fields.forEach((field) => {
-                const key = field.id.split("_")[0];
+                const key = field.id.split("_")[0] ?? field.id;
                 registro[key] = getRandomValue(field as FormField);
             });
             batchData.push(registro);

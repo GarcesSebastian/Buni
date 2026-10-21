@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
 import { Event } from "@/types/Events";
 import { User } from "./useUserData";
 import { TemplateData } from "@/config/TemplateData";
 import { useAuth } from "./useAuth";
+import { apiFetch } from "@/lib/api/client";
 
 
 export const useDataSync = () => {
@@ -32,32 +32,27 @@ export const useDataSync = () => {
         }
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/data`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
+            const raw = await apiFetch<
+                Omit<User, "users" | "roles"> & {
+                    users: { id: string, name: string, email: string, password: string, role_id: string, created_at: string }[],
+                    roles: { id: string, name: string, permissions: Record<string, boolean>, state: string }[],
                 }
-            });
+            >("/users/data");
 
-            if (!response.ok) {
-                throw new Error('Error al obtener los datos del usuario');
-            }
-
-            const data = await response.json();
-
-            data.users = data.users.map((user: { id: string, name: string, email: string, password: string, role_id: string, created_at: string }) => ({
-                ...user,
-                roles: {
-                    id: user.role_id,
-                    key: "roles"
-                }
-            }));
-
-            data.roles = data.roles.map((role: { id: string, name: string, permissions: Record<string, boolean>, state: string }) => ({
-                ...role,
-                state: "true"
-            }));
+            const data: User = {
+                ...raw,
+                users: raw.users.map((user) => ({
+                    ...user,
+                    roles: {
+                        id: user.role_id,
+                        key: "roles"
+                    }
+                })),
+                roles: raw.roles.map((role) => ({
+                    ...role,
+                    state: "true"
+                })),
+            } as unknown as User;
 
             setUserState(data);
         } catch (error) {
@@ -69,12 +64,6 @@ export const useDataSync = () => {
     useEffect(() => {
         fetchAllData();
     }, [isAuthenticated]);
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            console.log("user fetched", user);
-        }
-    }, [user, isAuthenticated]);
 
     return { user, setUser, updateEvent, fetchAllData };
 }; 

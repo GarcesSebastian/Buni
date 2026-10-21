@@ -10,49 +10,76 @@ import { QRDialog } from "./Dialogs/QRDialog"
 import { FilterDialog } from "./Dialogs/Tables/FilterDialog"
 import { EditDialog } from "./Dialogs/Tables/EditDialog"
 import { DeleteDialog } from "./Dialogs/Tables/DeleteDialog"
-import { useUserData } from "@/hooks/auth/useUserData"
+import { User, useUserData } from "@/hooks/auth/useUserData"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/Input"
 import CustomLoader from "@/components/ui/CustomLoader"
 import { DialogRecovery } from "./Dialogs/User/DialogRecovery"
-import Cookies from "js-cookie"
+import { apiFetch, ApiError } from "@/lib/api/client"
 import { useNotification } from "@/hooks/client/useNotification"
+import { User as TableUserType, ConfigUser, ConfigFormUser } from "@/types/User"
+import type { Event, ConfigEvent, ConfigEventForm, ConfigScenery, ConfigFormScenery, TableEvent, TableScenery } from "@/types/Events"
+import type { ConfigPrograms, ConfigFormPrograms, TablePrograms } from "@/types/Programs"
+import type { TableUser } from "@/types/User"
+import type { GeneralStructureForm } from "@/types/Table"
 
-export function TableGeneric({ structure, structureForm, table }) {
+type ColumnStructure = ConfigUser | ConfigEvent | ConfigScenery | ConfigPrograms
+type StructureForm = ConfigFormUser | ConfigEventForm | ConfigFormScenery | ConfigFormPrograms | GeneralStructureForm
+type TableConfig = TableUser | TableEvent | TableScenery | TablePrograms
+
+interface TableGenericProps {
+  structure: ColumnStructure[]
+  structureForm: StructureForm
+  table: TableConfig
+}
+
+type Row = Record<string, unknown>
+
+interface SortConfig {
+  key: string
+  direction: "asc" | "desc"
+}
+
+export function TableGeneric({ structure, structureForm: structureFormProp, table: tableProp }: TableGenericProps) {
+  // Internal normalized views. The props accept the heterogeneous per-screen config
+  // shapes (users/events/scenery/programs); internally we treat the form config as the
+  // shared `GeneralStructureForm` and the table config as a superset with the optional flags.
+  const structureForm = structureFormProp as unknown as GeneralStructureForm
+  const table = tableProp as { name: string; key: string; isQR?: boolean; isView?: boolean; isUser?: boolean }
   const { user, isLoaded } = useUserData()
   const router = useRouter()
   const { showNotification } = useNotification();
   const [mounted, setMounted] = useState(false)
   const [openCreate, setOpenCreate] = useState(false)
   const [openQR, setOpenQR] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState(null)
-  const [qrType, setQrType] = useState("inscriptions")
-  const [filters, setFilters] = useState({
+  const [selectedEvent, setSelectedEvent] = useState<Row | null>(null)
+  const [qrType, setQrType] = useState<"inscriptions" | "assists">("inscriptions")
+  const [filters, setFilters] = useState<Record<string, string>>({
     nombre: "",
     organizador: "",
     aniversario: "",
   })
-  const [sortConfig, setSortConfig] = useState(null)
-  const [openFilter, setOpenFilter] = useState(null)
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [openEdit, setOpenEdit] = useState(false)
-  const [eventToEdit, setEventToEdit] = useState(null)
+  const [eventToEdit, setEventToEdit] = useState<Row | null>(null)
   const [openDelete, setOpenDelete] = useState(false)
-  const [eventToDelete, setEventToDelete] = useState(null)
+  const [eventToDelete, setEventToDelete] = useState<Row | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [sendedCode, setSendedCode] = useState(false)
   const [openRecovery, setOpenRecovery] = useState(false)
-  const [eventToRecovery, setEventToRecovery] = useState(null)
+  const [eventToRecovery, setEventToRecovery] = useState<Row | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const userTableData = useMemo(() => {
+  const userTableData = useMemo<Row[]>(() => {
     if (!isLoaded) return [];
-    return user[table.key] || [];
+    return (user[table.key as keyof User] as unknown as Row[]) || [];
   }, [isLoaded, user, table.key]);
 
-  const sortedAndFilteredEvents = useMemo(() => {
+  const sortedAndFilteredEvents = useMemo<Row[]>(() => {
     if (!isLoaded) return [];
 
     const filteredEvents = userTableData.filter(
@@ -60,7 +87,8 @@ export function TableGeneric({ structure, structureForm, table }) {
         return Object.keys(filters).every((key) => {
           const filterKey = key
           if (filters[filterKey] === "") return true
-          return event[filterKey]?.toString().toLowerCase().includes(filters[filterKey].toLowerCase())
+          const cell = event[filterKey]
+          return cell?.toString().toLowerCase().includes((filters[filterKey] ?? "").toLowerCase())
         })
       }
     )
@@ -84,16 +112,20 @@ export function TableGeneric({ structure, structureForm, table }) {
     if (!isLoaded) return;
     Object.keys(structureForm).forEach(value => {
       const valueFormatted = value == "formAssists" || value == "formInscriptions" ? "forms" : value
-      if (structureForm[value].type == "select" && user[valueFormatted]) {
-        const rest = user[valueFormatted].filter(v => v.state == true || v.state == "true").map(s => {
-          const name = s.name || s.nombre
-          return {
-            value: name,
-            label: name.charAt(0).toUpperCase() + name.slice(1),
-            id: s.id
-          }
-        })
-        structureForm[value].options = rest
+      const field = structureForm[value]
+      const dataList = user[valueFormatted as keyof User]
+      if (field && field.type == "select" && Array.isArray(dataList)) {
+        const rest = (dataList as Array<{ state?: unknown; name?: string; nombre?: string; id: string }>)
+          .filter(v => v.state == true || v.state == "true")
+          .map(s => {
+            const name = (s.name || s.nombre) as string
+            return {
+              value: name,
+              label: name.charAt(0).toUpperCase() + name.slice(1),
+              id: s.id
+            }
+          })
+        ;(field as { options?: { value: string; label: string; id?: number }[] }).options = rest as unknown as { value: string; label: string; id?: number }[]
       }
     })
   }, [isLoaded, structureForm, user]);
@@ -104,27 +136,27 @@ export function TableGeneric({ structure, structureForm, table }) {
     )
   }
 
-  const handleQRClick = (event, type) => {
+  const handleQRClick = (event: Row, type: "inscriptions" | "assists") => {
     setSelectedEvent(event)
     setQrType(type)
     setOpenQR(true)
   }
 
-  const handleEditClick = (event) => {
+  const handleEditClick = (event: Row) => {
     setEventToEdit(event)
     setOpenEdit(true)
   }
 
-  const handleDeleteClick = (event) => {
+  const handleDeleteClick = (event: Row) => {
     setEventToDelete(event)
     setOpenDelete(true)
   }
 
-  const handleFilter = (column, value) => {
+  const handleFilter = (column: string, value: string) => {
     setFilters((prev) => ({ ...prev, [column]: value }))
   }
 
-  const handleSort = (column, direction) => {
+  const handleSort = (column: string, direction: "asc" | "desc" | null) => {
     setSortConfig(direction ? { key: column, direction } : null)
   }
 
@@ -137,7 +169,7 @@ export function TableGeneric({ structure, structureForm, table }) {
     setSortConfig(null)
   }
 
-  const normalizeData = (data, value) => {
+  const normalizeData = (data: Row, value: string) => {
     if (typeof data[value] != "object") {
       if (value === "cupos" && data[value] === "-1") {
         return "Ilimitado"
@@ -159,7 +191,7 @@ export function TableGeneric({ structure, structureForm, table }) {
               disabled
               type={showPassword ? "text" : "password"}
               className="w-full border-none"
-              value={data[value]}
+              value={data[value] as string}
               style={{
                 cursor: 'default',
                 color: 'var(--foreground)',
@@ -175,53 +207,51 @@ export function TableGeneric({ structure, structureForm, table }) {
       }
 
       if (value === "horarioInicio" || value === "horarioFin") {
-        return new Date(data[value]).toLocaleString("es-ES", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
+        return new Date(data[value] as string).toLocaleString("es-ES", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
       }
 
-      return data[value]
+      return data[value] as React.ReactNode
     }
 
-    const DataEvent = data[value]
+    const DataEvent = data[value] as { key?: string; id?: string } | null
 
     if (!DataEvent || !DataEvent.key) {
-      return data[value]
+      return data[value] as React.ReactNode
     }
 
-    const dataFind = user[DataEvent.key]?.find((f) => f.id === DataEvent.id)
+    const dataList = user[DataEvent.key as keyof User]
+    const dataFind = Array.isArray(dataList)
+      ? (dataList as Array<{ id: string; name?: string; nombre?: string }>).find((f) => f.id === DataEvent.id)
+      : undefined
     return dataFind?.name || dataFind?.nombre
   }
 
-  const handleViewData = (data) => {
+  const handleViewData = (data: Row) => {
     router.push(`/${table.key}/${data.id}`)
   }
 
-  const handleRecoverPassword = async (data) => {
+  const handleRecoverPassword = async (data: Row) => {
     setOpenRecovery(true)
     setEventToRecovery(data)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${data.id}/recovery`, {
+      await apiFetch<unknown>(`/users/${data.id}/recovery`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${Cookies.get("token")}`
-        },
       })
-
-      const data_response = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data_response.error || "Error al enviar el código de recuperación")
-      }
 
       setSendedCode(true)
     } catch (error) {
       console.error(error)
       setOpenRecovery(false)
 
+      const message = error instanceof ApiError
+        ? ((error.body as { error?: string } | null)?.error || "Error al enviar el código de recuperación")
+        : (error instanceof Error ? error.message : "Error al enviar el código de recuperación")
+
       showNotification({
+        title: "",
         type: "error",
-        message: error.message || "Error al enviar el código de recuperación"
+        message
       })
     }
 
@@ -274,7 +304,7 @@ export function TableGeneric({ structure, structureForm, table }) {
               </TableRow>
             ) : (
               sortedAndFilteredEvents.map((data, index) => (
-                <TableRow key={data.id || index}>
+                <TableRow key={(data.id as string) || index}>
                   <TableCell>{index + 1}</TableCell>
                   {structure.map((column) => {
                     if (column.key === "id") return null;
@@ -349,14 +379,14 @@ export function TableGeneric({ structure, structureForm, table }) {
         onOpenChange={setOpenCreate}
       />
 
-      {selectedEvent && <QRDialog open={openQR} onOpenChange={setOpenQR} event={selectedEvent} type={qrType} />}
+      {selectedEvent && <QRDialog open={openQR} onOpenChange={setOpenQR} event={selectedEvent as unknown as Event} type={qrType} />}
 
       {eventToDelete && (
         <DeleteDialog
           data={{ table: table, structureForm: structureForm }}
           open={openDelete}
           onOpenChange={setOpenDelete}
-          initialData={eventToDelete}
+          initialData={eventToDelete as Record<string, string>}
         />
       )}
 
@@ -365,14 +395,14 @@ export function TableGeneric({ structure, structureForm, table }) {
           data={{ table: table, structureForm: structureForm }}
           open={openEdit}
           onOpenChange={setOpenEdit}
-          initialData={eventToEdit}
+          initialData={eventToEdit as Record<string, string>}
         />
       )}
 
       {openRecovery && (
         <DialogRecovery
           open={openRecovery}
-          eventToRecovery={eventToRecovery}
+          eventToRecovery={eventToRecovery as unknown as TableUserType}
           sendedCode={sendedCode}
           setSendedCode={setSendedCode}
           onOpenChange={setOpenRecovery}
@@ -383,13 +413,13 @@ export function TableGeneric({ structure, structureForm, table }) {
         open={openFilter !== null}
         onOpenChange={() => setOpenFilter(null)}
         column={openFilter}
-        onFilter={(value) => {
+        onFilter={(value: string) => {
           if (openFilter) {
             handleFilter(openFilter, value)
           }
           setOpenFilter(null)
         }}
-        onSort={(direction) => {
+        onSort={(direction: "asc" | "desc" | null) => {
           if (openFilter) {
             handleSort(openFilter, direction)
           }

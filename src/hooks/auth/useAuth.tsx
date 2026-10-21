@@ -3,17 +3,13 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { Permissions } from '@/types/Permissions';
 import { useLogout } from '@/contexts/LogoutContext';
+import type { AuthUser } from '@/types/User';
 
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    permissions: Permissions | string;
-    created_at: string;
-}
+// Canonical session user lives in `@/types/User` (design §5.3). Re-exported here as
+// `User` so existing `import { User } from '@/hooks/auth/useAuth'` call sites keep working.
+export type User = AuthUser;
+export type { AuthUser };
 
 export interface AuthState {
     user: User | null;

@@ -9,7 +9,7 @@ import ExcelJS from "exceljs"
 import { useNotification } from "@/hooks/client/useNotification"
 import { useUserData } from "@/hooks/auth/useUserData"
 import { useSocket } from "@/hooks/server/useSocket"
-import Cookies from "js-cookie"
+import { apiFetch, ApiError } from "@/lib/api/client"
 
 import type { TabsEvent } from "@/app/events/[id]/page"
 import { Assists } from "@/types/Events"
@@ -130,6 +130,7 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
     
     headerRow.eachCell((cell, colNumber) => {
       const cellData = headers[colNumber - 1]
+      if (!cellData) return
 
       const text = `Parent:${cellData.parentKey}\nType:${type}\nData:${cellData.data}\nKey:${cellData.key}\nColumn:${colNumber}`
 
@@ -380,7 +381,7 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
                 const note: newComment = cell.note as unknown as newComment;
                 
                 if (note && note.texts && note.texts.length > 0) {
-                  const noteText = note.texts[0].text;
+                  const noteText = note.texts[0]?.text ?? "";
                   const metadata: { parentKey: string, type: string, data: string, key: string, column: string } = {
                     parentKey: "",
                     type: "",
@@ -396,11 +397,11 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
                   const columnMatch = noteText.match(/Column:\s*([^\n]+)/u);
                   
                   if (parentKeyMatch && typeMatch && dataMatch && keyMatch && columnMatch) {
-                    metadata.parentKey = parentKeyMatch[1];
-                    metadata.type = typeMatch[1];
-                    metadata.data = dataMatch[1];
-                    metadata.key = keyMatch[1];
-                    metadata.column = columnMatch[1];
+                    metadata.parentKey = parentKeyMatch[1] ?? "";
+                    metadata.type = typeMatch[1] ?? "";
+                    metadata.data = dataMatch[1] ?? "";
+                    metadata.key = keyMatch[1] ?? "";
+                    metadata.column = columnMatch[1] ?? "";
                   }
 
                   headerMetadata[headerValue] = metadata;
@@ -446,24 +447,22 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             
             Object.keys(headerMetadata).forEach((key) => {
               const metaData = headerMetadata[key] as MetadataItem;
+              const itemValue = item[key] ?? "";
               
               if(isProbablyDateString(metaData.data)){
-                data[metaData.key] = new Date(item[key]).toISOString().split("T")[0];
+                data[metaData.key] = new Date(itemValue).toISOString().split("T")[0] ?? "";
                 return;
               }
               
               if(metaData.parentKey === "undefined"){
-                data[metaData.key] = item[key];
+                data[metaData.key] = itemValue;
                 return;
               }
               
               const keySplited = metaData.key.split("_")[0];
               if(keySplited === metaData.parentKey){
-                if(!parentKeyGroups[metaData.parentKey]) {
-                  parentKeyGroups[metaData.parentKey] = {};
-                }
-                
-                parentKeyGroups[metaData.parentKey][metaData.key] = item[key];
+                const group = parentKeyGroups[metaData.parentKey] ?? (parentKeyGroups[metaData.parentKey] = {});
+                group[metaData.key] = itemValue;
               }
             });
             
@@ -474,7 +473,7 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             templateData.push(data as Assists);
           });
 
-          const requiredKeys = columns?.map((col) => {
+          const requiredKeys = (columns ?? []).map((col) => {
             const key = col.key;
             return typeof key === 'string' ? key.toLowerCase() : String(key).toLowerCase();
           });
@@ -483,7 +482,8 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             throw new Error("El archivo no contiene datos.");
           }
 
-          const importedKeys = Object.keys(templateData[0]).map((key) => key.toLowerCase());
+          const firstTemplate = templateData[0] ?? {};
+          const importedKeys = Object.keys(firstTemplate).map((key) => key.toLowerCase());
 
           const hasAllRequiredKeys = requiredKeys.every((reqKey) =>
             importedKeys.includes(reqKey)
@@ -540,19 +540,16 @@ export function DataImportExport({ type, eventId, data: DataTest, columns, fileN
             })
           }
 
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${Cookies.get("token")}`
-            },
-            body: JSON.stringify(eventFinded)
-          })
-
-          const data_response = await response.json()
-
-          if (!response.ok) {
-            throw new Error(data_response.error || "Error al actualizar el usuario")
+          try {
+            await apiFetch<unknown>(`/events/${eventId}`, {
+              method: "PUT",
+              body: JSON.stringify(eventFinded),
+            })
+          } catch (err) {
+            if (err instanceof ApiError) {
+              throw new Error((err.body as { error?: string } | null)?.error || "Error al actualizar el usuario")
+            }
+            throw err
           }
 
           setUser(newData)

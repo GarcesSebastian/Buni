@@ -1,99 +1,106 @@
 import { User } from "@/types/User";
-import { useState } from "react";
-import Cookies from "js-cookie";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch, unwrap, type Envelope } from "@/lib/api/client";
 
-const useUsers = () => {
-    const [users, setUsers] = useState<User[]>([]);
+interface RawUser {
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+    role_id: string;
+    created_at: string;
+}
 
-    const getUsers = async () => {  
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                }
-            });
-            const data = await response.json();
+const USERS_KEY = ["users"] as const;
 
-            if (!data || !Array.isArray(data)) {
-                setUsers([]);
-                return;
-            }
+const fetchUsers = async (): Promise<User[]> => {
+    const data = await apiFetch<RawUser[]>("/users");
 
-            const usersFiltered = data.map((user: { id: string, name: string, email: string, password: string, role_id: string, created_at: string }) => ({
-                ...user,
-                roles: {
-                    id: user.role_id,
-                    key: "roles"
-                },
-            }));
-
-            setUsers(usersFiltered);
-        } catch (error) {
-            console.error(error);
-            setUsers([]);
-        }
+    if (!data || !Array.isArray(data)) {
+        return [];
     }
+
+    return data.map((user) => ({
+        ...user,
+        roles: {
+            id: user.role_id,
+            key: "roles",
+        },
+    })) as unknown as User[];
+};
+
+/**
+ * Users hook (design §5.4). TanStack Query drives the users list internally while the
+ * public API `{ users, getUsers, createUser, updateUser, deleteUser }` is preserved so
+ * consumers keep calling `getUsers()` / `createUser()` unchanged. Real-time behavior is
+ * kept: mutations and socket-driven updates invalidate the `['users']` query to rehydrate.
+ */
+const useUsers = () => {
+    const queryClient = useQueryClient();
+
+    const { data: users = [] } = useQuery({
+        queryKey: USERS_KEY,
+        queryFn: fetchUsers,
+        // The list is fetched on demand via getUsers(); do not auto-fetch on mount.
+        enabled: false,
+    });
+
+    const getUsers = async () => {
+        await queryClient.fetchQuery({ queryKey: USERS_KEY, queryFn: fetchUsers });
+    };
+
+    const createMutation = useMutation({
+        mutationFn: (user: User) =>
+            apiFetch<Envelope<User>>("/users", {
+                method: "POST",
+                body: JSON.stringify(user),
+            }),
+        // State bug fix (design §5.2): do NOT store the mutation response as the array.
+        // Invalidate so the list rehydrates (socket rehydration / refetch), preserving behavior.
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: USERS_KEY });
+        },
+    });
 
     const createUser = async (user: User) => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                },
-                body: JSON.stringify(user)
-            });
-            const data = await response.json();
+        const data = await createMutation.mutateAsync(user);
+        return unwrap(data);
+    };
 
-            if (response.ok) {  
-                setUsers(data);
-                return data;
-            }
-
-            throw new Error(data.error || 'Error al crear el usuario');
-        } catch (error) {
-            throw error;
-        }
-    }
+    const updateMutation = useMutation({
+        mutationFn: (user: User) =>
+            apiFetch<Envelope<User>>(`/users/${user.id}`, {
+                method: "PUT",
+                body: JSON.stringify(user),
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: USERS_KEY });
+        },
+    });
 
     const updateUser = async (user: User) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                },
-                body: JSON.stringify(user)
-            });
-            const data = await response.json();
-            setUsers(data);
+            const data = await updateMutation.mutateAsync(user);
+            return unwrap(data);
         } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     const deleteUser = async (userId: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+            const data = await apiFetch<unknown>(`/users/${userId}`, {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                }
             });
-            const data = await response.json();
+            queryClient.invalidateQueries({ queryKey: USERS_KEY });
             return data;
         } catch (error) {
             console.error(error);
             throw error;
         }
-    }
+    };
 
     return { users, getUsers, createUser, updateUser, deleteUser };
-}
+};
 
 export default useUsers;

@@ -10,6 +10,7 @@ import { AuthProvider } from "@/hooks/auth/useAuth"
 import { SocketProvider } from "@/hooks/server/useSocket"
 import { RouteProtection } from "@/components/services/RouteProtection"
 import { LogoutProvider } from "@/contexts/LogoutContext"
+import { QueryProvider } from "@/hooks/client/QueryProvider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href={"/logo.png"} type="image/x-icon" />
       </head>
       <body className={inter.className}>
+        <QueryProvider>
         <NotificationProvider>
           <LogoutProvider>
             <div className="h-screen overflow-hidden">
@@ -49,6 +51,7 @@ export default function RootLayout({
             </div>
           </LogoutProvider>
         </NotificationProvider>
+        </QueryProvider>
       </body>
     </html>
   )

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
+import { apiFetch, ApiError } from "@/lib/api/client"
 import { User, useUserData } from "@/hooks/auth/useUserData"
 import { GeneralStructureForm } from "@/types/Table"
 import { Form } from "@/types/Forms"
@@ -75,12 +76,13 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
         throw new Error('No hay token de autenticación');
       }
 
-      formData.id = initialData.id;
+      formData.id = initialData.id ?? "";
       const updatedFormData: UpdatedFormData = { ...formData } as UpdatedFormData;
       
       Object.keys(updatedFormData).forEach((key: string) => {
-        if (typeof updatedFormData[key] == "string"){
-          const dataSplit = updatedFormData[key].split("_")
+        const fieldValue = updatedFormData[key]
+        if (typeof fieldValue == "string"){
+          const dataSplit = fieldValue.split("_")
           if (dataSplit.length <= 1) return;
 
           const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "forms" : key
@@ -103,19 +105,16 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
         ),
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}/${initialData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(updatedFormData)
-      });
-
-      const data_response = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data_response.error || 'Error al editar el registro');
+      try {
+        await apiFetch<unknown>(`/${data.table.key}/${initialData.id}`, {
+          method: "PUT",
+          body: JSON.stringify(updatedFormData),
+        });
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw new Error((err.body as { error?: string } | null)?.error || 'Error al editar el registro');
+        }
+        throw err;
       }
 
       if (Array.isArray(user[key])) {  
@@ -156,14 +155,15 @@ export function EditDialog({ data, open, onOpenChange, initialData }: Props) {
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4">
             {Object.keys(data.structureForm).map((value, index) => {
-              if(data.structureForm[value].noEdit) return;
+              const form = data.structureForm[value]
+              if(!form || form.noEdit) return;
               
               return(
                 <div key={index} className="grid gap-2">
                   <InputBasic
                     formData={formData}
                     data={{
-                      form: data.structureForm[value],
+                      form,
                       onChange: handleChange(value),
                       key: value,
                       index: index

@@ -1,6 +1,5 @@
 "use client"
 
-import Cookies from "js-cookie"
 import { Button } from "@/components/ui/Button"
 import {
   Dialog,
@@ -10,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
+import { apiFetch, ApiError } from "@/lib/api/client"
 import { GeneralStructureForm } from "@/types/Table"
 import { User, useUserData } from "@/hooks/auth/useUserData"
 import { useNotification } from "@/hooks/client/useNotification"
@@ -51,18 +51,15 @@ export function DeleteDialog({ open, onOpenChange, data, initialData }: Props) {
         [data.table.key]: updatedData,
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}/${initialData.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${Cookies.get("token")}`
+      try {
+        await apiFetch<unknown>(`/${data.table.key}/${initialData.id}`, {
+          method: "DELETE",
+        })
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw new Error((err.body as { error?: string } | null)?.error || "Error al eliminar el registro")
         }
-      })
-
-      const data_response = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data_response.error || "Error al eliminar el registro")
+        throw err
       }
 
       setUser(newData)

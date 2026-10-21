@@ -108,9 +108,11 @@ export function DataTable({
     })
   })
 
+  const currentPage = pagination.currentPage ?? 1
+  const rowsPerPage = pagination.rowsPerPage ?? 5
   const paginatedData = filteredData.slice(
-    (pagination.currentPage - 1) * pagination.rowsPerPage,
-    pagination.currentPage * pagination.rowsPerPage,
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage,
   )
 
   const handleFilter = (column: string, value: string | string[] | number) => {
@@ -266,9 +268,9 @@ export function DataTable({
       {data.length > 0 && columns.length > 0 && (
         <Pagination
           type={type}
-          currentPage={pagination.currentPage}
+          currentPage={currentPage}
           totalItems={filteredData.length}
-          rowsPerPage={pagination.rowsPerPage}
+          rowsPerPage={rowsPerPage}
           onPageChange={onPageChange}
           onRowsPerPageChange={onRowsPerPageChange}
         />

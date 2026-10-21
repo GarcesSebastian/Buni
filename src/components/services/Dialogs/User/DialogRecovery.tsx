@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Check, Loader2 } from "lucide-react"
 import { useState, useRef, ChangeEvent, KeyboardEvent, FormEvent, useEffect } from "react"
-import Cookies from "js-cookie"
+import { apiFetch, ApiError } from "@/lib/api/client"
 import { User } from "@/types/User"
 
 interface Props {
@@ -120,7 +120,7 @@ export const DialogRecovery = ({ open, eventToRecovery, sendedCode, setSendedCod
         if (pastedDigits) {
             const newCode = [...code];
             for (let i = 0; i < pastedDigits.length; i++) {
-                newCode[i] = pastedDigits[i];
+                newCode[i] = pastedDigits[i] ?? "";
             }
             setCode(newCode);
             
@@ -133,27 +133,20 @@ export const DialogRecovery = ({ open, eventToRecovery, sendedCode, setSendedCod
         setIsLoadingSend(true);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${eventToRecovery.id}/verify-recovery`, {
+            await apiFetch<unknown>(`/users/${eventToRecovery.id}/verify-recovery`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`,
-                },
                 body: JSON.stringify({
                     code: code.join('')
                 })
             })
 
-            const data_response = await response.json()
-
-            if (!response.ok) {
-                setError(data_response.error || "Error al verificar el código de recuperación")
-                return
-            }
-
             setSendedCode(true)
             setIsVerify(true)
         } catch (error) {
+            if (error instanceof ApiError) {
+                setError((error.body as { error?: string } | null)?.error || "Error al verificar el código de recuperación")
+                return
+            }
             console.error(error)
             setError('Error al procesar el código. Inténtelo de nuevo.');
         } finally {
@@ -175,27 +168,20 @@ export const DialogRecovery = ({ open, eventToRecovery, sendedCode, setSendedCod
         setIsLoadingChange(true);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${eventToRecovery.id}/change-password`, {
+            await apiFetch<unknown>(`/users/${eventToRecovery.id}/change-password`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`,
-                },
                 body: JSON.stringify({
                     password: password
                 })
             })
 
-            const data_response = await response.json()
-
-            if (!response.ok) {
-                setError(data_response.error || "Error al cambiar la contraseña")
-                return
-            }
-
             setIsChange(true)
             setIsLoadingChange(false)
         } catch (error) {
+            if (error instanceof ApiError) {
+                setError((error.body as { error?: string } | null)?.error || "Error al cambiar la contraseña")
+                return
+            }
             console.error(error)
             setError('Error al procesar el código. Inténtelo de nuevo.');
         }

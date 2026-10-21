@@ -125,7 +125,7 @@ export default function RolesPage() {
                     created_at: u.created_at
                 }
 
-                socket?.emit("UPDATE_USER", newUser);                
+                socket?.emit("UPDATE_USER", newUser as unknown as import("@/types/contract.generated").UpdateUserPayload);                
             })
 
             setUser(newData);

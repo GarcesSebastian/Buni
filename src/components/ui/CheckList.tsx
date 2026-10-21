@@ -199,7 +199,8 @@ const CheckList = ({itemsList, setItemsList, normalizeString}: CheckListProps) =
             return
         }
 
-        const newId = itemsList[itemsList.length - 1] ? itemsList[itemsList.length - 1].id + 1 : 1
+        const lastItem = itemsList[itemsList.length - 1]
+        const newId = lastItem ? lastItem.id + 1 : 1
         setItemsList((prev: ItemList[]) => [...prev, {id: newId.toString(), value: currentItem}])
         setCurrentItem("Crear nuevo")
         setIsOpenItems((prev: Record<string, boolean>) => ({...prev, [newId.toString()]: false}))

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog"
+import { apiFetch, ApiError, type Envelope } from "@/lib/api/client"
 import { Form } from "@/types/Forms"
 import { GeneralStructureForm } from "@/types/Table"
 import { InputBasic } from "../../InputGeneric"
@@ -68,8 +69,9 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
       const updatedFormData: UpdatedFormData = { ...formData, id: (Array.isArray(keyData) ? keyData.length : 0) + 1 };
       
       Object.keys(updatedFormData).forEach((key: string) => {
-        if (typeof updatedFormData[key] == "string"){
-          const dataSplit = updatedFormData[key].split("_")
+        const fieldValue = updatedFormData[key]
+        if (typeof fieldValue == "string"){
+          const dataSplit = fieldValue.split("_")
           if (dataSplit.length <= 1) return;
 
           const keyFormatted = key == "formAssists" || key == "formInscriptions" ? "forms" : key
@@ -96,20 +98,18 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
 
       const body_response = JSON.parse(JSON.stringify(updatedFormData))
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${data.table.key}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(body_response)
-      })
-
-      const data_response = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data_response.error || 'Error al crear el registro'); 
-      } 
+      let data_response: Envelope<unknown>;
+      try {
+        data_response = await apiFetch<Envelope<unknown>>(`/${data.table.key}`, {
+          method: "POST",
+          body: JSON.stringify(body_response),
+        });
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw new Error((err.body as { error?: string } | null)?.error || 'Error al crear el registro');
+        }
+        throw err;
+      }
 
       const newData = {
         ...user,
@@ -149,12 +149,15 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 py-4 px-2 max-h-[100vh] overflow-y-auto">
-            {Object.keys(data.structureForm).map((value, index) => (
+            {Object.keys(data.structureForm).map((value, index) => {
+              const form = data.structureForm[value]
+              if (!form) return null
+              return (
               <div key={index}>
                 <InputBasic
                   formData={formData}
                   data={{
-                    form: data.structureForm[value],
+                    form,
                     onChange: (e: React.ChangeEvent<HTMLInputElement> | string) =>
                       setFormData({
                         ...formData,
@@ -166,7 +169,8 @@ export function CreateEventDialog({ data, open, onOpenChange }: Props) {
                   user={user}
                 />
               </div>
-            ))}
+              )
+            })}
           </div>
 
           <DialogFooter className="flex flex-row mt-4">

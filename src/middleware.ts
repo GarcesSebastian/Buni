@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { redirectToForms, redirectToDevTools } from './lib/MiddlewareEvents';
+import { getServerApiBaseUrl } from './lib/serverApiBase';
 
 const publicPaths = [
     '/forms/assists',
@@ -21,7 +22,7 @@ const isPublicPath = (path: string): boolean => {
 
 async function verifyTokenWithBackend(token: string): Promise<boolean> {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify`, {
+        const response = await fetch(`${getServerApiBaseUrl()}/auth/verify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,11 +56,9 @@ export async function middleware(req: NextRequest): Promise<Response> {
     }
 
     if (path === '/') {
-        console.log("token", token)
         if (token) {
             try {
                 const isValid = await verifyTokenWithBackend(token);
-                console.log("isValid", isValid)
                 if (isValid) {
                     return NextResponse.redirect(new URL('/dashboard', req.url));
                 } else {

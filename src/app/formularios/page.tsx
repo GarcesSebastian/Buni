@@ -41,7 +41,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { useUserData } from "@/hooks/auth/useUserData"
 import { configField } from "@/config/Forms"
 import type { Form, FormField } from "@/types/Forms"
-import Cookies from "js-cookie"
+import { apiFetch, ApiError, type Envelope } from "@/lib/api/client"
 import { useNotification } from "@/hooks/client/useNotification"
 import { generateUniqueName } from "@/lib/utils"
 import CustomLoader from "@/components/ui/CustomLoader"
@@ -208,39 +208,35 @@ export default function FormulariosPage() {
         state: true,
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms`, {
-        method: "POST",
-        body: JSON.stringify(nuevoFormulario),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${Cookies.get("token")}`,
-        },
-      })
-
-      const data_response = await response.json()
-
-      if (response.ok) {
-        const newData = {
-          ...user,
-          forms: [...user.forms, data_response.data]
-        }
-        
-        setUser(newData)
-        setCurrentForm(data_response.data)
-        socket?.emit("UPDATE_DATA", newData)
-        showNotification({
-          title: "Éxito",
-          message: "Formulario creado correctamente",
-          type: "success"
+      let data_response: Envelope<Form>
+      try {
+        data_response = await apiFetch<Envelope<Form>>("/forms", {
+          method: "POST",
+          body: JSON.stringify(nuevoFormulario),
         })
-        return;
+      } catch (err) {
+        showNotification({
+          title: "Error",
+          message: (err instanceof ApiError ? (err.body as { error?: string } | null)?.error : undefined) || "Error al crear el formulario",
+          type: "error"
+        })
+        return
       }
-      
+
+      const newData = {
+        ...user,
+        forms: [...user.forms, data_response.data]
+      }
+
+      setUser(newData)
+      setCurrentForm(data_response.data)
+      socket?.emit("UPDATE_DATA", newData)
       showNotification({
-        title: "Error",
-        message: data_response.error || "Error al crear el formulario",
-        type: "error"
+        title: "Éxito",
+        message: "Formulario creado correctamente",
+        type: "success"
       })
+      return;
     } catch (error) {
       console.error("Error al crear el formulario:", error)
       showNotification({
@@ -266,34 +262,32 @@ export default function FormulariosPage() {
         forms: user.forms.filter((f) => f.id !== id)
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${Cookies.get("token")}`,
-        },
-      })
-
-      const data_response = await response.json()
-
-      if (response.ok) {
-          setUser(newData)
-      
-          if (currentForm?.id === id) {
-            setCurrentForm(null)
-          }
-      
-          socket?.emit("UPDATE_DATA", newData)
-          setShowDeleteDialog(false)
-          setFormToDelete(null)
-          showNotification({
-            title: "Éxito",
-            message: "Formulario eliminado correctamente",
-            type: "success"
-          })
-          return;
+      try {
+        await apiFetch<unknown>(`/forms/${id}`, {
+          method: "DELETE",
+        })
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw new Error((err.body as { error?: string } | null)?.error || "Error al eliminar el formulario")
+        }
+        throw err
       }
 
-      throw new Error(data_response.error || "Error al eliminar el formulario")
+      setUser(newData)
+
+      if (currentForm?.id === id) {
+        setCurrentForm(null)
+      }
+
+      socket?.emit("UPDATE_DATA", newData)
+      setShowDeleteDialog(false)
+      setFormToDelete(null)
+      showNotification({
+        title: "Éxito",
+        message: "Formulario eliminado correctamente",
+        type: "success"
+      })
+      return;
     } catch (error) {
       console.error("Error al eliminar el formulario:", error)
       showNotification({
@@ -330,30 +324,27 @@ export default function FormulariosPage() {
         forms: user.forms.map((f) => (f.id === currentForm.id ? currentForm : f))
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${currentForm.id}`, {
-        method: "PUT",
-        body: JSON.stringify(currentForm),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${Cookies.get("token")}`,
-        },
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setUser(newData)
-        setCurrentForm(null)
-        socket?.emit("UPDATE_DATA", newData)
-        showNotification({
-          title: "Éxito",
-          message: "Formulario actualizado correctamente",
-          type: "success"
+      try {
+        await apiFetch<unknown>(`/forms/${currentForm.id}`, {
+          method: "PUT",
+          body: JSON.stringify(currentForm),
         })
-        return;
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw new Error((err.body as { error?: string } | null)?.error || "Error al actualizar el formulario")
+        }
+        throw err
       }
 
-      throw new Error(data.error || "Error al actualizar el formulario")
+      setUser(newData)
+      setCurrentForm(null)
+      socket?.emit("UPDATE_DATA", newData)
+      showNotification({
+        title: "Éxito",
+        message: "Formulario actualizado correctamente",
+        type: "success"
+      })
+      return;
     } catch (error) {
       console.error("Error al actualizar el formulario:", error)
       showNotification({
@@ -405,29 +396,26 @@ export default function FormulariosPage() {
         forms: user.forms.map((f) => (f.id === id ? newForm : f))
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(newForm),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${Cookies.get("token")}`,
-        },
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setUser(newData)  
-        socket?.emit("UPDATE_DATA", newData)
-        showNotification({
-          title: "Éxito",
-          message: "Estado del formulario actualizado correctamente",
-          type: "success"
+      try {
+        await apiFetch<unknown>(`/forms/${id}`, {
+          method: "PUT",
+          body: JSON.stringify(newForm),
         })
-        return;
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw new Error((err.body as { error?: string } | null)?.error || "Error al actualizar el estado del formulario")
+        }
+        throw err
       }
 
-      throw new Error(data.error || "Error al actualizar el estado del formulario")
+      setUser(newData)
+      socket?.emit("UPDATE_DATA", newData)
+      showNotification({
+        title: "Éxito",
+        message: "Estado del formulario actualizado correctamente",
+        type: "success"
+      })
+      return;
     } catch (error) {
       console.error("Error al actualizar el estado del formulario:", error)
       showNotification({

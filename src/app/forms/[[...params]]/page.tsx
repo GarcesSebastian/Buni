@@ -186,7 +186,8 @@ export default function FormsPage() {
           .filter((campo) => campo.required)
           .filter((campo) => {
             if (campo.type === "checkbox") return formValues[campo.id] === true
-            return formValues[campo.id] && formValues[campo.id].toString().trim() !== ""
+            const fieldValue = formValues[campo.id]
+            return fieldValue && fieldValue.toString().trim() !== ""
           }).length
 
         const calculatedProgress = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0
@@ -242,10 +243,11 @@ export default function FormsPage() {
         const newFormValues: Record<string, formOptionsType> = {}
         Object.keys(formValues).forEach((key) => {
           const value = formValues[key]
+          const baseKey = key.split("_")[0] ?? key
           if (value && typeof value === 'object' && !Array.isArray(value)) {
-            newFormValues[key.split("_")[0]] = JSON.stringify(value)
+            newFormValues[baseKey] = JSON.stringify(value)
           } else {
-            newFormValues[key.split("_")[0]] = value as formOptionsType
+            newFormValues[baseKey] = value as formOptionsType
           }
         })
 
@@ -285,8 +287,8 @@ export default function FormsPage() {
           setSubmitted(true)
 
           const payload = {
-            idEvent: idEvent,
-            typeForm: typeForm,
+            idEvent: idEvent ?? "",
+            typeForm: typeForm as 'inscriptions' | 'assists',
             data: sanitizedFormValues
           }
 

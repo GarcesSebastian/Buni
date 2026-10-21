@@ -1,20 +1,13 @@
 import { Scenery } from "@/types/Events";
 import { useState } from "react";
-import Cookies from "js-cookie";
+import { apiFetch, unwrap, type Envelope } from "@/lib/api/client";
 
 const useScenery = () => {
     const [scenery, setScenery] = useState<Scenery[]>([]);
 
-    const getScenery = async () => {  
+    const getScenery = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                }
-            });
-            const data = await response.json();
+            const data = await apiFetch<Scenery[]>("/scenery");
 
             if (!data || !Array.isArray(data)) {
                 setScenery([]);
@@ -29,40 +22,20 @@ const useScenery = () => {
     }
 
     const createScenery = async (scenery: Scenery) => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                },
-                body: JSON.stringify(scenery)
-            });
-            const data = await response.json();
-
-            if (response.ok) {  
-                setScenery(data);
-                return data;
-            }
-
-            throw new Error(data.error || 'Error al crear el escenario');
-        } catch (error) {
-            throw error;
-        }
+        const data = await apiFetch<Envelope<Scenery>>("/scenery", {
+            method: "POST",
+            body: JSON.stringify(scenery),
+        });
+        return unwrap(data);
     }
 
     const updateScenery = async (scenery: Scenery) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery/${scenery.id}`, {
+            const data = await apiFetch<Envelope<Scenery>>(`/scenery/${scenery.id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                },
-                body: JSON.stringify(scenery)
+                body: JSON.stringify(scenery),
             });
-            const data = await response.json();
-            setScenery(data);
+            return unwrap(data);
         } catch (error) {
             console.error(error);
         }
@@ -70,14 +43,9 @@ const useScenery = () => {
 
     const deleteScenery = async (sceneryId: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scenery/${sceneryId}`, {
+            const data = await apiFetch<unknown>(`/scenery/${sceneryId}`, {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`
-                }
             });
-            const data = await response.json();
             return data;
         } catch (error) {
             console.error(error);
